@@ -153,20 +153,51 @@ export const getPool = (): Pool => {
   return pgPool;
 };
 
+// Database query result interface
+export interface DatabaseQueryResult<T = any> {
+  rows: T[];
+  rowCount: number;
+  command: string;
+  oid: number;
+  fields: any[];
+}
+
 // Execute query with automatic connection management
 export const query = async <T = any>(
   text: string,
   params?: any[]
-): Promise<T[]> => {
+): Promise<DatabaseQueryResult<T>> => {
   const pool = getPool();
   const client = await pool.connect();
 
   try {
     const result = await client.query(text, params);
-    return result.rows;
+    return {
+      rows: result.rows,
+      rowCount: result.rowCount || 0,
+      command: result.command,
+      oid: result.oid,
+      fields: result.fields,
+    };
   } finally {
     client.release();
   }
+};
+
+// Helper function for client queries within transactions
+export const clientQuery = async <T = any>(
+  client: PoolClient,
+  text: string,
+  params?: any[]
+): Promise<DatabaseQueryResult<T>> => {
+  const result = await client.query(text, params);
+  return {
+    rows: result.rows,
+    rowCount: result.rowCount || 0,
+    command: result.command,
+    oid: result.oid,
+    fields: result.fields,
+  };
 };
 
 // Execute transaction

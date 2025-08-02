@@ -1,5 +1,11 @@
 import { Model } from '@nozbe/watermelondb';
-import { field, date, readonly } from '@nozbe/watermelondb/decorators';
+import {
+  field,
+  date,
+  readonly,
+  children,
+} from '@nozbe/watermelondb/decorators';
+import { TABLE_NAMES } from '../schema';
 
 // User preferences interface
 export interface UserPreferences {
@@ -12,19 +18,28 @@ export interface UserPreferences {
 
 // User model class
 export default class User extends Model {
-  static table = 'users';
+  static table = TABLE_NAMES.USERS;
 
   // User fields
   @field('name') name!: string;
   @field('email') email!: string;
   @field('avatar_url') avatarUrl?: string;
+  @field('email_verified') emailVerified!: boolean;
   @field('is_active') isActive!: boolean;
+  @field('provider') provider!: string;
+  @field('provider_id') providerId?: string;
   @date('last_login_at') lastLoginAt?: Date;
   @field('preferences') preferencesRaw?: string;
 
   // Timestamps
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
+  @date('synced_at') syncedAt?: Date;
+
+  // Relationships to financial entities
+  @children(TABLE_NAMES.FINANCIAL_ACCOUNTS) financialAccounts!: any[];
+  @children(TABLE_NAMES.FINANCIAL_GOALS) financialGoals!: any[];
+  @children(TABLE_NAMES.SCENARIOS) scenarios!: any[];
 
   // Computed properties
   get preferences(): UserPreferences {
@@ -37,7 +52,7 @@ export default class User extends Model {
         notifications: true,
       };
     }
-    
+
     try {
       return JSON.parse(this.preferencesRaw);
     } catch {
@@ -62,7 +77,7 @@ export default class User extends Model {
 
   get isOnline(): boolean {
     if (!this.lastLoginAt) return false;
-    
+
     // Consider user online if last login was within 5 minutes
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     return this.lastLoginAt.getTime() > fiveMinutesAgo;
@@ -76,10 +91,12 @@ export default class User extends Model {
   }
 
   // Update user preferences
-  async updatePreferences(newPreferences: Partial<UserPreferences>): Promise<void> {
+  async updatePreferences(
+    newPreferences: Partial<UserPreferences>
+  ): Promise<void> {
     const currentPreferences = this.preferences;
     const updatedPreferences = { ...currentPreferences, ...newPreferences };
-    
+
     await this.update(user => {
       user.preferences = updatedPreferences;
     });

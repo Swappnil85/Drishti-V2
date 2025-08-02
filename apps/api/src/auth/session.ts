@@ -86,7 +86,7 @@ export class SessionService {
       ]
     );
 
-    const session = result[0];
+    const session = result.rows[0];
     return this.mapSessionToInfo(session);
   }
 
@@ -111,14 +111,14 @@ export class SessionService {
         [refreshTokenSignature, payload.userId]
       );
 
-      if (result.length === 0) {
+      if (result.rows.length === 0) {
         return {
           isValid: false,
           error: 'Session not found or expired',
         };
       }
 
-      const session = result[0];
+      const session = result.rows[0];
 
       // Update last activity
       await this.updateLastActivity(session.id);
@@ -227,7 +227,7 @@ export class SessionService {
       [userId]
     );
 
-    return result.map(session => this.mapSessionToInfo(session));
+    return result.rows.map(session => this.mapSessionToInfo(session));
   }
 
   // Clean up expired sessions
@@ -239,7 +239,7 @@ export class SessionService {
       AND is_active = true
     `);
 
-    return result.length;
+    return result.rowCount;
   }
 
   // Get session statistics
@@ -272,7 +272,7 @@ export class SessionService {
       values
     );
 
-    const stats = result[0];
+    const stats = result.rows[0];
     return {
       totalSessions: parseInt(stats.total_sessions, 10),
       activeSessions: parseInt(stats.active_sessions, 10),
@@ -368,7 +368,9 @@ export class SessionService {
       [sessionId]
     );
 
-    return result.length > 0 ? this.mapSessionToInfo(result[0]) : null;
+    return result.rows.length > 0
+      ? this.mapSessionToInfo(result.rows[0])
+      : null;
   }
 }
 

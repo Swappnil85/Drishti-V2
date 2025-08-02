@@ -17,8 +17,8 @@
     "type-check": "npm run type-check --workspaces"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0",
@@ -34,5 +34,10 @@
     "url": "https://github.com/Swappnil85/Drishti.git"
   },
   "author": "Swapnil",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@nozbe/watermelondb": "^0.28.0",
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/netinfo": "^11.4.1"
+  }
 }

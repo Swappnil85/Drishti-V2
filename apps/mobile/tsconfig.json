@@ -9,14 +9,20 @@
     "strict": true,
     "target": "esnext",
     "composite": true,
-    "types": ["react-native", "jest"],
+    "types": ["react-native", "jest", "node"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@drishti/shared/*": ["../../packages/shared/src/*"],
+      "@drishti/shared": ["../../packages/shared/src/index"]
+    }
   },
   "include": [
     "src/**/*",
     "App.tsx",
-    "app.config.js"
+    "app.config.js",
+    "../../packages/shared/src/**/*"
   ],
   "exclude": [
     "node_modules",

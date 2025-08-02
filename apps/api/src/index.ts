@@ -14,6 +14,8 @@ import {
 } from './db/connection';
 import { runMigrations, getMigrationStatus } from './db/migrations/migrator';
 import { authRoutes } from './routes/auth';
+import { financialRoutes } from './routes/financial';
+import { syncRoutes } from './routes/sync';
 
 // Load environment variables
 dotenv.config();
@@ -69,6 +71,12 @@ async function registerPlugins() {
 
   // Register authentication routes
   await fastify.register(authRoutes, { prefix: '/auth' });
+
+  // Register financial routes
+  await fastify.register(financialRoutes, { prefix: '/financial' });
+
+  // Register sync routes
+  await fastify.register(syncRoutes, { prefix: '/sync' });
 }
 
 // Routes

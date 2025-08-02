@@ -315,13 +315,13 @@ export class AuthService {
     const result = await query<User>('SELECT * FROM users WHERE email = $1', [
       email,
     ]);
-    return result.length > 0 ? result[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   // Get user by ID
   async getUserById(id: string): Promise<User | null> {
     const result = await query<User>('SELECT * FROM users WHERE id = $1', [id]);
-    return result.length > 0 ? result[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   // Update last login
@@ -372,14 +372,14 @@ export class AuthService {
         [token]
       );
 
-      if (result.length === 0) {
+      if (result.rows.length === 0) {
         return {
           success: false,
           error: 'Invalid or expired verification token',
         };
       }
 
-      const user = result[0];
+      const user = result.rows[0];
 
       // Update user as verified
       await query(
