@@ -24,12 +24,14 @@ This project uses a **monorepo structure** with the following components:
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/Swappnil85/Drishti.git
    cd Drishti
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -43,11 +45,13 @@ This project uses a **monorepo structure** with the following components:
 ### Development
 
 Start all applications in development mode:
+
 ```bash
 npm run dev
 ```
 
 Or run individual applications:
+
 ```bash
 # API Backend
 npm run dev --workspace=apps/api
@@ -56,18 +60,54 @@ npm run dev --workspace=apps/api
 npm run dev --workspace=apps/mobile
 ```
 
+## 🚀 Development Status
+
+### ✅ Epic 1: Core Infrastructure - COMPLETE
+
+- Database setup with WatermelonDB (mobile) and PostgreSQL (backend)
+- API foundation with Fastify
+- Mobile app foundation with React Native + Expo
+- Development environment setup
+
+### ✅ Epic 2: Authentication & Authorization - COMPLETE
+
+- ✅ **User Registration & Login**: PostgreSQL-based user management with email verification
+- ✅ **OAuth Integration**: Google and Apple Sign-In with JWT token management
+- ✅ **Biometric Authentication**: Face ID, Touch ID, Fingerprint support across platforms
+- ✅ **Session Management**: Advanced session tracking with device fingerprinting and security monitoring
+- ⚠️ **Security Status**: [Critical security hardening required](https://github.com/Swappnil85/Drishti/issues/1) before production deployment
+
+### 🔄 Epic 3: AI Vision Processing - PLANNED
+
+- Camera integration and image capture
+- AI-powered image analysis and description
+- Real-time object detection and recognition
+- Accessibility features for visual assistance
+
 ## 📱 Applications
 
 ### API Backend (`apps/api`)
+
 - **Framework**: Fastify
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL with Redis caching
 - **Language**: TypeScript
-- **Features**: RESTful API, Authentication, AI Integration
+- **Features**:
+  - RESTful API with comprehensive authentication
+  - JWT token management with session tracking
+  - OAuth providers (Google, Apple)
+  - Multi-factor authentication support
+  - Rate limiting and security middleware
 
 ### Mobile App (`apps/mobile`)
+
 - **Framework**: React Native with Expo
 - **Language**: TypeScript
-- **Features**: Camera Integration, AI-powered Visual Analysis, Accessibility Features
+- **Features**:
+  - Biometric authentication (Face ID, Touch ID, Fingerprint)
+  - Secure credential storage with Expo SecureStore
+  - Cross-platform OAuth integration
+  - Local database with WatermelonDB
+  - Camera integration (planned)
 
 ## 🛠️ Development Scripts
 
