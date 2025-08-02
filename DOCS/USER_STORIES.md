@@ -1,798 +1,885 @@
-Epic 1: Project Infrastructure & Setup
+# Drishti Stories - Enhanced Development Guide
 
-User Story: As a developer, I need a properly configured React Native Expo project with TypeScript.
+## Epic 1: Project Infrastructure & Setup ✅ COMPLETED
 
-Acceptance Criteria:
+**User Story**: As a developer, I need a properly configured React Native Expo project with TypeScript.
 
-The project is initialized with expo-cli.
+- **Acceptance Criteria**:
+  - The project is initialized with expo-cli
+  - TypeScript is configured correctly (tsconfig.json)
+  - All necessary dependencies for a standard React Native Expo app are installed
+  - The app runs without errors on both iOS and Android simulators
 
-TypeScript is configured correctly (tsconfig.json).
+**User Story**: As a developer, I need a Node.js backend with Fastify and PostgreSQL setup.
 
-All necessary dependencies for a standard React Native Expo app are installed.
+- **Acceptance Criteria**:
+  - A Fastify server is created and can be run locally
+  - A PostgreSQL database is connected to the Fastify server
+  - A basic "hello world" endpoint is created to verify the connection
+  - Database connection details are managed securely (e.g., using environment variables)
 
-The app runs without errors on both iOS and Android simulators.
+**User Story**: As a developer, I need a local SQLite database with Watermelon DB integration.
 
-User Story: As a developer, I need a Node.js backend with Fastify and PostgreSQL setup.
+- **Acceptance Criteria**:
+  - Watermelon DB is integrated into the React Native Expo project
+  - A basic database schema for a single model (e.g., User) is defined
+  - The app can read and write to the local SQLite database
+  - The app can work offline using the local database
 
-Acceptance Criteria:
+**User Story**: As a developer, I need ESLint, TypeScript strict mode, and testing frameworks configured.
 
-A Fastify server is created and can be run locally.
+- **Acceptance Criteria**:
+  - ESLint is configured with a reasonable set of rules
+  - TypeScript is configured in strict mode to enforce type safety
+  - Jest or a similar testing framework is installed and configured for both the frontend and backend
+  - A simple test file for both the frontend and backend can be run successfully
 
-A PostgreSQL database is connected to the Fastify server.
+**User Story**: As a developer, I need a CI/CD pipeline setup for automated testing and builds.
 
-A basic "hello world" endpoint is created to verify the connection.
+- **Acceptance Criteria**:
+  - A GitHub Actions or similar pipeline is configured
+  - The pipeline automatically runs tests on every push to the main branch
+  - The pipeline is configured to build the app for both iOS and Android
 
-Database connection details are managed securely (e.g., using environment variables).
+## Epic 2: Core Security & Authentication System ✅ COMPLETED
 
-User Story: As a developer, I need a local SQLite database with Watermelon DB integration.
+**User Story**: As a user, I can sign up using Apple ID, Google, or email/password.
 
-Acceptance Criteria:
+- **Acceptance Criteria**:
+  - The sign-up screen presents options for Apple ID, Google, and email/password
+  - Users can successfully create an account using their preferred method
+  - Email/password sign-up requires a valid email format and a strong password
 
-Watermelon DB is integrated into the React Native Expo project.
+**User Story**: As a user, I can authenticate using biometrics (Face ID/Touch ID/Fingerprint).
 
-A basic database schema for a single model (e.g., User) is defined.
+- **Acceptance Criteria**:
+  - The app prompts the user to enable biometrics after initial sign-in
+  - Users can opt in to use biometrics for future logins
+  - Biometric authentication successfully logs the user in without needing a password or PIN
 
-The app can read and write to the local SQLite database.
+**User Story**: As a user, I can set up a PIN as backup authentication.
 
-The app can work offline using the local database.
+- **Acceptance Criteria**:
+  - Users can create a 4-digit PIN for login
+  - The PIN is stored securely (e.g., hashed)
+  - The PIN can be used to log in if biometrics fail or are disabled
+  - Users can reset their PIN after verifying their identity (e.g., via email)
 
-User Story: As a developer, I need ESLint, TypeScript strict mode, and testing frameworks configured.
+**User Story**: As a security-conscious user, I want my sensitive data encrypted locally.
 
-Acceptance Criteria:
+- **Acceptance Criteria**:
+  - All personally identifiable information (PII) is encrypted on the device
+  - Sensitive financial data is encrypted at rest within the local database
+  - The app can decrypt and display data only after the user is authenticated
 
-ESLint is configured with a reasonable set of rules.
+**User Story**: As a user, I want automatic session timeout for security.
 
-TypeScript is configured in strict mode to enforce type safety.
+- **Acceptance Criteria**:
+  - The app logs the user out after a period of inactivity (e.g., 5 minutes)
+  - The user is prompted to re-authenticate (e.g., with PIN or biometrics) to resume using the app
 
-Jest or a similar testing framework is installed and configured for both the frontend and backend.
+## Epic 3: Core Data Models & Local Database ✅ COMPLETED
 
-A simple test file for both the frontend and backend can be run successfully.
+**User Story**: As a developer, I need all core entities (User, FinancialAccount, FinancialGoal, Scenario) implemented.
 
-User Story: As a developer, I need a CI/CD pipeline setup for automated testing and builds.
+- **Acceptance Criteria**:
+  - Watermelon DB models are created for each entity
+  - The models have all the necessary fields and relationships defined as per the PRD
+  - Migrations are set up to handle schema changes
 
-Acceptance Criteria:
+**User Story**: As a user, I want my data to work offline-first.
 
-A GitHub Actions or similar pipeline is configured.
+- **Acceptance Criteria**:
+  - Users can create and edit accounts and goals while offline
+  - All changes are saved to the local database and are visible to the user
+  - A clear visual indicator shows the user that they are offline
 
-The pipeline automatically runs tests on every push to the main branch.
-
-The pipeline is configured to build the app for both iOS and Android.
-
-Epic 2: Core Security & Authentication System
-
-**ENHANCED EPIC 2** (Based on Epic 1 Principal Engineer Review)
-
-User Story: **US2.1: PostgreSQL Database Integration** ⭐ CRITICAL (New from Epic 1 review)
-
-As a developer, I need a production-ready PostgreSQL database to replace the mock implementation.
-
-Acceptance Criteria:
-
-PostgreSQL database connection established with connection pooling (min: 5, max: 20 connections)
-
-Database migrations system implemented with versioning support
-
-Health check endpoints return actual database status (not mock responses)
-
-Connection timeout and retry logic implemented (30s timeout, automatic reconnection)
-
-Database performance monitoring enabled with query time tracking
-
-All existing mock functionality replaced with real database operations
-
-Connection pooling metrics available for monitoring
-
-Database backup and recovery procedures documented
-
-User Story: **US2.2: OAuth Authentication System** (Enhanced)
-
-As a user, I can sign up and sign in using Apple ID, Google, or email/password with secure token management.
-
-Acceptance Criteria:
-
-OAuth integration with Apple ID and Google using Expo AuthSession
-
-Email/password authentication with secure password requirements (12+ chars, mixed case, numbers, special chars)
-
-User registration flow with email verification for email/password accounts
-
-Account linking capability for users with multiple authentication methods
-
-Secure token storage using Expo SecureStore (not AsyncStorage)
-
-Authentication state persistence across app restarts
-
-JWT tokens with RS256 signing and 15-minute expiry
-
-Refresh token rotation implemented with secure storage
-
-Authentication completes in <3 seconds for all methods
-
-Error handling for network failures and invalid credentials
-
-User Story: **US2.3: Biometric Authentication** (Enhanced)
-
-As a user, I can authenticate using biometrics (Face ID/Touch ID/Fingerprint) for quick and secure access.
-
-Acceptance Criteria:
-
-Biometric authentication setup during onboarding flow
-
-Support for Face ID (iOS), Touch ID (iOS), and Android Fingerprint
-
-Graceful fallback to PIN when biometrics are unavailable or fail
-
-Biometric authentication bypass option for accessibility compliance
-
-Secure biometric data handling (no storage of biometric templates)
-
-Biometric authentication completes in <2 seconds
-
-Platform-specific biometric availability detection
-
-User can disable/enable biometric authentication in settings
-
-Biometric authentication works after app backgrounding/foregrounding
-
-User Story: **US2.4: PIN Backup Authentication** (Enhanced)
-
-As a user, I can set up a secure PIN as backup authentication when biometrics are unavailable.
-
-Acceptance Criteria:
-
-6-digit PIN creation with complexity requirements (no repeated digits, no sequential patterns)
-
-PIN stored using PBKDF2 hashing with salt (100,000 iterations minimum)
-
-PIN attempt limiting (5 attempts, then 30-minute temporary lockout)
-
-PIN change functionality requiring current PIN verification
-
-Emergency PIN reset with email verification for email/password accounts
-
-PIN stored in Expo SecureStore with additional encryption
-
-PIN entry UI with secure input (no screenshots, no copy/paste)
-
-PIN timeout after 3 minutes of inactivity during entry
-
-User Story: **US2.5: Local Data Encryption** (Enhanced)
-
-As a security-conscious user, I want all my sensitive financial data encrypted locally using industry-standard encryption.
-
-Acceptance Criteria:
-
-AES-256-GCM encryption implemented for all sensitive user data
-
-Secure key derivation using PBKDF2 with user authentication-derived keys
-
-Encryption key stored in device secure enclave/keystore (iOS Keychain, Android Keystore)
-
-Encrypted data includes: financial accounts, goals, personal information, preferences
-
-Encryption/decryption performance <100ms for typical operations
-
-Keys never stored in plain text anywhere in the application
-
-Automatic key rotation capability for enhanced security
-
-Data integrity verification using GCM authentication tags
-
-Secure key backup and recovery mechanism for account recovery
-
-User Story: **US2.6: Session Management & Auto-Lock** (Enhanced)
-
-As a user, I want automatic session timeout and app locking with configurable security settings.
-
-Acceptance Criteria:
-
-Configurable auto-lock timeout options (1, 5, 15, 30 minutes, never)
-
-Background app detection with immediate lock when app goes to background
-
-Session timeout with secure token invalidation on server side
-
-Biometric/PIN re-authentication required after timeout
-
-Session activity tracking for security monitoring (login times, device info)
-
-Sensitive screens (account details, goals) immediately locked on app backgrounding
-
-User notification before session timeout (30-second warning)
-
-Session extension capability for active users
-
-Force logout capability for security incidents
-
-User Story: **US2.7: Device Security Validation** ⭐ NEW
-
-As a security-conscious user, I want the app to detect and warn me about compromised devices.
-
-Acceptance Criteria:
-
-Jailbreak detection for iOS devices using multiple detection methods
-
-Root detection for Android devices with comprehensive checks
-
-Debugger detection during runtime to prevent reverse engineering
-
-Emulator detection for fraud prevention and security
-
-Security warning display with user education about risks
-
-Optional app functionality restriction on compromised devices (configurable)
-
-Security status logging for monitoring and compliance
-
-Device security check performed on app startup and periodically
-
-User can acknowledge security warnings and continue (with limitations)
-
-Security status included in error reporting for support purposes
-
-User Story: **US2.8: Error Monitoring & Observability** ⭐ CRITICAL (New from Epic 1 review)
-
-As a developer, I need comprehensive error monitoring and performance tracking for production reliability.
-
-Acceptance Criteria:
-
-Sentry integration for error tracking and performance monitoring
-
-Structured error logging with context information (user ID, device info, app version)
-
-Performance monitoring for authentication flows and critical user journeys
-
-User session tracking (privacy-compliant, no PII)
-
-Real-time error alerting for critical issues (authentication failures, security events)
-
-Error categorization and priority assignment (critical, high, medium, low)
-
-Performance metrics collection (authentication time, encryption time, database query time)
-
-Custom error boundaries for React Native components
-
-Error rate monitoring with automated alerting thresholds
-
-Privacy-compliant analytics with user consent management
-
-User Story: **US2.9: API Security Enhancement** (Enhanced)
-
-As a developer, I need enhanced API security measures for production deployment.
-
-Acceptance Criteria:
-
-JWT token implementation with RS256 signing (not HS256)
-
-Refresh token rotation with secure storage and automatic cleanup
-
-API rate limiting per authenticated user (not just per IP address)
-
-Request/response logging for security auditing (excluding sensitive data)
-
-API versioning strategy implementation (v1, v2, etc.)
-
-Enhanced CORS configuration for production environment
-
-API endpoint authentication middleware with role-based access
-
-Security headers implementation (HSTS, CSP, X-Frame-Options)
-
-API request validation with comprehensive input sanitization
-
-API response time monitoring with performance alerts
-
-User Story: **US2.10: Security Compliance & Documentation** ⭐ NEW
-
-As a compliance officer, I need comprehensive security documentation and OWASP compliance verification.
-
-Acceptance Criteria:
-
-OWASP Mobile Security Checklist 100% compliance verification
-
-Security architecture documentation with data flow diagrams
-
-Threat model documentation identifying potential attack vectors
-
-Security testing procedures and automated security test suite
-
-Compliance audit trail preparation for financial data regulations
-
-Security incident response procedures documented
-
-Data privacy impact assessment (DPIA) for GDPR compliance
-
-Security control matrix mapping to compliance requirements
-
-Regular security assessment schedule and procedures
-
-Security training materials for development team
-
-User Story: As a security-conscious user, I want my sensitive data encrypted locally.
-
-Acceptance Criteria:
-
-All personally identifiable information (PII) is encrypted on the device.
-
-Sensitive financial data is encrypted at rest within the local database.
-
-The app can decrypt and display data only after the user is authenticated.
-
-User Story: As a user, I want automatic session timeout for security.
-
-Acceptance Criteria:
-
-The app logs the user out after a period of inactivity (e.g., 5 minutes).
-
-The user is prompted to re-authenticate (e.g., with PIN or biometrics) to resume using the app.
-
-Epic 3: Core Data Models & Local Database
-
-User Story: As a developer, I need all core entities (User, FinancialAccount, FinancialGoal, Scenario) implemented.
-
-Acceptance Criteria:
-Watermelon DB models are created for each entity.
-The models have all the necessary fields and relationships defined as per the PRD.
-Migrations are set up to handle schema changes.
-
-User Story: As a user, I want my data to work offline-first.
-
-Acceptance Criteria:
-Users can create and edit accounts and goals while offline.
-All changes are saved to the local database and are visible to the user.
-A clear visual indicator shows the user that they are offline.
-
-User Story: As a user, I want my data to sync when I go back online.
-
-Acceptance Criteria:
-When the app detects a network connection, it automatically syncs local changes to the backend.
-The sync process is non-blocking and doesn't interrupt the user's experience.
-The user is notified when the sync is complete.
-
-User Story: As a developer, I need data validation and error handling.
-
-Acceptance Criteria:
-All incoming data is validated on both the frontend and backend.
-Invalid data is rejected with a clear error message.
-The app gracefully handles errors (e.g., API failures) without crashing.
-
-User Story: As a user, I want my account numbers encrypted for security.
-
-Acceptance Criteria:
-Financial account numbers and other sensitive financial data are encrypted before being stored.
-The encryption key is managed securely.
-Only the user can access and decrypt this information.
-
-Epic 4: Navigation & Core UI Framework
-
-User Story: As a user, I can navigate between main app sections smoothly.
-
-Acceptance Criteria:
-A bottom tab navigator is implemented for core screens (Dashboard, Accounts, Goals, etc.).
-Transitions between screens are smooth and responsive.
-The back button works as expected.
-
-User Story: As a user, I experience consistent UI components throughout the app.
-
-Acceptance Criteria:
-A component library with reusable UI elements (buttons, input fields, cards, etc.) is created.
-All screens use these standardized components.
-The design is consistent with the provided design specifications.
-
-User Story: As a user with accessibility needs, I can navigate using screen readers.
-
-Acceptance Criteria:
-All UI elements have proper accessibility labels.
-The app is testable with VoiceOver (iOS) and TalkBack (Android).
-The navigation flow is logical and easy to follow for screen reader users.
-
-User Story: As a user, I can use the app in both light and dark modes.
-
-Acceptance Criteria:
-The app automatically switches between light and dark mode based on system settings.
-All components and screens are properly themed for both modes.
-Text and background colors have sufficient contrast in both modes.
-
-User Story: As a user, I experience haptic feedback for interactions.
-
-Acceptance Criteria:
-Tapping on buttons, toggles, or other interactive elements triggers subtle haptic feedback.
-Haptic feedback is implemented using Expo's Haptics module.
-
-Epic 5: User Onboarding & Profile Management
-
-User Story: As a new user, I can complete onboarding quickly and understand the app's value.
-
-Acceptance Criteria:
-The onboarding process is a series of simple, well-designed screens.
-Each screen explains a key feature or benefit of the app.
-The onboarding flow guides the user to set up their first account and goal.
-
-User Story: As a user, I can set my basic financial information and preferences.
-
-Acceptance Criteria:
-A profile screen allows users to input their salary, savings rate, and desired retirement age.
-The app uses this information to provide personalized calculations.
-The data is saved to the user's profile and persists between sessions.
-
-User Story: As a user, I can configure my security and privacy settings.
-
-Acceptance Criteria:
-A dedicated settings screen includes options to enable/disable biometrics, change PIN, and manage data privacy.
-Users can control which data is shared or synchronized.
-
-Any changes to these settings are saved securely.
-
-User Story: As a user, I can update my profile information.
-
-Acceptance Criteria:
-The profile screen has an "Edit" function.
-Users can update their personal information (e.g., name, email) and financial data.
-Changes are validated and saved to the backend.
-
-User Story: As a user, I want personalized recommendations based on my profile.
-
-Acceptance Criteria:
-The app suggests a suitable savings rate or retirement goal based on the user's input.
-The recommendations are displayed prominently on the dashboard.
-Users can accept or dismiss the recommendations.
-
-Epic 6: Financial Account Management
-
-User Story: As a user, I can add multiple financial accounts (checking, savings, investment, retirement).
-
-Acceptance Criteria:
-A dedicated "Add Account" screen allows the user to specify account type, name, and initial balance.
-The app displays a list of all added accounts on the accounts screen.
-The app supports various account types as defined in the PRD.
-
-User Story: As a user, I can update account balances manually.
-
-Acceptance Criteria:
-Users can select an account and input a new balance.
-The updated balance is saved and reflected in the total net worth calculation.
-The app stores a history of balance changes.
-
-User Story: As a user, I can categorize accounts by tax treatment.
-
-Acceptance Criteria:
-The "Add/Edit Account" screen includes an option to select tax treatment (e.g., Taxable, Tax-Advantaged).
-This categorization is used in the calculation engine.
-
-User Story: As a user, I can edit or delete accounts.
-
-Acceptance Criteria:
-The app provides an intuitive way to edit account details (e.g., name, balance) or delete an account.
-A confirmation dialog appears before a deletion is finalized.
-Deleting an account updates all related calculations and visualizations.
-
-User Story: As a user, I can see my total net worth across all accounts.
-
-Acceptance Criteria:
-The dashboard displays a live-updating total net worth.
-The net worth is calculated by summing all account balances.
-The net worth calculation correctly handles accounts with negative balances (debt).
-
-User Story: As a user with debt, I can track negative balances appropriately.
-
-Acceptance Criteria:
-The app allows users to add accounts with negative balances.
-Negative balances are clearly distinguished from positive ones in the UI.
-The net worth calculation correctly subtracts debt from total assets.
-
-Epic 7: Financial Calculation Engine
-
-User Story: As a user, I want accurate future value projections for my accounts.
-
-Acceptance Criteria:
-The calculation engine uses compounding interest formulas to project future values.
-Users can input an expected annual return rate for each account.
-The projections are displayed on the dashboard and goal screens.
-
-User Story: As a user, I want to calculate my FIRE number based on expenses.
-
-Acceptance Criteria:
-The app takes the user's annual expenses as input.
-The calculation engine determines the required FIRE number (e.g., 25x annual expenses).
-This calculation is displayed on the goal creation screen.
-
-User Story: As a user, I want to know my required savings rate to reach goals.
-
-Acceptance Criteria:
-The calculation engine determines the monthly or annual savings required to hit a specific goal.
-This is based on the user's current savings and expected returns.
-This information is presented clearly to the user.
-
-User Story: As a user, I want Coast FIRE calculations.
-
-Acceptance Criteria:
-The app can calculate the "Coast FIRE" number—the amount needed to save by a certain age to reach FIRE without further contributions.
-The calculation takes into account future returns and inflation.
-
-User Story: As a user, I want to model market downturns and volatility.
-
-Acceptance Criteria:
-The scenario planning feature allows users to simulate market crashes or lower-than-average returns.
-The projection charts and numbers update to reflect these downturns.
-
-User Story: As a user with debt, I want debt payoff strategies calculated.
-
-Acceptance Criteria:
-The app can show a debt snowball or debt avalanche strategy.
-Users can input their debt details, and the app will generate a payoff timeline.
-
-Epic 8: Goal Creation & Management (Single Goal MVP)
-
-User Story: As a user, I can create a FIRE goal with target amount and date.
-
-Acceptance Criteria:
-A dedicated "Create Goal" screen allows users to input a name, target amount, and target date.
-The goal is saved and appears on the goals screen.
-
-User Story: As a user, I can see my progress toward my goal.
-
-Acceptance Criteria:
-The goals screen displays a progress bar or percentage completion.
-The progress is calculated based on the current net worth and the target amount.
-
-User Story: As a user, I can adjust my goal if circumstances change.
-
-Acceptance Criteria:
-Users can edit an existing goal's target amount or date.
-The app updates the progress and calculations automatically.
-
-User Story: As a user, I can see if my goal is feasible with current savings.
-
-Acceptance Criteria:
-The app provides a "Feasibility Score" or a clear indicator (e.g., "On Track," "Off Track").
-This is based on the required savings rate vs. the user's actual savings rate.
-
-User Story: As a user, I can track my goal adjustment history.
-
-Acceptance Criteria:
-The app maintains a log of all changes made to a goal.
-Users can view this history to see how their goals have evolved.
-
-User Story: As a user, I want goal milestones and celebrations.
-
-Acceptance Criteria:
-The app celebrates when the user reaches a significant milestone (e.g., 25% progress).
-A small animation or notification appears to congratulate the user.
-
-Epic 9: Scenario Planning & Projections
-
-User Story: As a user, I can create different financial scenarios with varying assumptions.
-
-Acceptance Criteria:
-The "Scenarios" screen allows users to create new scenarios.
-Each scenario can have different inputs for market returns, inflation, and savings rates.
-
-User Story: As a user, I can adjust inflation rates, market returns, and savings rates.
-
-Acceptance Criteria:
-Sliders or input fields allow users to easily modify these key variables within each scenario.
-The app updates all calculations and visualizations in real-time.
-
-User Story: As a user, I can compare scenarios side-by-side.
-
-Acceptance Criteria:
-
-The UI allows users to select two or more scenarios to compare.
-
-A comparison chart visually displays the differences in outcomes.
-
-Key metrics (e.g., FIRE date) are displayed for each scenario.
-
-User Story: As a user, I can save and name my scenarios.
-
-Acceptance Criteria:
-
-Users can give a descriptive name to each scenario.
-
-The scenarios are saved and can be revisited later.
-
-User Story: As a user, I can see detailed year-by-year projections.
-
-Acceptance Criteria:
-
-The app provides a table or a detailed graph showing the projected account balances for each year.
-
-Users can scroll through the projection to see the long-term outlook.
-
-User Story: As a user, I can stress-test my plans with market downturns.
-
-Acceptance Criteria:
-
-A pre-built "Market Downturn" scenario can be applied to a user's plan.
-
-This scenario simulates a significant drop in returns to show the impact on their goals.
-
-Epic 10: Data Visualization & Charts
-
-User Story: As a user, I can see my goal progress in visual charts.
-
-Acceptance Criteria:
-
-The goal screen features a clear and engaging progress chart (e.g., a pie chart or a bar chart).
-
-The chart updates in real-time as the user's net worth changes.
-
-User Story: As a user, I can view projection timelines as interactive graphs.
-
-Acceptance Criteria:
-
-The projection screen displays a line graph of projected net worth over time.
-
-Users can tap on points on the graph to see specific values for a given year.
-
-User Story: As a user with accessibility needs, I can access chart data via screen reader.
-
-Acceptance Criteria:
-
-The app provides a textual summary of the chart data.
-
-The screen reader can read the data points and key insights from the visualizations.
-
-User Story: As a user, I can zoom and pan through long-term projections.
-
-Acceptance Criteria:
-
-The projection graph is interactive, allowing users to zoom in and out.
-
-Users can pan across the graph to explore different timeframes.
-
-User Story: As a user, I can see my net worth growth over time.
-
-Acceptance Criteria:
-
-A historical chart on the dashboard shows the user's net worth growth.
-
-This chart is populated with data from past balance updates.
-
-User Story: As a user, I can compare different scenarios visually.
-
-Acceptance Criteria:
-
-The scenario comparison screen uses a multi-line graph to show different scenarios.
-
-Each line is clearly labeled with the scenario name.
-
-Epic 11: Backend API Development
-
-User Story: As a mobile app, I need reliable API endpoints for all operations.
-
-Acceptance Criteria:
-
-RESTful API endpoints are created for all CRUD operations (Create, Read, Update, Delete) on core entities.
-
-The endpoints respond with a consistent data format (e.g., JSON).
-
-User Story: As a system, I need proper authentication and authorization.
-
-Acceptance Criteria:
-
-All protected endpoints require a valid authentication token.
-
-The backend validates that the user is authorized to perform the requested action.
-
-User Story: As a system, I need rate limiting and security middleware.
-
-Acceptance Criteria:
-
-Rate limiting is implemented on all endpoints to prevent abuse.
-
-CORS and other security headers are configured to protect against common web vulnerabilities.
-
-User Story: As a developer, I need comprehensive API documentation.
-
-Acceptance Criteria:
-
-API documentation (e.g., using Swagger/OpenAPI) is generated and accessible.
-
-The documentation describes all endpoints, request/response formats, and authentication requirements.
-
-User Story: As a system, I need health monitoring and error tracking.
-
-Acceptance Criteria:
-
-The backend reports its health status to a monitoring service.
-
-A tool like Sentry or a similar service is set up to capture and log errors.
-
-User Story: As a system, I need database connection pooling and optimization.
-
-Acceptance Criteria:
-
-The backend uses a database connection pool to manage connections efficiently.
-
-Database queries are optimized to ensure fast response times.
-
-Epic 12: Sync & Offline Functionality
-
-User Story: As a user, I can use all core features without internet connection.
-
-Acceptance Criteria:
-
-The app remains fully functional (read and write) when in airplane mode or with no network connection.
-
-The UI clearly indicates that the app is in offline mode.
-
-User Story: As a user, my data syncs automatically when I go back online.
-
-Acceptance Criteria:
-
-The app detects when the network connection is restored.
-
-A background process triggers to sync all pending local changes to the server.
-
-The sync process is resilient to network interruptions.
-
-User Story: As a user, I can see sync status and resolve any conflicts.
-
-Acceptance Criteria:
-
-The UI displays a small icon or message indicating the current sync status.
-
-In the event of a sync conflict (e.g., data changed on two devices simultaneously), the user is presented with options to resolve the conflict.
-
-User Story: As a user, I'm notified when sync fails or succeeds.
-
-Acceptance Criteria:
-
-A small notification (e.g., a toast message) informs the user of successful syncs.
-
-If a sync fails, a persistent notification with an option to retry is displayed.
-
-User Story: As a developer, I need conflict resolution strategies for data sync.
-
-Acceptance Criteria:
-
-The sync mechanism uses a clear and predictable conflict resolution strategy (e.g., "last write wins" or a more sophisticated merge).
-
-The strategy is documented, and tests are written to ensure it works correctly.
-
-Epic 13: Security Hardening & Compliance
-
-User Story: As a security-conscious user, I want certificate pinning for API calls.
-
-Acceptance Criteria:
-
-The app is configured to only trust a specific server certificate for API calls.
-
-Any attempt to connect to the backend with a different certificate results in a connection failure.
-
-User Story: As a user, I want to know if my device security is compromised.
-
-Acceptance Criteria:
-
-The app detects if the device is rooted or jailbroken.
-
-If a security risk is detected, the user is warned, and sensitive app functionality is disabled.
-
-User Story: As a user, I want my data to be GDPR and CCPA compliant.
-
-Acceptance Criteria:
-
-The app has a privacy policy that is accessible to all users.
-
-Data storage and processing follow the principles of GDPR and CCPA.
-
-Users can request their data or the deletion of their account.
-
-User Story: As a user, I want to export or delete my data.
-
-Acceptance Criteria:
-
-A dedicated section in the settings allows users to request a data export.
-
-Users can also initiate a full account deletion, which permanently removes all their data from the system.
-
-User Story: As a developer, I need security audit tools and monitoring.
-
-Acceptance Criteria:
-
-The CI/CD pipeline includes static analysis tools to check for security vulnerabilities.
-
-The app's dependencies are regularly checked for known vulnerabilities.
-
-Security-related events are logged and monitored.
+**User Story**: As a user, I want my data to sync when I go back online.
+
+- **Acceptance Criteria**:
+  - When the app detects a network connection, it automatically syncs local changes to the backend
+  - The sync process is non-blocking and doesn't interrupt the user's experience
+  - The user is notified when the sync is complete
+
+**User Story**: As a developer, I need data validation and error handling. ✅ COMPLETED
+
+- **Acceptance Criteria**:
+  - All incoming data is validated on both the frontend and backend
+  - Invalid data is rejected with a clear error message
+  - The app gracefully handles errors (e.g., API failures) without crashing
+
+**User Story**: As a user, I want my account numbers encrypted for security.
+
+- **Enhanced Acceptance Criteria**:
+  - Financial account numbers and other sensitive financial data are encrypted using AES-256-GCM before being stored
+  - The encryption key is derived using PBKDF2 and stored in Expo SecureStore/Keychain
+  - Only the authenticated user can access and decrypt this information
+  - **NEW**: Encryption keys are rotated every 90 days with automatic migration
+  - **NEW**: All sensitive data access is logged for security auditing
+  - **NEW**: Decryption fails gracefully if keys are compromised, allowing data recovery through re-authentication
+
+## Epic 4: Navigation & Core UI Framework
+
+**User Story**: As a user, I can navigate between main app sections smoothly.
+
+- **Enhanced Acceptance Criteria**:
+  - A bottom tab navigator is implemented for core screens (Dashboard, Accounts, Goals, Scenarios, Settings)
+  - Transitions between screens are smooth and responsive (<300ms)
+  - The back button works as expected with proper navigation stack management
+  - **NEW**: Deep linking support for sharing specific goals or scenarios
+  - **NEW**: Navigation state is preserved during app backgrounding/foregrounding
+  - **NEW**: Breadcrumb navigation for complex nested flows
+  - **NEW**: Swipe gestures for tab navigation on supported devices
+
+**User Story**: As a user, I experience consistent UI components throughout the app.
+
+- **Enhanced Acceptance Criteria**:
+  - A component library with reusable UI elements (buttons, input fields, cards, modals, charts) is created
+  - All screens use these standardized components with consistent spacing (8px grid system)
+  - The design follows Material Design 3 principles for Android and Human Interface Guidelines for iOS
+  - **NEW**: Component library includes loading states, error states, and empty states
+  - **NEW**: All components support both light and dark themes with smooth transitions
+  - **NEW**: Components include built-in form validation with real-time feedback
+  - **NEW**: Design tokens are centralized for consistent colors, typography, and spacing
+
+**User Story**: As a user with accessibility needs, I can navigate using screen readers.
+
+- **Enhanced Acceptance Criteria**:
+  - All UI elements have proper accessibility labels and hints
+  - The app is fully testable with VoiceOver (iOS) and TalkBack (Android)
+  - The navigation flow is logical and easy to follow for screen reader users
+  - **NEW**: Screen reader announces loading states and progress updates
+  - **NEW**: Financial data is announced in user-friendly format (e.g., "One thousand two hundred dollars" not "1200")
+  - **NEW**: Charts include textual descriptions and data tables for screen readers
+  - **NEW**: Focus management ensures logical tab order through forms and lists
+
+**User Story**: As a user, I can use the app in both light and dark modes.
+
+- **Enhanced Acceptance Criteria**:
+  - The app automatically switches between light and dark mode based on system settings
+  - All components and screens are properly themed for both modes
+  - Text and background colors meet WCAG AA contrast requirements (4.5:1 for normal text, 3:1 for large text)
+  - **NEW**: Charts and visualizations adapt colors for optimal readability in both themes
+  - **NEW**: Users can manually override system theme preference
+  - **NEW**: Theme transitions are animated smoothly without jarring color changes
+  - **NEW**: High contrast mode support for users with visual impairments
+
+**User Story**: As a user, I experience haptic feedback for interactions.
+
+- **Enhanced Acceptance Criteria**:
+  - Tapping on buttons, toggles, or other interactive elements triggers contextual haptic feedback
+  - Haptic feedback is implemented using Expo's Haptics module with different intensities
+  - **NEW**: Different haptic patterns for different actions (light for taps, medium for toggles, heavy for alerts)
+  - **NEW**: Haptic feedback can be disabled in accessibility settings
+  - **NEW**: Success/error feedback uses distinct haptic patterns
+  - **NEW**: Pull-to-refresh and swipe gestures include appropriate haptic feedback
+
+## Epic 5: User Onboarding & Profile Management
+
+**User Story**: As a new user, I can complete onboarding quickly and understand the app's value.
+
+- **Enhanced Acceptance Criteria**:
+  - The onboarding process consists of maximum 5 intuitive screens with progress indicators
+  - Each screen explains a key feature with animated illustrations and clear value propositions
+  - The onboarding flow guides users to set up their first account and FIRE goal within 3 minutes
+  - **NEW**: Onboarding includes a brief FIRE education module with interactive examples
+  - **NEW**: Users can skip non-essential onboarding steps and complete them later
+  - **NEW**: Personalized onboarding path based on user's age and financial situation
+  - **NEW**: Onboarding progress is saved and resumable if interrupted
+  - **NEW**: A/B testing framework for onboarding optimization
+
+**User Story**: As a user, I can set my basic financial information and preferences.
+
+- **Enhanced Acceptance Criteria**:
+  - Profile screen allows users to input salary, current savings, desired retirement age, and annual expenses
+  - The app uses this information to provide personalized FIRE number calculations and recommendations
+  - User can specify risk tolerance level (Conservative/Moderate/Aggressive) affecting projection assumptions
+  - **NEW**: Income input supports multiple sources (salary, freelance, investment income, side hustles)
+  - **NEW**: Expense tracking includes categories with percentage breakdowns
+  - **NEW**: Regional settings for tax considerations and retirement systems
+  - **NEW**: Currency selection with automatic exchange rate handling
+  - **NEW**: Data validation ensures realistic financial inputs with helpful guidance
+
+**User Story**: As a user, I can configure my security and privacy settings.
+
+- **Enhanced Acceptance Criteria**:
+  - Dedicated settings screen includes biometric enable/disable, PIN change, and data privacy controls
+  - Users can control local-only mode vs cloud sync preferences
+  - Session timeout can be adjusted from 1-60 minutes based on user preference
+  - **NEW**: Data export functionality for GDPR compliance (JSON and CSV formats)
+  - **NEW**: Account deletion option with clear data retention policy explanation
+  - **NEW**: Privacy dashboard showing what data is collected and how it's used
+  - **NEW**: Granular controls for analytics, crash reporting, and performance data sharing
+  - **NEW**: Security event log showing recent authentication attempts and device access
+
+**User Story**: As a user, I can update my profile information.
+
+- **Enhanced Acceptance Criteria**:
+  - Profile screen has an intuitive "Edit" mode with inline validation
+  - Users can update personal information (name, email, phone) and financial data
+  - Changes are validated in real-time with helpful error messages
+  - **NEW**: Change history tracking for auditing purposes
+  - **NEW**: Bulk import functionality for account balances via CSV
+  - **NEW**: Photo upload for profile picture with automatic resizing
+  - **NEW**: Emergency contact information for account recovery
+  - **NEW**: Two-factor authentication setup for sensitive changes
+
+**User Story**: As a user, I want personalized recommendations based on my profile.
+
+- **Enhanced Acceptance Criteria**:
+  - App suggests optimal savings rates based on age, income, and retirement timeline
+  - Recommendations are displayed on dashboard with clear explanations and rationale
+  - Users can accept recommendations with one tap or dismiss with feedback
+  - **NEW**: ML-powered recommendations improve over time based on user behavior
+  - **NEW**: Recommendations include specific actionable steps (e.g., "Increase 401k by 2%")
+  - **NEW**: Comparative analysis showing user's position relative to peers (anonymized)
+  - **NEW**: Goal milestone suggestions based on FIRE methodology best practices
+  - **NEW**: Risk-adjusted recommendations based on market conditions and user age
+
+## Epic 6: Financial Account Management
+
+**User Story**: As a user, I can add multiple financial accounts (checking, savings, investment, retirement).
+
+- **Enhanced Acceptance Criteria**:
+  - "Add Account" wizard supports all major account types with guided input
+  - Account setup includes institution selection from searchable database of 10,000+ institutions
+  - Smart defaults for interest rates and tax treatments based on account type
+  - **NEW**: Account categorization with custom tags and colors for organization
+  - **NEW**: Account linking for related accounts (e.g., checking + savings at same bank)
+  - **NEW**: Import account data via CSV for bulk setup
+  - **NEW**: Account templates for common setups (e.g., "Standard FIRE Portfolio")
+  - **NEW**: Validation against realistic balance ranges with warnings for unusual values
+
+**User Story**: As a user, I can update account balances manually.
+
+- **Enhanced Acceptance Criteria**:
+  - Quick balance update with large, easy-to-tap input fields optimized for mobile
+  - Updated balances trigger automatic recalculation of net worth and goal progress
+  - Balance history is stored with timestamps for trend analysis
+  - **NEW**: Bulk balance update mode for updating multiple accounts simultaneously
+  - **NEW**: Balance change notifications with percentage change calculations
+  - **NEW**: Smart suggestions for balance updates based on typical account patterns
+  - **NEW**: Balance verification prompts for significant changes (>20% variation)
+  - **NEW**: Integration with bank account aggregation services (Plaid) for automatic updates
+
+**User Story**: As a user, I can categorize accounts by tax treatment.
+
+- **Enhanced Acceptance Criteria**:
+  - Account setup includes comprehensive tax treatment options (Taxable, Traditional IRA/401k, Roth IRA/401k, HSA)
+  - Tax categorization affects withdrawal strategy calculations and FIRE projections
+  - Regional tax treatment options based on user's country/state
+  - **NEW**: Tax-loss harvesting opportunities identification for taxable accounts
+  - **NEW**: Asset allocation suggestions based on tax-advantaged account types
+  - **NEW**: Tax impact calculator for early withdrawal scenarios
+  - **NEW**: Annual contribution limit tracking with automatic alerts for maximum contributions
+  - **NEW**: Tax bracket optimization recommendations based on account mix
+
+**User Story**: As a user, I can edit or delete accounts.
+
+- **Enhanced Acceptance Criteria**:
+  - Intuitive swipe-to-edit and swipe-to-delete gestures with confirmation dialogs
+  - Account deletion includes impact analysis showing effect on goals and projections
+  - Soft delete option allowing account recovery within 30 days
+  - **NEW**: Merge account functionality for consolidating duplicate accounts
+  - **NEW**: Account archiving option for closed accounts while preserving historical data
+  - **NEW**: Bulk operations for managing multiple accounts efficiently
+  - **NEW**: Account transfer functionality for moving balances between accounts
+  - **NEW**: Detailed audit trail for all account modifications with timestamps and reasons
+
+**User Story**: As a user, I can see my total net worth across all accounts.
+
+- **Enhanced Acceptance Criteria**:
+  - Dashboard displays real-time net worth with smooth animated updates
+  - Net worth calculation correctly handles negative balances and different currencies
+  - Historical net worth chart shows trends over time with interactive data points
+  - **NEW**: Net worth breakdown by account type with visual percentage representations
+  - **NEW**: Monthly net worth change calculations with trend indicators
+  - **NEW**: Net worth milestones and achievement celebrations
+  - **NEW**: Comparison to previous periods (month/quarter/year) with variance analysis
+  - **NEW**: Net worth projections based on current savings rate and market assumptions
+
+**User Story**: As a user with debt, I can track negative balances appropriately.
+
+- **Enhanced Acceptance Criteria**:
+  - Negative balances are displayed with distinct visual indicators (red text, debt icons)
+  - Net worth calculation properly subtracts debt from assets with clear breakdown
+  - Debt accounts show interest accrual and payment due dates
+  - **NEW**: Debt payoff calculator with snowball vs avalanche strategy comparison
+  - **NEW**: Interest cost projections for current debt balances
+  - **NEW**: Debt-to-income ratio tracking with benchmark comparisons
+  - **NEW**: Integration with debt payoff goal creation and tracking
+  - **NEW**: Minimum payment tracking with overpayment allocation optimization
+
+## Epic 7: Financial Calculation Engine
+
+**User Story**: As a user, I want accurate future value projections for my accounts.
+
+- **Enhanced Acceptance Criteria**:
+  - Calculation engine uses compound interest formulas with monthly compounding accuracy
+  - Users can set individual expected annual return rates for each account type
+  - Projections account for inflation adjustment with customizable inflation rates
+  - **NEW**: Monte Carlo simulation support for probabilistic projections (1000+ iterations)
+  - **NEW**: Sequence of returns risk modeling for retirement withdrawal scenarios
+  - **NEW**: Market volatility impact analysis with confidence intervals
+  - **NEW**: Tax-adjusted projections considering account types and withdrawal strategies
+  - **NEW**: Real-time calculation updates with <200ms performance requirement
+
+**User Story**: As a user, I want to calculate my FIRE number based on expenses.
+
+- **Enhanced Acceptance Criteria**:
+  - App calculates FIRE number using 4% rule (25x annual expenses) as default
+  - Users can adjust withdrawal rate from 3-5% based on their risk tolerance
+  - Calculation includes geographic cost-of-living adjustments
+  - **NEW**: Multiple FIRE variants calculation (Lean FIRE, Fat FIRE, Coast FIRE, Barista FIRE)
+  - **NEW**: Healthcare cost projections for early retirement scenarios
+  - **NEW**: Social Security benefits integration for retirement planning
+  - **NEW**: Expense inflation modeling with category-specific inflation rates
+  - **NEW**: FIRE number stress testing under various economic scenarios
+
+**User Story**: As a user, I want to know my required savings rate to reach goals.
+
+- **Enhanced Acceptance Criteria**:
+  - Calculation engine determines monthly/annual savings required for specific goal achievement
+  - Recommendations consider current net worth, expected returns, and timeline
+  - Results clearly indicate if goals are achievable with current income
+  - **NEW**: Savings rate optimization across multiple goals with priority weighting
+  - **NEW**: Tax-advantaged account contribution order recommendations
+  - **NEW**: Automatic adjustment suggestions when goals become unrealistic
+  - **NEW**: Sensitivity analysis showing impact of small savings rate changes
+  - **NEW**: Income replacement ratio calculations for retirement adequacy
+
+**User Story**: As a user, I want Coast FIRE calculations.
+
+- **Enhanced Acceptance Criteria**:
+  - Coast FIRE calculation determines amount needed by specific age to reach FIRE without additional contributions
+  - Calculations account for compound growth until traditional retirement age
+  - Multiple coast points can be calculated (age 30, 35, 40, etc.)
+  - **NEW**: Coast FIRE visualization showing contribution phase vs coast phase timeline
+  - **NEW**: Barista FIRE calculations for part-time work scenarios
+  - **NEW**: Geographic arbitrage considerations for location-independent FIRE
+  - **NEW**: Healthcare coverage gap analysis during coast phase
+  - **NEW**: Coast FIRE stress testing under various market scenarios
+
+**User Story**: As a user, I want to model market downturns and volatility.
+
+- **Enhanced Acceptance Criteria**:
+  - Scenario planning includes major market crash simulations (2008, 2020 level events)
+  - Users can model sustained low-return periods and their impact on FIRE timeline
+  - Volatility modeling shows range of possible outcomes with confidence bands
+  - **NEW**: Historical market data integration for realistic scenario modeling
+  - **NEW**: Recovery timeline projections following market downturns
+  - **NEW**: Dollar-cost averaging benefits visualization during volatile periods
+  - **NEW**: Rebalancing strategy impact analysis during market stress
+  - **NEW**: Safe withdrawal rate adjustments based on market conditions
+
+**User Story**: As a user with debt, I want debt payoff strategies calculated.
+
+- **Enhanced Acceptance Criteria**:
+  - Debt snowball and avalanche strategies with side-by-side comparison
+  - Payoff timeline visualization with total interest savings calculations
+  - Integration with FIRE timeline showing optimal debt vs investment balance
+  - **NEW**: Debt consolidation analysis with potential savings calculations
+  - **NEW**: Minimum payment vs accelerated payment scenario comparison
+  - **NEW**: ROI analysis of debt payoff vs investment opportunities
+  - **NEW**: Credit score improvement projections based on debt payoff timeline
+  - **NEW**: Emergency fund vs debt payoff priority recommendations
+
+## Epic 8: Goal Creation & Management (Single Goal MVP)
+
+**User Story**: As a user, I can create a FIRE goal with target amount and date.
+
+- **Enhanced Acceptance Criteria**:
+  - Streamlined goal creation wizard with smart defaults based on user profile
+  - Goal setup includes FIRE type selection (Traditional, Lean, Fat, Coast, Barista)
+  - Target amount calculator with expense-based and lifestyle-based approaches
+  - **NEW**: Goal templates for common FIRE scenarios with pre-filled assumptions
+  - **NEW**: Goal import from financial planning tools and spreadsheets
+  - **NEW**: Multi-currency goal support for international FIRE planning
+  - **NEW**: Goal sharing functionality for accountability partners
+  - **NEW**: Automated goal creation based on life events (promotion, marriage, etc.)
+
+**User Story**: As a user, I can see my progress toward my goal.
+
+- **Enhanced Acceptance Criteria**:
+  - Interactive progress visualization with multiple view options (percentage, dollar amount, time remaining)
+  - Progress calculations update in real-time as account balances change
+  - Historical progress tracking with milestone celebrations
+  - **NEW**: Progress velocity tracking showing acceleration/deceleration trends
+  - **NEW**: Projection confidence indicators based on market volatility
+  - **NEW**: Progress comparison to initial projections with variance analysis
+  - **NEW**: Social comparison features (anonymous benchmarking against similar users)
+  - **NEW**: Progress sharing capabilities for social media with privacy controls
+
+**User Story**: As a user, I can adjust my goal if circumstances change.
+
+- **Enhanced Acceptance Criteria**:
+  - One-tap goal adjustment with immediate impact preview
+  - Automatic feasibility recalculation when goals are modified
+  - Change impact analysis showing effect on required savings rate
+  - **NEW**: Guided adjustment wizard for major life changes (job loss, inheritance, marriage)
+  - **NEW**: Temporary goal suspension during financial hardship with restart planning
+  - **NEW**: Goal splitting functionality for creating sub-goals or alternative paths
+  - **NEW**: Seasonal adjustment support for irregular income/expenses
+  - **NEW**: Goal dependency management when multiple goals interact
+
+**User Story**: As a user, I can see if my goal is feasible with current savings.
+
+- **Enhanced Acceptance Criteria**:
+  - Clear feasibility scoring with color-coded indicators (Green: On Track, Yellow: Challenging, Red: Unrealistic)
+  - Detailed analysis showing required vs actual savings rate
+  - Actionable recommendations for improving feasibility
+  - **NEW**: Feasibility sensitivity analysis showing impact of small changes
+  - **NEW**: Alternative timeline suggestions if current goal is unrealistic
+  - **NEW**: Risk-adjusted feasibility considering market volatility
+  - **NEW**: Life event impact modeling (career changes, family growth, etc.)
+  - **NEW**: Peer comparison showing feasibility relative to similar demographic groups
+
+**User Story**: As a user, I can track my goal adjustment history.
+
+- **Enhanced Acceptance Criteria**:
+  - Comprehensive log of all goal modifications with timestamps and reasons
+  - Visual timeline showing goal evolution over time
+  - Impact analysis for each adjustment on overall FIRE timeline
+  - **NEW**: Adjustment pattern analysis to identify trends and improve future planning
+  - **NEW**: Rollback functionality for recent adjustments with impact preview
+  - **NEW**: Adjustment notifications to accountability partners or financial advisors
+  - **NEW**: Seasonal adjustment recommendations based on historical patterns
+  - **NEW**: Goal stability scoring based on adjustment frequency
+
+**User Story**: As a user, I want goal milestones and celebrations.
+
+- **Enhanced Acceptance Criteria**:
+  - Automated milestone detection at 25%, 50%, 75%, and 100% progress
+  - Celebratory animations and notifications with confetti effects
+  - Milestone sharing capabilities for social media
+  - **NEW**: Custom milestone creation for personal significance (e.g., "First $100k")
+  - **NEW**: Milestone rewards system with achievement badges
+  - **NEW**: Time-based milestones (e.g., "One year of progress")
+  - **NEW**: Community milestone celebrations with anonymous leaderboards
+  - **NEW**: Milestone reflection prompts encouraging users to document their journey
+
+## Epic 9: Scenario Planning & Projections
+
+**User Story**: As a user, I can create different financial scenarios with varying assumptions.
+
+- **Enhanced Acceptance Criteria**:
+  - Intuitive scenario creation wizard with template options (Optimistic, Pessimistic, Conservative)
+  - Each scenario supports independent variables for returns, inflation, and savings rates
+  - Scenario cloning functionality for creating variations of existing scenarios
+  - **NEW**: Life event scenario templates (job loss, career change, inheritance, marriage, divorce)
+  - **NEW**: Economic environment scenarios (recession, inflation, market boom)
+  - **NEW**: Personal milestone scenarios (home purchase, children, education costs)
+  - **NEW**: What-if analysis tools for testing specific assumptions
+  - **NEW**: Scenario collaboration features for couples planning together
+
+**User Story**: As a user, I can adjust inflation rates, market returns, and savings rates.
+
+- **Enhanced Acceptance Criteria**:
+  - Intuitive sliders and input fields for easy variable modification
+  - Real-time calculation updates as variables change
+  - Historical context provided for realistic assumption setting
+  - **NEW**: Smart assumption validation preventing unrealistic combinations
+  - **NEW**: Market data integration for current and historical context
+  - **NEW**: Regional assumption defaults based on user location
+  - **NEW**: Uncertainty ranges for each variable with confidence intervals
+  - **NEW**: Assumption impact analysis showing sensitivity to each variable
+
+**User Story**: As a user, I can compare scenarios side-by-side.
+
+- **Enhanced Acceptance Criteria**:
+  - Split-screen comparison view with synchronized scrolling
+  - Key metric comparison table (FIRE date, required savings, final net worth)
+  - Visual highlighting of significant differences between scenarios
+  - **NEW**: Probability analysis showing likelihood of each scenario outcome
+  - **NEW**: Risk-return profile comparison with visual risk indicators
+  - **NEW**: Break-even analysis showing when scenarios diverge significantly
+  - **NEW**: Export comparison reports for external review or advisor consultation
+  - **NEW**: Scenario ranking based on user-defined criteria (speed, safety, probability)
+
+**User Story**: As a user, I can save and name my scenarios.
+
+- **Enhanced Acceptance Criteria**:
+  - Descriptive naming with emoji and color coding support
+  - Scenario organization with folders and tags
+  - Search and filter functionality for large scenario collections
+  - **NEW**: Scenario versioning with change tracking and rollback capability
+  - **NEW**: Scenario sharing with other users (anonymized data)
+  - **NEW**: Automated scenario updates when base assumptions change
+  - **NEW**: Scenario templates marketplace for common planning situations
+  - **NEW**: Scenario archival with restoration capabilities
+
+**User Story**: As a user, I can see detailed year-by-year projections.
+
+- **Enhanced Acceptance Criteria**:
+  - Interactive projection table with sortable columns and filtering options
+  - Detailed yearly breakdown including contributions, growth, taxes, and inflation
+  - Export functionality for external spreadsheet analysis
+  - **NEW**: Decade view for long-term planning with expandable detail
+  - **NEW**: Critical milestone highlighting (first $100k, half to goal, etc.)
+  - **NEW**: Withdrawal strategy modeling for post-FIRE years
+  - **NEW**: Account-specific projections showing individual account growth
+  - **NEW**: Tax-impact projections with bracket optimization suggestions
+
+**User Story**: As a user, I can stress-test my plans with market downturns.
+
+- **Enhanced Acceptance Criteria**:
+  - Pre-built stress test scenarios (2008 Crisis, COVID-19, 1970s Stagflation)
+  - Custom stress test creation with user-defined severity and duration
+  - Recovery timeline analysis showing bounce-back projections
+  - **NEW**: Sequence of returns risk analysis for early retirement scenarios
+  - **NEW**: Safe withdrawal rate adjustments during market stress
+  - **NEW**: Emergency fund adequacy analysis under stress conditions
+  - **NEW**: Rebalancing opportunity identification during market downturns
+  - **NEW**: Stress test scheduling for automatic periodic plan validation
+
+## Epic 10: Data Visualization & Charts
+
+**User Story**: As a user, I can see my goal progress in visual charts.
+
+- **Enhanced Acceptance Criteria**:
+  - Multiple chart types (circular progress, bar charts, line graphs) for different data views
+  - Smooth animations when progress updates with haptic feedback
+  - Interactive charts allowing drill-down into specific time periods
+  - **NEW**: 3D visualization options for enhanced engagement
+  - **NEW**: Chart customization with user-selectable colors and styles
+  - **NEW**: Progress comparison charts showing actual vs projected performance
+  - **NEW**: Goal velocity charts showing acceleration/deceleration patterns
+  - **NEW**: Achievement visualization with milestone markers and celebrations
+
+**User Story**: As a user, I can view projection timelines as interactive graphs.
+
+- **Enhanced Acceptance Criteria**:
+  - Smooth, responsive line graphs with pinch-to-zoom and pan functionality
+  - Data point tooltips showing detailed information for specific years
+  - Multiple projection lines for different scenarios with clear differentiation
+  - **NEW**: Confidence bands showing projection uncertainty ranges
+  - **NEW**: Area charts for account composition over time
+  - **NEW**: Logarithmic scale options for better visualization of exponential growth
+  - **NEW**: Annotation capabilities for marking important life events on timeline
+  - **NEW**: Chart export functionality in multiple formats (PNG, PDF, SVG)
+
+**User Story**: As a user with accessibility needs, I can access chart data via screen reader.
+
+- **Enhanced Acceptance Criteria**:
+  - Comprehensive textual descriptions of chart trends and key insights
+  - Data table alternatives for all visualizations
+  - Audio descriptions of chart patterns and significant changes
+  - **NEW**: Haptic feedback for chart exploration on supported devices
+  - **NEW**: Voice navigation for chart data points
+  - **NEW**: High contrast chart modes for users with visual impairments
+  - **NEW**: Simplified chart views for cognitive accessibility
+  - **NEW**: Chart data export to screen reader-friendly formats
+
+**User Story**: As a user, I can zoom and pan through long-term projections.
+
+- **Enhanced Acceptance Criteria**:
+  - Smooth gesture-based navigation with momentum scrolling
+  - Intelligent zoom levels with automatic scale adjustment
+  - Overview panel showing current position within larger timeline
+  - **NEW**: Snap-to-milestone functionality for easy navigation to important points
+  - **NEW**: Minimap overview for quick navigation across decades
+  - **NEW**: Gesture shortcuts for common navigation patterns
+  - **NEW**: Zoom history for returning to previous views
+  - **NEW**: Performance optimization ensuring smooth interaction even with 50+ year projections
+
+**User Story**: As a user, I can see my net worth growth over time.
+
+- **Enhanced Acceptance Criteria**:
+  - Historical chart populated with actual balance update data
+  - Trend analysis with growth rate calculations and projections
+  - Account contribution breakdown showing sources of growth
+  - **NEW**: Growth attribution analysis (contributions vs market growth vs compound interest)
+  - **NEW**: Milestone markers showing significant net worth achievements
+  - **NEW**: Seasonality analysis for identifying patterns in financial behavior
+  - **NEW**: Goal progress overlay showing trajectory toward FIRE targets
+  - **NEW**: Peer comparison with anonymized benchmarks for similar demographics
+
+**User Story**: As a user, I can compare different scenarios visually.
+
+- **Enhanced Acceptance Criteria**:
+  - Multi-line graphs with distinct colors and line styles for each scenario
+  - Interactive legend allowing selective show/hide of scenarios
+  - Synchronized zooming and panning across all scenario lines
+  - **NEW**: Scenario probability weighting visualization
+  - **NEW**: Convergence/divergence analysis highlighting when scenarios significantly differ
+  - **NEW**: Risk-return scatter plots for portfolio optimization
+  - **NEW**: Scenario overlap analysis showing common outcome ranges
+  - **NEW**: Dynamic scenario updating as base assumptions change
+
+## Epic 11: Backend API Development
+
+**User Story**: As a mobile app, I need reliable API endpoints for all operations.
+
+- **Enhanced Acceptance Criteria**:
+  - RESTful API with consistent JSON response format and error handling
+  - Comprehensive CRUD operations for all entities with proper HTTP status codes
+  - API versioning strategy supporting backward compatibility
+  - **NEW**: GraphQL endpoint for efficient mobile data fetching
+  - **NEW**: Real-time WebSocket connections for live data updates
+  - **NEW**: Batch operation endpoints for efficient bulk data operations
+  - **NEW**: API response caching with intelligent cache invalidation
+  - **NEW**: Request/response compression for mobile bandwidth optimization
+
+**User Story**: As a system, I need proper authentication and authorization.
+
+- **Enhanced Acceptance Criteria**:
+  - JWT-based authentication with secure refresh token rotation
+  - Role-based access control for different user types (free, premium, admin)
+  - API endpoint protection with proper scope validation
+  - **NEW**: Multi-factor authentication support for sensitive operations
+  - **NEW**: Device fingerprinting for enhanced security monitoring
+  - **NEW**: Session management with concurrent session limits
+  - **NEW**: API key management for third-party integrations
+  - **NEW**: OAuth 2.0 implementation for social login providers
+
+**User Story**: As a system, I need rate limiting and security middleware.
+
+- **Enhanced Acceptance Criteria**:
+  - Rate limiting implemented on all endpoints with tiered limits based on user type
+  - CORS configuration preventing unauthorized cross-origin requests
+  - Security headers (HSTS, CSP, X-Frame-Options) properly configured
+  - **NEW**: DDoS protection with adaptive rate limiting based on traffic patterns
+  - **NEW**: IP whitelist/blacklist functionality for enhanced security
+  - **NEW**: Request signing validation for critical financial operations
+  - **NEW**: Anomaly detection for unusual API usage patterns
+  - **NEW**: Geographic restrictions for compliance with regional regulations
+
+**User Story**: As a developer, I need comprehensive API documentation.
+
+- **Enhanced Acceptance Criteria**:
+  - OpenAPI 3.0 specification with interactive documentation
+  - Complete request/response examples for all endpoints
+  - Authentication flow documentation with code samples
+  - **NEW**: SDK generation for multiple programming languages
+  - **NEW**: API changelog with versioning and migration guides
+  - **NEW**: Interactive API testing environment within documentation
+  - **NEW**: Error code reference with troubleshooting guides
+  - **NEW**: Performance benchmarks and SLA documentation
+
+**User Story**: As a system, I need health monitoring and error tracking.
+
+- **Enhanced Acceptance Criteria**:
+  - Comprehensive health check endpoints for all system components
+  - Integration with monitoring services (Sentry, DataDog) for error tracking
+  - Automated alerting for system degradation or failures
+  - **NEW**: Custom metrics tracking for business KPIs
+  - **NEW**: Distributed tracing for complex request flows
+  - **NEW**: Performance profiling with automatic optimization suggestions
+  - **NEW**: Capacity planning metrics with auto-scaling triggers
+  - **NEW**: Security event monitoring with threat detection capabilities
+
+**User Story**: As a system, I need database connection pooling and optimization.
+
+- **Enhanced Acceptance Criteria**:
+  - Connection pooling with optimal pool size configuration
+  - Database query optimization with performance monitoring
+  - Automated index creation and maintenance
+  - **NEW**: Read replica support for scaling read-heavy operations
+  - **NEW**: Database partitioning strategy for large datasets
+  - **NEW**: Query caching layer with intelligent invalidation
+  - **NEW**: Database backup automation with point-in-time recovery
+  - **NEW**: Database migration tooling with rollback capabilities
+
+## Epic 12: Sync & Offline Functionality
+
+**User Story**: As a user, I can use all core features without internet connection.
+
+- **Enhanced Acceptance Criteria**:
+  - Complete functionality for account management, goal tracking, and calculations offline
+  - Clear visual indicators for offline mode with connectivity status
+  - Offline queue management for pending operations
+  - **NEW**: Offline data conflict prevention with optimistic locking
+  - **NEW**: Background sync preparation while online for improved offline experience
+  - **NEW**: Offline help documentation and tutorials
+  - **NEW**: Graceful degradation for features requiring internet connectivity
+  - **NEW**: Offline analytics tracking for sync when connection restored
+
+**User Story**: As a user, my data syncs automatically when I go back online.
+
+- **Enhanced Acceptance Criteria**:
+  - Automatic connection detection with immediate sync initiation
+  - Non-blocking sync process allowing continued app usage
+  - Intelligent sync ordering prioritizing critical data first
+  - **NEW**: Delta sync for efficient bandwidth usage
+  - **NEW**: Sync progress indicators with detailed status information
+  - **NEW**: Bandwidth-aware sync with quality adaptation for slow connections
+  - **NEW**: Sync scheduling to avoid peak usage times
+  - **NEW**: Retry logic with exponential backoff for failed sync attempts
+
+**User Story**: As a user, I can see sync status and resolve any conflicts.
+
+- **Enhanced Acceptance Criteria**:
+  - Real-time sync status indicators throughout the app
+  - Conflict resolution interface with clear diff visualization
+  - User-friendly conflict resolution options (keep local, keep remote, merge)
+  - **NEW**: Automatic conflict resolution for non-critical data
+  - **NEW**: Conflict history tracking with resolution audit trail
+  - **NEW**: Smart merge suggestions based on data types and user patterns
+  - **NEW**: Bulk conflict resolution for multiple simultaneous conflicts
+  - **NEW**: Conflict prevention through better offline data management
+
+**User Story**: As a user, I'm notified when sync fails or succeeds.
+
+- **Enhanced Acceptance Criteria**:
+  - Unobtrusive success notifications with sync summary information
+  - Persistent failure notifications with clear retry options
+  - Detailed error information for troubleshooting sync issues
+  - **NEW**: Sync health dashboard showing historical sync performance
+  - **NEW**: Predictive sync failure warnings based on connection quality
+  - **NEW**: Offline capability notifications when entering areas with poor connectivity
+  - **NEW**: Sync statistics for user awareness (data usage, sync frequency)
+  - **NEW**: Customizable notification preferences for different sync events
+
+**User Story**: As a developer, I need conflict resolution strategies for data sync.
+
+- **Enhanced Acceptance Criteria**:
+  - Documented conflict resolution strategy with clear precedence rules
+  - Comprehensive test coverage for all conflict scenarios
+  - Performance optimization for large-scale sync operations
+  - **NEW**: Machine learning-based conflict resolution learning from user preferences
+  - **NEW**: Data integrity validation with automatic corruption detection
+  - **NEW**: Sync performance monitoring with optimization recommendations
+  - **NEW**: Conflict simulation testing for robustness validation
+  - **NEW**: Cross-device sync coordination for users with multiple devices
+
+## Epic 13: Security Hardening & Compliance
+
+**User Story**: As a security-conscious user, I want certificate pinning for API calls.
+
+- **Enhanced Acceptance Criteria**:
+  - Certificate pinning configured for all API communications
+  - Automatic fallback handling for certificate renewal
+  - Security violation logging for attempted certificate attacks
+  - **NEW**: Certificate transparency monitoring for enhanced security
+  - **NEW**: Public key pinning as backup to certificate pinning
+  - **NEW**: Certificate rotation automation with zero-downtime updates
+  - **NEW**: Network security monitoring with threat intelligence integration
+  - **NEW**: SSL/TLS configuration hardening with latest security standards
+
+**User Story**: As a user, I want to know if my device security is compromised.
+
+- **Enhanced Acceptance Criteria**:
+  - Real-time detection of rooted/jailbroken devices with appropriate warnings
+  - Security risk assessment with recommended mitigation actions
+  - Graceful feature degradation when security risks are detected
+  - **NEW**: Malware detection integration with regular security scans
+  - **NEW**: Device integrity monitoring with behavioral analysis
+  - **NEW**: Security score dashboard with improvement recommendations
+  - **NEW**: Threat intelligence integration for emerging security risks
+  - **NEW**: Security education resources for users to improve device security
+
+**User Story**: As a user, I want my data to be GDPR and CCPA compliant.
+
+- **Enhanced Acceptance Criteria**:
+  - Accessible privacy policy with clear data usage explanations
+  - Data processing compliance with GDPR principles and CCPA requirements
+  - User rights implementation (access, rectification, erasure, portability)
+  - **NEW**: Consent management platform with granular permission controls
+  - **NEW**: Data retention policy automation with automatic deletion
+  - **NEW**: Privacy impact assessments for new features
+  - **NEW**: Cross-border data transfer compliance with appropriate safeguards
+  - **NEW**: Regular compliance audits with third-party validation
+
+**User Story**: As a user, I want to export or delete my data.
+
+- **Enhanced Acceptance Criteria**:
+  - One-click data export in multiple formats (JSON, CSV, PDF)
+  - Complete account deletion with confirmation and grace period
+  - Data deletion verification with cryptographic proof
+  - **NEW**: Selective data export with granular control over data types
+  - **NEW**: Data portability to other financial planning platforms
+  - **NEW**: Automated data deletion scheduling based on retention policies
+  - **NEW**: Data anonymization options for users who want to contribute to research
+  - **NEW**: Family account data management for shared financial planning
+
+**User Story**: As a developer, I need security audit tools and monitoring.
+
+- **Enhanced Acceptance Criteria**:
+  - Automated security scanning in CI/CD pipeline with vulnerability detection
+  - Dependency vulnerability monitoring with automatic alerts
+  - Security event logging with centralized monitoring dashboard
+  - **NEW**: Penetration testing automation with regular security assessments
+  - **NEW**: Code security analysis with real-time vulnerability scanning
+  - **NEW**: Infrastructure security monitoring with compliance reporting
+  - **NEW**: Security metrics dashboard with trend analysis
+  - **NEW**: Incident response automation with escalation procedures
+
+---
+
+## Additional Epic Enhancements
+
+### Epic 14: Advanced Analytics & Insights (Future Phase)
+
+**User Story**: As a user, I want AI-powered insights about my financial progress.
+
+- **Acceptance Criteria**:
+  - Machine learning analysis of spending patterns and saving opportunities
+  - Predictive modeling for goal achievement probability
+  - Personalized recommendations based on similar user success patterns
+  - Anomaly detection for unusual financial activity or goal deviations
+  - Natural language explanations of complex financial concepts and projections
+
+**User Story**: As a user, I want behavioral finance insights to improve my decision-making.
+
+- **Acceptance Criteria**:
+  - Behavioral pattern recognition with gentle nudges for better financial habits
+  - Loss aversion mitigation through positive framing of financial progress
+  - Temporal discounting awareness with future value visualization
+  - Social proof integration showing how similar users achieve their goals
+  - Cognitive bias education with practical applications to personal finance
+
+### Epic 15: Community & Social Features (Future Phase)
+
+**User Story**: As a user, I want to connect with other FIRE-focused individuals for motivation and accountability.
+
+- **Acceptance Criteria**:
+  - Anonymous community features with privacy-protected progress sharing
+  - Accountability partner matching based on similar goals and demographics
+  - Community challenges and group goal-setting with leaderboards
+  - Knowledge sharing forum for FIRE strategies and experiences
+  - Mentorship program connecting experienced and beginning FIRE practitioners
+
+---
+
+## Development Notes
+
+### Completed Through Epic 3, Story 4
+
+The following have been successfully implemented and should not require additional development effort:
+
+- Complete project infrastructure setup
+- Full authentication and security system
+- Core data models and local database implementation
+- Data validation and error handling frameworks
+
+### Implementation Priority for Remaining Stories
+
+1. **Epic 4**: Critical for user experience and accessibility
+2. **Epic 5**: Essential for user onboarding and retention
+3. **Epic 6**: Core financial functionality for MVP
+4. **Epic 7**: Financial calculation engine - heart of the application
+5. **Epic 8**: Goal management - primary user value proposition
+6. **Epic 9**: Scenario planning - advanced user engagement
+7. **Epic 10**: Data visualization - user experience enhancement
+8. **Epic 11**: Backend API - supporting infrastructure
+9. **Epic 12**: Sync functionality - technical requirement
+10. **Epic 13**: Security hardening - compliance requirement
+
+### Testing Requirements for Enhanced Features
+
+Each enhanced story should include:
+
+- Unit tests for new calculation logic
+- Integration tests for API endpoints
+- UI/UX tests for new interface elements
+- Accessibility tests for screen reader compatibility
+- Performance tests ensuring <200ms calculation times
+- Security tests for data protection features
+
+### Documentation Updates Required
+
+- API documentation updates for new endpoints
+- Security documentation for enhanced features
+- User guide updates for new functionality
+- Developer onboarding documentation
+- Compliance documentation for regulatory requirements
