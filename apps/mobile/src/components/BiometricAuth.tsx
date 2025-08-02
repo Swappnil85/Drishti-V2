@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useBiometric } from '../hooks/useBiometric';
-import { BiometricType } from '../services/auth/BiometricService';
 
 const BiometricAuth: React.FC = () => {
   const {
@@ -29,22 +28,25 @@ const BiometricAuth: React.FC = () => {
     getBiometricTypeName,
   } = useBiometric();
 
-  const [testCredentials, setTestCredentials] = useState({
+  const testCredentials = {
     email: 'test@example.com',
     token: 'test-jwt-token-12345',
-  });
+  };
 
   const handleEnableBiometric = async () => {
     try {
       const result = await enableBiometric(testCredentials);
-      
+
       if (result.success) {
         Alert.alert(
           'Success',
           `${getBiometricTypeName(result.biometricType!)} authentication enabled successfully!`
         );
       } else {
-        Alert.alert('Error', result.error || 'Failed to enable biometric authentication');
+        Alert.alert(
+          'Error',
+          result.error || 'Failed to enable biometric authentication'
+        );
       }
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred');
@@ -65,7 +67,10 @@ const BiometricAuth: React.FC = () => {
               await disableBiometric();
               Alert.alert('Success', 'Biometric authentication disabled');
             } catch (error) {
-              Alert.alert('Error', 'Failed to disable biometric authentication');
+              Alert.alert(
+                'Error',
+                'Failed to disable biometric authentication'
+              );
             }
           },
         },
@@ -76,7 +81,7 @@ const BiometricAuth: React.FC = () => {
   const handleAuthenticate = async () => {
     try {
       const result = await authenticate('Authenticate to access your account');
-      
+
       if (result.success) {
         Alert.alert(
           'Authentication Successful',
@@ -88,17 +93,23 @@ const BiometricAuth: React.FC = () => {
           'User chose to use password instead of biometrics'
         );
       } else {
-        Alert.alert('Authentication Failed', result.error || 'Authentication failed');
+        Alert.alert(
+          'Authentication Failed',
+          result.error || 'Authentication failed'
+        );
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred during authentication');
+      Alert.alert(
+        'Error',
+        'An unexpected error occurred during authentication'
+      );
     }
   };
 
   const handleGetStoredCredentials = async () => {
     try {
       const credentials = await getStoredCredentials();
-      
+
       if (credentials) {
         Alert.alert(
           'Stored Credentials',
@@ -138,7 +149,10 @@ const BiometricAuth: React.FC = () => {
         <Text style={styles.lockoutText}>
           Too many failed attempts. Try again in {remainingLockoutTime} minutes.
         </Text>
-        <TouchableOpacity style={styles.refreshButton} onPress={refreshLockoutStatus}>
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={refreshLockoutStatus}
+        >
           <Text style={styles.refreshButtonText}>Refresh Status</Text>
         </TouchableOpacity>
       </View>
@@ -148,8 +162,10 @@ const BiometricAuth: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
-        <Text style={styles.loadingText}>Checking biometric availability...</Text>
+        <ActivityIndicator size='large' color='#007bff' />
+        <Text style={styles.loadingText}>
+          Checking biometric availability...
+        </Text>
       </View>
     );
   }
@@ -236,7 +252,8 @@ const BiometricAuth: React.FC = () => {
       <View style={styles.infoContainer}>
         <Text style={styles.sectionTitle}>Information</Text>
         <Text style={styles.infoText}>
-          • Biometric authentication provides secure and convenient access to your account
+          • Biometric authentication provides secure and convenient access to
+          your account
         </Text>
         <Text style={styles.infoText}>
           • Your credentials are stored securely using device encryption

@@ -61,7 +61,7 @@ export class BiometricService {
     try {
       // Check if device has biometric hardware
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      
+
       if (!hasHardware) {
         return {
           isAvailable: false,
@@ -74,7 +74,7 @@ export class BiometricService {
 
       // Check if biometric records are enrolled
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      
+
       if (!isEnrolled) {
         return {
           isAvailable: false,
@@ -86,7 +86,8 @@ export class BiometricService {
       }
 
       // Get supported authentication types
-      const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      const supportedTypes =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
       const biometricTypes = this.mapAuthenticationTypes(supportedTypes);
 
       return {
@@ -108,7 +109,9 @@ export class BiometricService {
   }
 
   // Map Expo authentication types to our enum
-  private mapAuthenticationTypes(types: LocalAuthentication.AuthenticationType[]): BiometricType[] {
+  private mapAuthenticationTypes(
+    types: LocalAuthentication.AuthenticationType[]
+  ): BiometricType[] {
     const biometricTypes: BiometricType[] = [];
 
     types.forEach(type => {
@@ -136,11 +139,32 @@ export class BiometricService {
     return biometricTypes;
   }
 
+  // Check SecureStore availability
+  private async checkSecureStoreAvailability(): Promise<boolean> {
+    try {
+      // Test SecureStore by trying to set and get a test value
+      const testKey = 'secure_store_test';
+      const testValue = 'test';
+
+      await SecureStore.setItemAsync(testKey, testValue);
+      const retrievedValue = await SecureStore.getItemAsync(testKey);
+      await SecureStore.deleteItemAsync(testKey);
+
+      return retrievedValue === testValue;
+    } catch (error) {
+      console.warn('[BiometricService] SecureStore not available:', error);
+      return false;
+    }
+  }
+
   // Enable biometric authentication
-  async enableBiometricAuth(userCredentials?: { email: string; token: string }): Promise<BiometricAuthResult> {
+  async enableBiometricAuth(userCredentials?: {
+    email: string;
+    token: string;
+  }): Promise<BiometricAuthResult> {
     try {
       const availability = await this.checkBiometricAvailability();
-      
+
       if (!availability.isAvailable) {
         return {
           success: false,
@@ -148,9 +172,22 @@ export class BiometricService {
         };
       }
 
+      // Check SecureStore availability
+      const secureStoreAvailable = await this.checkSecureStoreAvailability();
+      if (!secureStoreAvailable) {
+        return {
+          success: false,
+          error:
+            'Secure storage is not available on this device. Biometric authentication requires secure storage.',
+        };
+      }
+
       // Store biometric settings
       await AsyncStorage.setItem(STORAGE_KEYS.BIOMETRIC_ENABLED, 'true');
-      await AsyncStorage.setItem(STORAGE_KEYS.BIOMETRIC_TYPE, availability.biometricTypes[0]);
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.BIOMETRIC_TYPE,
+        availability.biometricTypes[0]
+      );
 
       // Securely store user credentials if provided
       if (userCredentials) {
@@ -168,7 +205,10 @@ export class BiometricService {
       console.error('[BiometricService] Error enabling biometric auth:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to enable biometric authentication',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to enable biometric authentication',
       };
     }
   }
@@ -182,17 +222,25 @@ export class BiometricService {
       await AsyncStorage.removeItem(STORAGE_KEYS.FAILED_ATTEMPTS);
       await AsyncStorage.removeItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT);
     } catch (error) {
-      console.error('[BiometricService] Error disabling biometric auth:', error);
+      console.error(
+        '[BiometricService] Error disabling biometric auth:',
+        error
+      );
     }
   }
 
   // Check if biometric authentication is enabled
   async isBiometricEnabled(): Promise<boolean> {
     try {
-      const enabled = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_ENABLED);
+      const enabled = await AsyncStorage.getItem(
+        STORAGE_KEYS.BIOMETRIC_ENABLED
+      );
       return enabled === 'true';
     } catch (error) {
-      console.error('[BiometricService] Error checking if biometric is enabled:', error);
+      console.error(
+        '[BiometricService] Error checking if biometric is enabled:',
+        error
+      );
       return false;
     }
   }
@@ -200,17 +248,36 @@ export class BiometricService {
   // Check if device is locked out due to failed attempts
   async isLockedOut(): Promise<boolean> {
     try {
-      const failedAttempts = await AsyncStorage.getItem(STORAGE_KEYS.FAILED_ATTEMPTS);
-      const lastFailedAttempt = await AsyncStorage.getItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT);
+      // Check both AsyncStorage and SecureStore for lockout state
+      const [failedAttempts, lastFailedAttempt, secureLockoutState] =
+        await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEYS.FAILED_ATTEMPTS),
+          AsyncStorage.getItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT),
+          SecureStore.getItemAsync('biometric_lockout_state'),
+        ]);
 
-      if (!failedAttempts || !lastFailedAttempt) {
-        return false;
+      // Parse secure lockout state if available
+      let secureState = null;
+      if (secureLockoutState) {
+        try {
+          secureState = JSON.parse(secureLockoutState);
+        } catch (error) {
+          console.warn(
+            '[BiometricService] Failed to parse secure lockout state:',
+            error
+          );
+        }
       }
 
-      const attempts = parseInt(failedAttempts, 10);
-      const lastAttemptTime = parseInt(lastFailedAttempt, 10);
+      // Use secure state if available, otherwise fall back to AsyncStorage
+      const attempts =
+        secureState?.attempts ||
+        (failedAttempts ? parseInt(failedAttempts, 10) : 0);
+      const lastAttemptTime =
+        secureState?.lastAttemptTime ||
+        (lastFailedAttempt ? parseInt(lastFailedAttempt, 10) : 0);
 
-      if (attempts >= MAX_FAILED_ATTEMPTS) {
+      if (attempts >= MAX_FAILED_ATTEMPTS && lastAttemptTime > 0) {
         const timeSinceLastAttempt = Date.now() - lastAttemptTime;
         return timeSinceLastAttempt < LOCKOUT_DURATION;
       }
@@ -225,8 +292,10 @@ export class BiometricService {
   // Get remaining lockout time in minutes
   async getRemainingLockoutTime(): Promise<number> {
     try {
-      const lastFailedAttempt = await AsyncStorage.getItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT);
-      
+      const lastFailedAttempt = await AsyncStorage.getItem(
+        STORAGE_KEYS.LAST_FAILED_ATTEMPT
+      );
+
       if (!lastFailedAttempt) {
         return 0;
       }
@@ -237,13 +306,18 @@ export class BiometricService {
 
       return Math.max(0, Math.ceil(remainingTime / (60 * 1000))); // Convert to minutes
     } catch (error) {
-      console.error('[BiometricService] Error getting remaining lockout time:', error);
+      console.error(
+        '[BiometricService] Error getting remaining lockout time:',
+        error
+      );
       return 0;
     }
   }
 
   // Authenticate with biometrics
-  async authenticateWithBiometrics(promptMessage?: string): Promise<BiometricAuthResult> {
+  async authenticateWithBiometrics(
+    promptMessage?: string
+  ): Promise<BiometricAuthResult> {
     try {
       // Check if biometric auth is enabled
       const isEnabled = await this.isBiometricEnabled();
@@ -265,8 +339,12 @@ export class BiometricService {
       }
 
       // Get biometric type for prompt
-      const biometricType = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_TYPE);
-      const defaultPrompt = this.getDefaultPromptMessage(biometricType as BiometricType);
+      const biometricType = await AsyncStorage.getItem(
+        STORAGE_KEYS.BIOMETRIC_TYPE
+      );
+      const defaultPrompt = this.getDefaultPromptMessage(
+        biometricType as BiometricType
+      );
 
       // Perform biometric authentication
       const result = await LocalAuthentication.authenticateAsync({
@@ -279,7 +357,7 @@ export class BiometricService {
       if (result.success) {
         // Reset failed attempts on successful authentication
         await this.resetFailedAttempts();
-        
+
         return {
           success: true,
           biometricType: biometricType as BiometricType,
@@ -287,7 +365,7 @@ export class BiometricService {
       } else {
         // Handle authentication failure
         await this.recordFailedAttempt();
-        
+
         return {
           success: false,
           error: result.error || 'Biometric authentication failed',
@@ -297,7 +375,7 @@ export class BiometricService {
     } catch (error) {
       console.error('[BiometricService] Authentication error:', error);
       await this.recordFailedAttempt();
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Authentication failed',
@@ -306,12 +384,20 @@ export class BiometricService {
   }
 
   // Get stored user credentials
-  async getStoredCredentials(): Promise<{ email: string; token: string } | null> {
+  async getStoredCredentials(): Promise<{
+    email: string;
+    token: string;
+  } | null> {
     try {
-      const credentials = await SecureStore.getItemAsync(STORAGE_KEYS.USER_CREDENTIALS);
+      const credentials = await SecureStore.getItemAsync(
+        STORAGE_KEYS.USER_CREDENTIALS
+      );
       return credentials ? JSON.parse(credentials) : null;
     } catch (error) {
-      console.error('[BiometricService] Error getting stored credentials:', error);
+      console.error(
+        '[BiometricService] Error getting stored credentials:',
+        error
+      );
       return null;
     }
   }
@@ -319,13 +405,36 @@ export class BiometricService {
   // Record failed authentication attempt
   private async recordFailedAttempt(): Promise<void> {
     try {
-      const currentAttempts = await AsyncStorage.getItem(STORAGE_KEYS.FAILED_ATTEMPTS);
+      const currentAttempts = await AsyncStorage.getItem(
+        STORAGE_KEYS.FAILED_ATTEMPTS
+      );
       const attempts = currentAttempts ? parseInt(currentAttempts, 10) + 1 : 1;
-      
-      await AsyncStorage.setItem(STORAGE_KEYS.FAILED_ATTEMPTS, attempts.toString());
-      await AsyncStorage.setItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT, Date.now().toString());
+      const lastAttemptTime = Date.now();
+
+      // Store in both AsyncStorage and SecureStore for persistence
+      await Promise.all([
+        AsyncStorage.setItem(STORAGE_KEYS.FAILED_ATTEMPTS, attempts.toString()),
+        AsyncStorage.setItem(
+          STORAGE_KEYS.LAST_FAILED_ATTEMPT,
+          lastAttemptTime.toString()
+        ),
+        SecureStore.setItemAsync(
+          'biometric_lockout_state',
+          JSON.stringify({
+            attempts,
+            lastAttemptTime,
+            lockedUntil:
+              attempts >= MAX_FAILED_ATTEMPTS
+                ? lastAttemptTime + LOCKOUT_DURATION
+                : null,
+          })
+        ),
+      ]);
     } catch (error) {
-      console.error('[BiometricService] Error recording failed attempt:', error);
+      console.error(
+        '[BiometricService] Error recording failed attempt:',
+        error
+      );
     }
   }
 
@@ -335,7 +444,10 @@ export class BiometricService {
       await AsyncStorage.removeItem(STORAGE_KEYS.FAILED_ATTEMPTS);
       await AsyncStorage.removeItem(STORAGE_KEYS.LAST_FAILED_ATTEMPT);
     } catch (error) {
-      console.error('[BiometricService] Error resetting failed attempts:', error);
+      console.error(
+        '[BiometricService] Error resetting failed attempts:',
+        error
+      );
     }
   }
 

@@ -3,7 +3,6 @@ import {
   biometricService,
   BiometricType,
   BiometricAuthResult,
-  BiometricAvailability,
 } from '../services/auth/BiometricService';
 
 // Hook state interface
@@ -20,7 +19,10 @@ interface BiometricState {
 // Hook return interface
 interface UseBiometricReturn extends BiometricState {
   checkAvailability: () => Promise<void>;
-  enableBiometric: (credentials?: { email: string; token: string }) => Promise<BiometricAuthResult>;
+  enableBiometric: (credentials?: {
+    email: string;
+    token: string;
+  }) => Promise<BiometricAuthResult>;
   disableBiometric: () => Promise<void>;
   authenticate: (promptMessage?: string) => Promise<BiometricAuthResult>;
   getStoredCredentials: () => Promise<{ email: string; token: string } | null>;
@@ -44,12 +46,13 @@ export const useBiometric = (): UseBiometricReturn => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      const [availability, isEnabled, isLockedOut, remainingTime] = await Promise.all([
-        biometricService.checkBiometricAvailability(),
-        biometricService.isBiometricEnabled(),
-        biometricService.isLockedOut(),
-        biometricService.getRemainingLockoutTime(),
-      ]);
+      const [availability, isEnabled, isLockedOut, remainingTime] =
+        await Promise.all([
+          biometricService.checkBiometricAvailability(),
+          biometricService.isBiometricEnabled(),
+          biometricService.isLockedOut(),
+          biometricService.getRemainingLockoutTime(),
+        ]);
 
       setState(prev => ({
         ...prev,
@@ -64,7 +67,10 @@ export const useBiometric = (): UseBiometricReturn => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to check biometric availability',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to check biometric availability',
         isLoading: false,
       }));
     }
@@ -72,7 +78,10 @@ export const useBiometric = (): UseBiometricReturn => {
 
   // Enable biometric authentication
   const enableBiometric = useCallback(
-    async (credentials?: { email: string; token: string }): Promise<BiometricAuthResult> => {
+    async (credentials?: {
+      email: string;
+      token: string;
+    }): Promise<BiometricAuthResult> => {
       try {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
@@ -95,7 +104,10 @@ export const useBiometric = (): UseBiometricReturn => {
 
         return result;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to enable biometric authentication';
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to enable biometric authentication';
         setState(prev => ({
           ...prev,
           error: errorMessage,
@@ -129,7 +141,10 @@ export const useBiometric = (): UseBiometricReturn => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to disable biometric authentication',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to disable biometric authentication',
         isLoading: false,
       }));
     }
@@ -141,7 +156,8 @@ export const useBiometric = (): UseBiometricReturn => {
       try {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-        const result = await biometricService.authenticateWithBiometrics(promptMessage);
+        const result =
+          await biometricService.authenticateWithBiometrics(promptMessage);
 
         if (!result.success) {
           // Refresh lockout status after failed authentication
@@ -169,7 +185,8 @@ export const useBiometric = (): UseBiometricReturn => {
 
         return result;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Authentication failed';
         setState(prev => ({
           ...prev,
           error: errorMessage,
@@ -229,7 +246,7 @@ export const useBiometric = (): UseBiometricReturn => {
       const timer = setInterval(() => {
         setState(prev => {
           const newRemainingTime = prev.remainingLockoutTime - 1;
-          
+
           if (newRemainingTime <= 0) {
             return {
               ...prev,
@@ -237,7 +254,7 @@ export const useBiometric = (): UseBiometricReturn => {
               remainingLockoutTime: 0,
             };
           }
-          
+
           return {
             ...prev,
             remainingLockoutTime: newRemainingTime,
@@ -247,6 +264,8 @@ export const useBiometric = (): UseBiometricReturn => {
 
       return () => clearInterval(timer);
     }
+
+    return undefined;
   }, [state.isLockedOut, state.remainingLockoutTime]);
 
   return {

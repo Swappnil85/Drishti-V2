@@ -8,6 +8,12 @@ import {
 import { googleOAuthService } from '../auth/providers/google';
 import { appleOAuthService } from '../auth/providers/apple';
 import { jwtService } from '../auth/jwt';
+import {
+  validateBody,
+  registerSchema,
+  loginSchema,
+  sanitizeInput,
+} from '../validation/auth';
 
 // Request interfaces
 interface RegisterRequest {
@@ -64,83 +70,93 @@ function getSessionContext(request: any): SessionContext {
 // Authentication routes
 export async function authRoutes(fastify: FastifyInstance) {
   // Register with email/password
-  fastify.post<RegisterRequest>('/register', async (request, reply) => {
-    const { email, name, password } = request.body;
+  fastify.post<RegisterRequest>(
+    '/register',
+    {
+      config: {
+        rateLimit: {
+          max: 3,
+          timeWindow: '15 minutes',
+        },
+      },
+      preHandler: validateBody(registerSchema),
+    },
+    async (request, reply) => {
+      const { email, name, password } = request.body;
 
-    if (!email || !name || !password) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Email, name, and password are required',
+      const registerData: RegisterData = {
+        email: sanitizeInput.html(email.toLowerCase().trim()),
+        name: sanitizeInput.html(name.trim()),
+        password,
+        provider: 'email',
+      };
+
+      const sessionContext = getSessionContext(request);
+      const result = await authService.register(registerData, sessionContext);
+
+      if (!result.success) {
+        return reply.code(400).send(result);
+      }
+
+      return reply.code(201).send({
+        success: true,
+        message: result.requiresEmailVerification
+          ? 'Registration successful. Please check your email to verify your account.'
+          : 'Registration successful',
+        user: {
+          id: result.user!.id,
+          email: result.user!.email,
+          name: result.user!.name,
+          email_verified: result.user!.email_verified,
+        },
+        tokens: result.tokens,
       });
     }
-
-    const registerData: RegisterData = {
-      email: email.toLowerCase().trim(),
-      name: name.trim(),
-      password,
-      provider: 'email',
-    };
-
-    const sessionContext = getSessionContext(request);
-    const result = await authService.register(registerData, sessionContext);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return reply.code(201).send({
-      success: true,
-      message: result.requiresEmailVerification
-        ? 'Registration successful. Please check your email to verify your account.'
-        : 'Registration successful',
-      user: {
-        id: result.user!.id,
-        email: result.user!.email,
-        name: result.user!.name,
-        email_verified: result.user!.email_verified,
-      },
-      tokens: result.tokens,
-    });
-  });
+  );
 
   // Login with email/password
-  fastify.post<LoginRequest>('/login', async (request, reply) => {
-    const { email, password } = request.body;
+  fastify.post<LoginRequest>(
+    '/login',
+    {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '15 minutes',
+        },
+      },
+      preHandler: validateBody(loginSchema),
+    },
+    async (request, reply) => {
+      const { email, password } = request.body;
 
-    if (!email || !password) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Email and password are required',
+      const loginData: LoginData = {
+        email: sanitizeInput.html(email.toLowerCase().trim()),
+        password,
+        provider: 'email',
+      };
+
+      const sessionContext = getSessionContext(request);
+      const result = await authService.login(loginData, sessionContext);
+
+      if (!result.success) {
+        const statusCode = result.requiresEmailVerification ? 403 : 401;
+        return reply.code(statusCode).send(result);
+      }
+
+      return reply.send({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: result.user!.id,
+          email: result.user!.email,
+          name: result.user!.name,
+          email_verified: result.user!.email_verified,
+          last_login_at: result.user!.last_login_at,
+        },
+        tokens: result.tokens,
       });
     }
-
-    const loginData: LoginData = {
-      email: email.toLowerCase().trim(),
-      password,
-      provider: 'email',
-    };
-
-    const sessionContext = getSessionContext(request);
-    const result = await authService.login(loginData, sessionContext);
-
-    if (!result.success) {
-      const statusCode = result.requiresEmailVerification ? 403 : 401;
-      return reply.code(statusCode).send(result);
-    }
-
-    return reply.send({
-      success: true,
-      message: 'Login successful',
-      user: {
-        id: result.user!.id,
-        email: result.user!.email,
-        name: result.user!.name,
-        email_verified: result.user!.email_verified,
-        last_login_at: result.user!.last_login_at,
-      },
-      tokens: result.tokens,
-    });
-  });
+  );
 
   // Google OAuth - Get authorization URL
   fastify.get('/google', async (_request, reply) => {
@@ -152,7 +168,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const state = Math.random().toString(36).substring(2, 15);
+      const state = require('crypto').randomBytes(32).toString('hex');
       const authUrl = googleOAuthService.getAuthorizationUrl(state);
 
       return reply.send({
@@ -275,7 +291,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const state = Math.random().toString(36).substring(2, 15);
+      const state = require('crypto').randomBytes(32).toString('hex');
       const authUrl = appleOAuthService.getAuthorizationUrl(state);
 
       return reply.send({

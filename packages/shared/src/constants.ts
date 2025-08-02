@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
+  BASE_URL: 'http://localhost:3000',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 } as const;
@@ -21,10 +21,12 @@ export const UPLOAD_LIMITS = {
 
 // Error Messages
 export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Network connection failed. Please check your internet connection.',
+  NETWORK_ERROR:
+    'Network connection failed. Please check your internet connection.',
   UNAUTHORIZED: 'You are not authorized to perform this action.',
   FILE_TOO_LARGE: 'File size exceeds the maximum limit.',
   INVALID_FILE_TYPE: 'Invalid file type. Please select a supported format.',
-  CAMERA_PERMISSION_DENIED: 'Camera permission is required to use this feature.',
+  CAMERA_PERMISSION_DENIED:
+    'Camera permission is required to use this feature.',
   GENERIC_ERROR: 'Something went wrong. Please try again.',
 } as const;

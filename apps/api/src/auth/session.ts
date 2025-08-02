@@ -59,7 +59,9 @@ export class SessionService {
   // Create a new session
   async createSession(data: CreateSessionData): Promise<SessionInfo> {
     const sessionId = crypto.randomUUID();
-    const refreshTokenHash = this.hashToken(data.refreshToken);
+    const refreshTokenSignature = this.generateTokenSignature(
+      data.refreshToken
+    );
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + (data.expiresInDays || 30)); // Default 30 days
 
@@ -74,7 +76,7 @@ export class SessionService {
       [
         sessionId,
         data.userId,
-        refreshTokenHash,
+        refreshTokenSignature,
         data.deviceInfo || null,
         data.ipAddress || null,
         data.userAgent || null,
@@ -95,7 +97,7 @@ export class SessionService {
     try {
       // Verify JWT token first
       const payload = jwtService.verifyRefreshToken(refreshToken);
-      const refreshTokenHash = this.hashToken(refreshToken);
+      const refreshTokenSignature = this.generateTokenSignature(refreshToken);
 
       // Find active session
       const result = await query<Session>(
@@ -106,7 +108,7 @@ export class SessionService {
         AND is_active = true 
         AND expires_at > NOW()
       `,
-        [refreshTokenHash, payload.userId]
+        [refreshTokenSignature, payload.userId]
       );
 
       if (result.length === 0) {
@@ -172,14 +174,14 @@ export class SessionService {
   // Revoke session by refresh token
   async revokeSessionByToken(refreshToken: string): Promise<void> {
     try {
-      const refreshTokenHash = this.hashToken(refreshToken);
+      const refreshTokenSignature = this.generateTokenSignature(refreshToken);
       await query(
         `
         UPDATE sessions 
         SET is_active = false, updated_at = NOW()
         WHERE refresh_token_hash = $1
       `,
-        [refreshTokenHash]
+        [refreshTokenSignature]
       );
     } catch (error) {
       console.error(
@@ -315,9 +317,12 @@ export class SessionService {
     };
   }
 
-  // Hash refresh token for storage
-  private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
+  // Generate HMAC signature for token validation
+  private generateTokenSignature(token: string): string {
+    const secretKey =
+      process.env.SESSION_SECRET ||
+      'default-session-secret-change-in-production';
+    return crypto.createHmac('sha256', secretKey).update(token).digest('hex');
   }
 
   // Map database session to SessionInfo

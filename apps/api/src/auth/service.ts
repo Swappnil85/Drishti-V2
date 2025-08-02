@@ -2,6 +2,8 @@ import { query, transaction } from '../db/connection';
 import { jwtService, JWTPayload, TokenPair } from './jwt';
 import { emailAuthService } from './providers/email';
 import { sessionService, CreateSessionData } from './session';
+// Error handling imports will be used in future iterations
+// import { AuthErrors, UserErrors, ValidationErrors, logError } from '../utils/errors';
 
 // User interfaces
 export interface User {
@@ -45,10 +47,10 @@ export interface SessionContext {
 export interface RegisterData {
   email: string;
   name: string;
-  password?: string;
+  password?: string | undefined;
   provider: 'email' | 'google' | 'apple';
-  providerId?: string;
-  avatarUrl?: string;
+  providerId?: string | undefined;
+  avatarUrl?: string | undefined;
 }
 
 // Login data
