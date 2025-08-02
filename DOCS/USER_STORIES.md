@@ -331,51 +331,36 @@ Epic 3: Core Data Models & Local Database
 User Story: As a developer, I need all core entities (User, FinancialAccount, FinancialGoal, Scenario) implemented.
 
 Acceptance Criteria:
-
 Watermelon DB models are created for each entity.
-
 The models have all the necessary fields and relationships defined as per the PRD.
-
 Migrations are set up to handle schema changes.
 
 User Story: As a user, I want my data to work offline-first.
 
 Acceptance Criteria:
-
 Users can create and edit accounts and goals while offline.
-
 All changes are saved to the local database and are visible to the user.
-
 A clear visual indicator shows the user that they are offline.
 
 User Story: As a user, I want my data to sync when I go back online.
 
 Acceptance Criteria:
-
 When the app detects a network connection, it automatically syncs local changes to the backend.
-
 The sync process is non-blocking and doesn't interrupt the user's experience.
-
 The user is notified when the sync is complete.
 
 User Story: As a developer, I need data validation and error handling.
 
 Acceptance Criteria:
-
 All incoming data is validated on both the frontend and backend.
-
 Invalid data is rejected with a clear error message.
-
 The app gracefully handles errors (e.g., API failures) without crashing.
 
 User Story: As a user, I want my account numbers encrypted for security.
 
 Acceptance Criteria:
-
 Financial account numbers and other sensitive financial data are encrypted before being stored.
-
 The encryption key is managed securely.
-
 Only the user can access and decrypt this information.
 
 Epic 4: Navigation & Core UI Framework
@@ -383,49 +368,35 @@ Epic 4: Navigation & Core UI Framework
 User Story: As a user, I can navigate between main app sections smoothly.
 
 Acceptance Criteria:
-
 A bottom tab navigator is implemented for core screens (Dashboard, Accounts, Goals, etc.).
-
 Transitions between screens are smooth and responsive.
-
 The back button works as expected.
 
 User Story: As a user, I experience consistent UI components throughout the app.
 
 Acceptance Criteria:
-
 A component library with reusable UI elements (buttons, input fields, cards, etc.) is created.
-
 All screens use these standardized components.
-
 The design is consistent with the provided design specifications.
 
 User Story: As a user with accessibility needs, I can navigate using screen readers.
 
 Acceptance Criteria:
-
 All UI elements have proper accessibility labels.
-
 The app is testable with VoiceOver (iOS) and TalkBack (Android).
-
 The navigation flow is logical and easy to follow for screen reader users.
 
 User Story: As a user, I can use the app in both light and dark modes.
 
 Acceptance Criteria:
-
 The app automatically switches between light and dark mode based on system settings.
-
 All components and screens are properly themed for both modes.
-
 Text and background colors have sufficient contrast in both modes.
 
 User Story: As a user, I experience haptic feedback for interactions.
 
 Acceptance Criteria:
-
 Tapping on buttons, toggles, or other interactive elements triggers subtle haptic feedback.
-
 Haptic feedback is implemented using Expo's Haptics module.
 
 Epic 5: User Onboarding & Profile Management
@@ -433,29 +404,21 @@ Epic 5: User Onboarding & Profile Management
 User Story: As a new user, I can complete onboarding quickly and understand the app's value.
 
 Acceptance Criteria:
-
 The onboarding process is a series of simple, well-designed screens.
-
 Each screen explains a key feature or benefit of the app.
-
 The onboarding flow guides the user to set up their first account and goal.
 
 User Story: As a user, I can set my basic financial information and preferences.
 
 Acceptance Criteria:
-
 A profile screen allows users to input their salary, savings rate, and desired retirement age.
-
 The app uses this information to provide personalized calculations.
-
 The data is saved to the user's profile and persists between sessions.
 
 User Story: As a user, I can configure my security and privacy settings.
 
 Acceptance Criteria:
-
 A dedicated settings screen includes options to enable/disable biometrics, change PIN, and manage data privacy.
-
 Users can control which data is shared or synchronized.
 
 Any changes to these settings are saved securely.
@@ -463,21 +426,15 @@ Any changes to these settings are saved securely.
 User Story: As a user, I can update my profile information.
 
 Acceptance Criteria:
-
 The profile screen has an "Edit" function.
-
 Users can update their personal information (e.g., name, email) and financial data.
-
 Changes are validated and saved to the backend.
 
 User Story: As a user, I want personalized recommendations based on my profile.
 
 Acceptance Criteria:
-
 The app suggests a suitable savings rate or retirement goal based on the user's input.
-
 The recommendations are displayed prominently on the dashboard.
-
 Users can accept or dismiss the recommendations.
 
 Epic 6: Financial Account Management
@@ -485,59 +442,42 @@ Epic 6: Financial Account Management
 User Story: As a user, I can add multiple financial accounts (checking, savings, investment, retirement).
 
 Acceptance Criteria:
-
 A dedicated "Add Account" screen allows the user to specify account type, name, and initial balance.
-
 The app displays a list of all added accounts on the accounts screen.
-
 The app supports various account types as defined in the PRD.
 
 User Story: As a user, I can update account balances manually.
 
 Acceptance Criteria:
-
 Users can select an account and input a new balance.
-
 The updated balance is saved and reflected in the total net worth calculation.
-
 The app stores a history of balance changes.
 
 User Story: As a user, I can categorize accounts by tax treatment.
 
 Acceptance Criteria:
-
 The "Add/Edit Account" screen includes an option to select tax treatment (e.g., Taxable, Tax-Advantaged).
-
 This categorization is used in the calculation engine.
 
 User Story: As a user, I can edit or delete accounts.
 
 Acceptance Criteria:
-
 The app provides an intuitive way to edit account details (e.g., name, balance) or delete an account.
-
 A confirmation dialog appears before a deletion is finalized.
-
 Deleting an account updates all related calculations and visualizations.
 
 User Story: As a user, I can see my total net worth across all accounts.
 
 Acceptance Criteria:
-
 The dashboard displays a live-updating total net worth.
-
 The net worth is calculated by summing all account balances.
-
 The net worth calculation correctly handles accounts with negative balances (debt).
 
 User Story: As a user with debt, I can track negative balances appropriately.
 
 Acceptance Criteria:
-
 The app allows users to add accounts with negative balances.
-
 Negative balances are clearly distinguished from positive ones in the UI.
-
 The net worth calculation correctly subtracts debt from total assets.
 
 Epic 7: Financial Calculation Engine
@@ -545,55 +485,40 @@ Epic 7: Financial Calculation Engine
 User Story: As a user, I want accurate future value projections for my accounts.
 
 Acceptance Criteria:
-
 The calculation engine uses compounding interest formulas to project future values.
-
 Users can input an expected annual return rate for each account.
-
 The projections are displayed on the dashboard and goal screens.
 
 User Story: As a user, I want to calculate my FIRE number based on expenses.
 
 Acceptance Criteria:
-
 The app takes the user's annual expenses as input.
-
 The calculation engine determines the required FIRE number (e.g., 25x annual expenses).
-
 This calculation is displayed on the goal creation screen.
 
 User Story: As a user, I want to know my required savings rate to reach goals.
 
 Acceptance Criteria:
-
 The calculation engine determines the monthly or annual savings required to hit a specific goal.
-
 This is based on the user's current savings and expected returns.
-
 This information is presented clearly to the user.
 
 User Story: As a user, I want Coast FIRE calculations.
 
 Acceptance Criteria:
-
 The app can calculate the "Coast FIRE" number—the amount needed to save by a certain age to reach FIRE without further contributions.
-
 The calculation takes into account future returns and inflation.
 
 User Story: As a user, I want to model market downturns and volatility.
 
 Acceptance Criteria:
-
 The scenario planning feature allows users to simulate market crashes or lower-than-average returns.
-
 The projection charts and numbers update to reflect these downturns.
 
 User Story: As a user with debt, I want debt payoff strategies calculated.
 
 Acceptance Criteria:
-
 The app can show a debt snowball or debt avalanche strategy.
-
 Users can input their debt details, and the app will generate a payoff timeline.
 
 Epic 8: Goal Creation & Management (Single Goal MVP)
@@ -601,49 +526,37 @@ Epic 8: Goal Creation & Management (Single Goal MVP)
 User Story: As a user, I can create a FIRE goal with target amount and date.
 
 Acceptance Criteria:
-
 A dedicated "Create Goal" screen allows users to input a name, target amount, and target date.
-
 The goal is saved and appears on the goals screen.
 
 User Story: As a user, I can see my progress toward my goal.
 
 Acceptance Criteria:
-
 The goals screen displays a progress bar or percentage completion.
-
 The progress is calculated based on the current net worth and the target amount.
 
 User Story: As a user, I can adjust my goal if circumstances change.
 
 Acceptance Criteria:
-
 Users can edit an existing goal's target amount or date.
-
 The app updates the progress and calculations automatically.
 
 User Story: As a user, I can see if my goal is feasible with current savings.
 
 Acceptance Criteria:
-
 The app provides a "Feasibility Score" or a clear indicator (e.g., "On Track," "Off Track").
-
 This is based on the required savings rate vs. the user's actual savings rate.
 
 User Story: As a user, I can track my goal adjustment history.
 
 Acceptance Criteria:
-
 The app maintains a log of all changes made to a goal.
-
 Users can view this history to see how their goals have evolved.
 
 User Story: As a user, I want goal milestones and celebrations.
 
 Acceptance Criteria:
-
 The app celebrates when the user reaches a significant milestone (e.g., 25% progress).
-
 A small animation or notification appears to congratulate the user.
 
 Epic 9: Scenario Planning & Projections
@@ -651,17 +564,13 @@ Epic 9: Scenario Planning & Projections
 User Story: As a user, I can create different financial scenarios with varying assumptions.
 
 Acceptance Criteria:
-
 The "Scenarios" screen allows users to create new scenarios.
-
 Each scenario can have different inputs for market returns, inflation, and savings rates.
 
 User Story: As a user, I can adjust inflation rates, market returns, and savings rates.
 
 Acceptance Criteria:
-
 Sliders or input fields allow users to easily modify these key variables within each scenario.
-
 The app updates all calculations and visualizations in real-time.
 
 User Story: As a user, I can compare scenarios side-by-side.

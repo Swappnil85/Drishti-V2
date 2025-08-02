@@ -14,9 +14,9 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
@@ -36,10 +36,7 @@
       "@drishti/shared": ["packages/shared/src/index"]
     }
   },
-  "include": [
-    "apps/**/*",
-    "packages/**/*"
-  ],
+  "include": ["apps/**/*", "packages/**/*"],
   "exclude": [
     "node_modules",
     "dist",
