@@ -80,21 +80,21 @@
 
 ## Epic 3: Core Data Models & Local Database ✅ COMPLETED
 
-**User Story**: As a developer, I need all core entities (User, FinancialAccount, FinancialGoal, Scenario) implemented.
+**User Story**: As a developer, I need all core entities (User, FinancialAccount, FinancialGoal, Scenario) implemented. ✅ COMPLETED
 
 - **Acceptance Criteria**:
   - Watermelon DB models are created for each entity
   - The models have all the necessary fields and relationships defined as per the PRD
   - Migrations are set up to handle schema changes
 
-**User Story**: As a user, I want my data to work offline-first.
+**User Story**: As a user, I want my data to work offline-first. ✅ COMPLETED
 
 - **Acceptance Criteria**:
   - Users can create and edit accounts and goals while offline
   - All changes are saved to the local database and are visible to the user
   - A clear visual indicator shows the user that they are offline
 
-**User Story**: As a user, I want my data to sync when I go back online.
+**User Story**: As a user, I want my data to sync when I go back online. ✅ COMPLETED
 
 - **Acceptance Criteria**:
   - When the app detects a network connection, it automatically syncs local changes to the backend
@@ -108,7 +108,7 @@
   - Invalid data is rejected with a clear error message
   - The app gracefully handles errors (e.g., API failures) without crashing
 
-**User Story**: As a user, I want my account numbers encrypted for security.
+**User Story**: As a user, I want my account numbers encrypted for security. ✅ COMPLETED
 
 - **Enhanced Acceptance Criteria**:
   - Financial account numbers and other sensitive financial data are encrypted using AES-256-GCM before being stored
