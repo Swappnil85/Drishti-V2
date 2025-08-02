@@ -43,7 +43,10 @@
     "react-native-vector-icons": "^10.0.0",
     "zustand": "^4.4.1",
     "@nozbe/watermelondb": "^0.27.1",
-    "expo-sqlite": "~11.3.3"
+    "expo-sqlite": "~11.3.3",
+    "expo-local-authentication": "~13.4.1",
+    "expo-secure-store": "~12.3.1",
+    "@react-native-async-storage/async-storage": "1.18.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
