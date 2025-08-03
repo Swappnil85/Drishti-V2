@@ -66,13 +66,13 @@ const Container: React.FC<ContainerProps> = ({
   const containerStyles = [
     styles.container,
     {
-      maxWidth: maxWidth || '100%',
+      maxWidth: (maxWidth as any) || '100%',
       padding: paddingValue,
       margin: marginValue,
       alignSelf: centered ? ('center' as any) : ('stretch' as any),
     },
     style,
-  ];
+  ] as any;
 
   return (
     <View

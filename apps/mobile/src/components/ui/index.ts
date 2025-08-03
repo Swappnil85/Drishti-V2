@@ -18,6 +18,9 @@ export { default as Flex } from './Flex';
 export { default as Avatar } from './Avatar';
 export { default as Badge } from './Badge';
 
+// Templates
+export * from '../templates';
+
 // Re-export types
 export type {
   ButtonProps,
@@ -29,4 +32,12 @@ export type {
   FlexProps,
   AvatarProps,
   BadgeProps,
+  ScreenTemplateProps,
+  HeaderProps,
+  LoadingStateProps,
+  ErrorStateProps,
+  EmptyStateProps,
+  ListTemplateProps,
+  FormTemplateProps,
+  ModalTemplateProps,
 } from '../../types/components';

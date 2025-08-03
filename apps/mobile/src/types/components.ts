@@ -314,6 +314,105 @@ export interface AnimatedProps {
   autoPlay?: boolean;
 }
 
+// Screen Template Types
+export interface ScreenTemplateProps extends BaseComponentProps, StyleProps {
+  children: ReactNode;
+  title?: string;
+  subtitle?: string;
+  headerActions?: ReactNode;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  scrollable?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+  loading?: boolean;
+  error?: string | Error | null;
+  onRetry?: () => void;
+  safeArea?: boolean;
+  padding?: SizeVariant | 'none';
+  backgroundColor?: string;
+}
+
+export interface HeaderProps extends BaseComponentProps, StyleProps {
+  title?: string;
+  subtitle?: string;
+  leftAction?: ReactNode;
+  rightActions?: ReactNode;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  backgroundColor?: string;
+  elevation?: boolean;
+}
+
+export interface LoadingStateProps extends BaseComponentProps, StyleProps {
+  message?: string;
+  size?: SizeVariant;
+  color?: ColorVariant;
+  overlay?: boolean;
+}
+
+export interface ErrorStateProps extends BaseComponentProps, StyleProps {
+  error?: string | Error;
+  title?: string;
+  message?: string;
+  onRetry?: () => void;
+  retryText?: string;
+  showIcon?: boolean;
+}
+
+export interface EmptyStateProps extends BaseComponentProps, StyleProps {
+  title?: string;
+  message?: string;
+  icon?: ReactNode;
+  action?: ReactNode;
+  actionText?: string;
+  onAction?: () => void;
+}
+
+export interface ListTemplateProps extends BaseComponentProps, StyleProps {
+  data: any[];
+  renderItem: (item: any, index: number) => React.ReactElement;
+  keyExtractor?: (item: any, index: number) => string;
+  loading?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+  onEndReached?: () => void;
+  onEndReachedThreshold?: number;
+  emptyState?: React.ComponentType<any> | React.ReactElement | null;
+  header?: React.ComponentType<any> | React.ReactElement | null;
+  footer?: React.ComponentType<any> | React.ReactElement | null;
+  separator?: React.ComponentType<any> | null;
+  numColumns?: number;
+}
+
+export interface FormTemplateProps extends BaseComponentProps, StyleProps {
+  children: ReactNode;
+  title?: string;
+  subtitle?: string;
+  onSubmit?: () => void;
+  submitText?: string;
+  submitDisabled?: boolean;
+  submitLoading?: boolean;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  cancelText?: string;
+  scrollable?: boolean;
+  validateOnChange?: boolean;
+}
+
+export interface ModalTemplateProps extends BaseComponentProps, StyleProps {
+  visible: boolean;
+  onClose: () => void;
+  title?: string;
+  subtitle?: string;
+  children: ReactNode;
+  size?: 'small' | 'medium' | 'large' | 'fullscreen';
+  position?: 'center' | 'bottom' | 'top';
+  showCloseButton?: boolean;
+  closeOnBackdrop?: boolean;
+  animationType?: 'none' | 'slide' | 'fade';
+}
+
 // Theme Types
 export interface ThemeContextType {
   colors: typeof import('../constants/design').COLORS;
