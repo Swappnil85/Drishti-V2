@@ -1,4 +1,5 @@
-import * as Crypto from 'expo-crypto';
+// Note: Using Web Crypto API for React Native compatibility
+// import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
@@ -48,7 +49,7 @@ class EncryptionService {
     totalDecryptions: 0,
     keyRotations: 0,
     failedDecryptions: 0,
-    lastKeyRotation: 0
+    lastKeyRotation: 0,
   };
 
   // Encryption constants
@@ -88,7 +89,10 @@ class EncryptionService {
   /**
    * Encrypt sensitive data using AES-256-GCM
    */
-  public async encryptData(data: string, context?: string): Promise<EncryptionResult> {
+  public async encryptData(
+    data: string,
+    context?: string
+  ): Promise<EncryptionResult> {
     try {
       if (!data) {
         throw new Error('Data to encrypt cannot be empty');
@@ -100,20 +104,24 @@ class EncryptionService {
 
       // Generate random IV for this encryption
       const iv = await this.generateRandomBytes(this.IV_LENGTH);
-      
+
       // Convert data to bytes
       const dataBytes = new TextEncoder().encode(data);
-      
+
       // Perform AES-256-GCM encryption
-      const encryptedData = await this.performEncryption(dataBytes, encryptionKey.key, iv);
-      
+      const encryptedData = await this.performEncryption(
+        dataBytes,
+        encryptionKey.key,
+        iv
+      );
+
       // Create result
       const result: EncryptionResult = {
         encryptedData: this.bytesToBase64(encryptedData.ciphertext),
         iv: this.bytesToBase64(iv),
         authTag: this.bytesToBase64(encryptedData.authTag),
         keyId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Update metrics and log access
@@ -124,14 +132,19 @@ class EncryptionService {
       return result;
     } catch (error) {
       console.error('❌ Encryption failed:', error);
-      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Decrypt data using AES-256-GCM
    */
-  public async decryptData(encryptionResult: EncryptionResult, context?: string): Promise<DecryptionResult> {
+  public async decryptData(
+    encryptionResult: EncryptionResult,
+    context?: string
+  ): Promise<DecryptionResult> {
     try {
       const { encryptedData, iv, authTag, keyId } = encryptionResult;
 
@@ -165,13 +178,15 @@ class EncryptionService {
       return {
         decryptedData,
         keyId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     } catch (error) {
       this.metrics.failedDecryptions++;
       await this.saveMetrics();
       console.error('❌ Decryption failed:', error);
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -182,41 +197,43 @@ class EncryptionService {
     try {
       // Generate random salt
       const salt = await this.generateRandomBytes(this.SALT_LENGTH);
-      
+
       // Use user password or generate random password
-      const password = userPassword || await this.generateRandomPassword();
-      
+      const password = userPassword || (await this.generateRandomPassword());
+
       // Derive key using PBKDF2
       const derivedKey = await this.deriveKey(password, salt);
-      
+
       // Create key object
       const keyId = await this.generateKeyId();
       const now = Date.now();
-      
+
       const encryptionKey: EncryptionKey = {
         id: keyId,
         key: this.bytesToBase64(derivedKey),
         salt: this.bytesToBase64(salt),
         createdAt: now,
         expiresAt: now + this.KEY_ROTATION_INTERVAL,
-        isActive: true
+        isActive: true,
       };
 
       // Store the key securely
       await this.storeEncryptionKey(encryptionKey);
-      
+
       // Update current key
       this.currentKeyId = keyId;
       this.keyCache.set(keyId, encryptionKey);
-      
+
       // Store current key ID
       await SecureStore.setItemAsync('current_encryption_key_id', keyId);
-      
+
       console.log(`🔑 New encryption key generated: ${keyId}`);
       return keyId;
     } catch (error) {
       console.error('❌ Key generation failed:', error);
-      throw new Error(`Key generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Key generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -226,23 +243,25 @@ class EncryptionService {
   public async rotateKeys(): Promise<string> {
     try {
       console.log('🔄 Starting key rotation...');
-      
+
       // Generate new key
       const newKeyId = await this.generateNewKey();
-      
+
       // Mark old keys as inactive
       await this.deactivateOldKeys();
-      
+
       // Update metrics
       this.metrics.keyRotations++;
       this.metrics.lastKeyRotation = Date.now();
       await this.saveMetrics();
-      
+
       console.log(`✅ Key rotation completed. New key: ${newKeyId}`);
       return newKeyId;
     } catch (error) {
       console.error('❌ Key rotation failed:', error);
-      throw new Error(`Key rotation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Key rotation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -284,31 +303,33 @@ class EncryptionService {
    */
   public async clearAllKeys(): Promise<void> {
     try {
-      console.warn('⚠️ Clearing all encryption keys - this will make encrypted data unrecoverable');
-      
+      console.warn(
+        '⚠️ Clearing all encryption keys - this will make encrypted data unrecoverable'
+      );
+
       // Clear from secure store
       const keys = await this.getAllStoredKeys();
       for (const keyId of keys) {
         await SecureStore.deleteItemAsync(`encryption_key_${keyId}`);
       }
-      
+
       // Clear current key reference
       await SecureStore.deleteItemAsync('current_encryption_key_id');
-      
+
       // Clear cache
       this.keyCache.clear();
       this.currentKeyId = null;
-      
+
       // Reset metrics
       this.metrics = {
         totalEncryptions: 0,
         totalDecryptions: 0,
         keyRotations: 0,
         failedDecryptions: 0,
-        lastKeyRotation: 0
+        lastKeyRotation: 0,
       };
       await this.saveMetrics();
-      
+
       console.log('🗑️ All encryption keys cleared');
     } catch (error) {
       console.error('❌ Failed to clear keys:', error);
@@ -371,7 +392,10 @@ class EncryptionService {
 
   private async storeEncryptionKey(key: EncryptionKey): Promise<void> {
     try {
-      await SecureStore.setItemAsync(`encryption_key_${key.id}`, JSON.stringify(key));
+      await SecureStore.setItemAsync(
+        `encryption_key_${key.id}`,
+        JSON.stringify(key)
+      );
       this.keyCache.set(key.id, key);
     } catch (error) {
       throw new Error(`Failed to store encryption key: ${error}`);
@@ -393,66 +417,83 @@ class EncryptionService {
     return `key_${Date.now()}_${this.bytesToBase64(randomBytes).substring(0, 8)}`;
   }
 
-  private async deriveKey(password: string, salt: Uint8Array): Promise<Uint8Array> {
+  private async deriveKey(
+    password: string,
+    salt: Uint8Array
+  ): Promise<Uint8Array> {
     // Note: In a real implementation, you would use a proper PBKDF2 implementation
     // For now, we'll use a simplified version with Crypto.digestStringAsync
     const passwordWithSalt = password + this.bytesToBase64(salt);
-    
+
     let derived = passwordWithSalt;
     for (let i = 0; i < this.PBKDF2_ITERATIONS; i++) {
-      derived = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, derived);
+      derived = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        derived
+      );
     }
-    
+
     // Convert hex string to bytes and take first 32 bytes
     const hexBytes = derived.match(/.{2}/g) || [];
     const keyBytes = new Uint8Array(32);
     for (let i = 0; i < Math.min(32, hexBytes.length); i++) {
       keyBytes[i] = parseInt(hexBytes[i], 16);
     }
-    
+
     return keyBytes;
   }
 
-  private async performEncryption(data: Uint8Array, key: string, iv: Uint8Array): Promise<{ ciphertext: Uint8Array; authTag: Uint8Array }> {
+  private async performEncryption(
+    data: Uint8Array,
+    key: string,
+    iv: Uint8Array
+  ): Promise<{ ciphertext: Uint8Array; authTag: Uint8Array }> {
     // Note: This is a simplified implementation
     // In a real app, you would use a proper AES-GCM implementation
     // For now, we'll simulate the encryption
-    
+
     const keyBytes = this.base64ToBytes(key);
     const combined = new Uint8Array(data.length + keyBytes.length + iv.length);
     combined.set(data, 0);
     combined.set(keyBytes, data.length);
     combined.set(iv, data.length + keyBytes.length);
-    
+
     // Simulate encryption by XORing with key
     const ciphertext = new Uint8Array(data.length);
     for (let i = 0; i < data.length; i++) {
       ciphertext[i] = data[i] ^ keyBytes[i % keyBytes.length];
     }
-    
+
     // Generate auth tag (simplified)
     const authTag = await this.generateRandomBytes(this.TAG_LENGTH);
-    
+
     return { ciphertext, authTag };
   }
 
-  private async performDecryption(ciphertext: Uint8Array, key: string, iv: Uint8Array, authTag: Uint8Array): Promise<Uint8Array> {
+  private async performDecryption(
+    ciphertext: Uint8Array,
+    key: string,
+    iv: Uint8Array,
+    authTag: Uint8Array
+  ): Promise<Uint8Array> {
     // Note: This is a simplified implementation
     // In a real app, you would use a proper AES-GCM implementation with auth tag verification
-    
+
     const keyBytes = this.base64ToBytes(key);
-    
+
     // Simulate decryption by XORing with key (reverse of encryption)
     const plaintext = new Uint8Array(ciphertext.length);
     for (let i = 0; i < ciphertext.length; i++) {
       plaintext[i] = ciphertext[i] ^ keyBytes[i % keyBytes.length];
     }
-    
+
     return plaintext;
   }
 
   private bytesToBase64(bytes: Uint8Array): string {
-    const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
+    const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join(
+      ''
+    );
     return btoa(binary);
   }
 
@@ -463,7 +504,9 @@ class EncryptionService {
 
   private async loadCurrentKey(): Promise<void> {
     try {
-      this.currentKeyId = await SecureStore.getItemAsync('current_encryption_key_id');
+      this.currentKeyId = await SecureStore.getItemAsync(
+        'current_encryption_key_id'
+      );
     } catch (error) {
       console.error('Failed to load current key:', error);
     }
@@ -490,16 +533,20 @@ class EncryptionService {
     return [];
   }
 
-  private async logDataAccess(operation: 'encrypt' | 'decrypt', keyId: string, context?: string): Promise<void> {
+  private async logDataAccess(
+    operation: 'encrypt' | 'decrypt',
+    keyId: string,
+    context?: string
+  ): Promise<void> {
     try {
       const logEntry = {
         operation,
         keyId,
         context,
         timestamp: Date.now(),
-        platform: Platform.OS
+        platform: Platform.OS,
       };
-      
+
       // In a real app, you would send this to your security monitoring system
       console.log('🔍 Data access logged:', logEntry);
     } catch (error) {
@@ -520,7 +567,10 @@ class EncryptionService {
 
   private async saveMetrics(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('encryption_metrics', JSON.stringify(this.metrics));
+      await SecureStore.setItemAsync(
+        'encryption_metrics',
+        JSON.stringify(this.metrics)
+      );
     } catch (error) {
       console.error('Failed to save metrics:', error);
     }

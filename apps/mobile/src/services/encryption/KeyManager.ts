@@ -24,7 +24,13 @@ export interface KeyBackup {
 
 export interface KeyAuditLog {
   keyId: string;
-  operation: 'created' | 'rotated' | 'accessed' | 'deleted' | 'backed_up' | 'restored';
+  operation:
+    | 'created'
+    | 'rotated'
+    | 'accessed'
+    | 'deleted'
+    | 'backed_up'
+    | 'restored';
   timestamp: number;
   userId?: string;
   deviceId: string;
@@ -38,7 +44,7 @@ class KeyManager {
     rotationIntervalDays: 90,
     maxKeyAge: 365 * 24 * 60 * 60 * 1000, // 1 year in ms
     requireBiometricAuth: true,
-    autoRotationEnabled: true
+    autoRotationEnabled: true,
   };
   private auditLogs: KeyAuditLog[] = [];
   private rotationTimer: NodeJS.Timeout | null = null;
@@ -63,7 +69,7 @@ class KeyManager {
       await this.loadAuditLogs();
       await this.checkDeviceSecurity();
       await this.startAutoRotation();
-      
+
       console.log('🔐 Key Manager initialized successfully');
     } catch (error) {
       console.error('❌ Key Manager initialization failed:', error);
@@ -79,18 +85,24 @@ class KeyManager {
       // Check if device supports biometric authentication
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      const supportedTypes =
+        await LocalAuthentication.supportedAuthenticationTypesAsync();
 
       console.log('🔍 Device Security Check:', {
         hasHardware,
         isEnrolled,
-        supportedTypes: supportedTypes.map(type => 
-          LocalAuthentication.AuthenticationType[type]
-        )
+        supportedTypes: supportedTypes.map(
+          type => LocalAuthentication.AuthenticationType[type]
+        ),
       });
 
-      if (this.rotationPolicy.requireBiometricAuth && (!hasHardware || !isEnrolled)) {
-        console.warn('⚠️ Biometric authentication not available, falling back to device passcode');
+      if (
+        this.rotationPolicy.requireBiometricAuth &&
+        (!hasHardware || !isEnrolled)
+      ) {
+        console.warn(
+          '⚠️ Biometric authentication not available, falling back to device passcode'
+        );
       }
 
       // Check SecureStore availability
@@ -98,7 +110,6 @@ class KeyManager {
       if (!isAvailable) {
         throw new Error('SecureStore is not available on this device');
       }
-
     } catch (error) {
       console.error('❌ Device security check failed:', error);
       throw error;
@@ -108,25 +119,36 @@ class KeyManager {
   /**
    * Securely store encryption key with biometric protection
    */
-  public async storeKey(keyId: string, keyData: string, requireAuth: boolean = true): Promise<void> {
+  public async storeKey(
+    keyId: string,
+    keyData: string,
+    requireAuth: boolean = true
+  ): Promise<void> {
     try {
       const options: SecureStore.SecureStoreOptions = {
-        requireAuthentication: requireAuth && this.rotationPolicy.requireBiometricAuth,
+        requireAuthentication:
+          requireAuth && this.rotationPolicy.requireBiometricAuth,
         authenticationPrompt: 'Authenticate to access your encryption keys',
         keychainService: 'drishti-encryption-keys',
       };
 
       // Add additional security on iOS
       if (Platform.OS === 'ios') {
-        options.accessGroup = 'group.com.drishti.encryption';
+        // Note: accessGroup requires specific entitlements
+        // options.accessGroup = 'group.com.drishti.encryption';
       }
 
       await SecureStore.setItemAsync(`key_${keyId}`, keyData, options);
-      
+
       await this.logKeyOperation(keyId, 'created', true);
       console.log(`🔑 Key stored securely: ${keyId}`);
     } catch (error) {
-      await this.logKeyOperation(keyId, 'created', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        keyId,
+        'created',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Failed to store key:', error);
       throw error;
     }
@@ -144,14 +166,19 @@ class KeyManager {
       };
 
       const keyData = await SecureStore.getItemAsync(`key_${keyId}`, options);
-      
+
       if (keyData) {
         await this.logKeyOperation(keyId, 'accessed', true);
       }
-      
+
       return keyData;
     } catch (error) {
-      await this.logKeyOperation(keyId, 'accessed', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        keyId,
+        'accessed',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Failed to retrieve key:', error);
       return null;
     }
@@ -167,7 +194,12 @@ class KeyManager {
       console.log(`🗑️ Key deleted: ${keyId}`);
       return true;
     } catch (error) {
-      await this.logKeyOperation(keyId, 'deleted', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        keyId,
+        'deleted',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Failed to delete key:', error);
       return false;
     }
@@ -179,19 +211,24 @@ class KeyManager {
   public async rotateKeys(): Promise<string> {
     try {
       console.log('🔄 Starting key rotation...');
-      
+
       // Generate new key through encryption service
       const newKeyId = await encryptionService.rotateKeys();
-      
+
       // Clean up old keys based on policy
       await this.cleanupOldKeys();
-      
+
       await this.logKeyOperation(newKeyId, 'rotated', true);
       console.log(`✅ Key rotation completed: ${newKeyId}`);
-      
+
       return newKeyId;
     } catch (error) {
-      await this.logKeyOperation('unknown', 'rotated', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        'unknown',
+        'rotated',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Key rotation failed:', error);
       throw error;
     }
@@ -214,8 +251,11 @@ class KeyManager {
       }
 
       // Encrypt key data with user password
-      const encryptedKey = await this.encryptKeyForBackup(keyData, userPassword);
-      
+      const encryptedKey = await this.encryptKeyForBackup(
+        keyData,
+        userPassword
+      );
+
       // Generate recovery code
       const recoveryCode = await this.generateRecoveryCode();
 
@@ -223,18 +263,26 @@ class KeyManager {
         keyId: currentKeyId,
         encryptedKey,
         backupDate: Date.now(),
-        recoveryCode
+        recoveryCode,
       };
 
       // Store backup securely
-      await SecureStore.setItemAsync(`backup_${currentKeyId}`, JSON.stringify(backup));
-      
+      await SecureStore.setItemAsync(
+        `backup_${currentKeyId}`,
+        JSON.stringify(backup)
+      );
+
       await this.logKeyOperation(currentKeyId, 'backed_up', true);
       console.log(`💾 Key backup created: ${currentKeyId}`);
-      
+
       return backup;
     } catch (error) {
-      await this.logKeyOperation('unknown', 'backed_up', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        'unknown',
+        'backed_up',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Key backup failed:', error);
       throw error;
     }
@@ -243,7 +291,11 @@ class KeyManager {
   /**
    * Restore key from backup
    */
-  public async restoreKeyFromBackup(backup: KeyBackup, userPassword: string, recoveryCode: string): Promise<boolean> {
+  public async restoreKeyFromBackup(
+    backup: KeyBackup,
+    userPassword: string,
+    recoveryCode: string
+  ): Promise<boolean> {
     try {
       // Verify recovery code
       if (backup.recoveryCode !== recoveryCode) {
@@ -251,17 +303,25 @@ class KeyManager {
       }
 
       // Decrypt key data
-      const keyData = await this.decryptKeyFromBackup(backup.encryptedKey, userPassword);
-      
+      const keyData = await this.decryptKeyFromBackup(
+        backup.encryptedKey,
+        userPassword
+      );
+
       // Store restored key
       await this.storeKey(backup.keyId, keyData, false);
-      
+
       await this.logKeyOperation(backup.keyId, 'restored', true);
       console.log(`🔄 Key restored from backup: ${backup.keyId}`);
-      
+
       return true;
     } catch (error) {
-      await this.logKeyOperation(backup.keyId, 'restored', false, error instanceof Error ? error.message : 'Unknown error');
+      await this.logKeyOperation(
+        backup.keyId,
+        'restored',
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('❌ Key restore failed:', error);
       return false;
     }
@@ -270,18 +330,20 @@ class KeyManager {
   /**
    * Update key rotation policy
    */
-  public async updateRotationPolicy(policy: Partial<KeyRotationPolicy>): Promise<void> {
+  public async updateRotationPolicy(
+    policy: Partial<KeyRotationPolicy>
+  ): Promise<void> {
     try {
       this.rotationPolicy = { ...this.rotationPolicy, ...policy };
       await this.saveRotationPolicy();
-      
+
       // Restart auto rotation with new policy
       if (this.rotationPolicy.autoRotationEnabled) {
         await this.startAutoRotation();
       } else {
         this.stopAutoRotation();
       }
-      
+
       console.log('⚙️ Key rotation policy updated:', this.rotationPolicy);
     } catch (error) {
       console.error('❌ Failed to update rotation policy:', error);
@@ -314,9 +376,10 @@ class KeyManager {
       }
 
       const keyCreationTime = this.extractTimestampFromKeyId(currentKeyId);
-      const rotationInterval = this.rotationPolicy.rotationIntervalDays * 24 * 60 * 60 * 1000;
-      
-      return (Date.now() - keyCreationTime) >= rotationInterval;
+      const rotationInterval =
+        this.rotationPolicy.rotationIntervalDays * 24 * 60 * 60 * 1000;
+
+      return Date.now() - keyCreationTime >= rotationInterval;
     } catch (error) {
       console.error('❌ Failed to check rotation need:', error);
       return false;
@@ -375,14 +438,20 @@ class KeyManager {
     }
   }
 
-  private async encryptKeyForBackup(keyData: string, password: string): Promise<string> {
+  private async encryptKeyForBackup(
+    keyData: string,
+    password: string
+  ): Promise<string> {
     // Simplified encryption for backup
     // In a real implementation, you would use proper encryption
     const combined = keyData + password;
     return btoa(combined);
   }
 
-  private async decryptKeyFromBackup(encryptedKey: string, password: string): Promise<string> {
+  private async decryptKeyFromBackup(
+    encryptedKey: string,
+    password: string
+  ): Promise<string> {
     // Simplified decryption for backup
     // In a real implementation, you would use proper decryption
     const combined = atob(encryptedKey);
@@ -417,11 +486,11 @@ class KeyManager {
         timestamp: Date.now(),
         deviceId: await this.getDeviceId(),
         success,
-        errorMessage
+        errorMessage,
       };
 
       this.auditLogs.push(logEntry);
-      
+
       // Keep only last 1000 logs
       if (this.auditLogs.length > 1000) {
         this.auditLogs = this.auditLogs.slice(-1000);
@@ -450,7 +519,10 @@ class KeyManager {
     try {
       const policyData = await SecureStore.getItemAsync('key_rotation_policy');
       if (policyData) {
-        this.rotationPolicy = { ...this.rotationPolicy, ...JSON.parse(policyData) };
+        this.rotationPolicy = {
+          ...this.rotationPolicy,
+          ...JSON.parse(policyData),
+        };
       }
     } catch (error) {
       console.error('Failed to load rotation policy:', error);
@@ -459,7 +531,10 @@ class KeyManager {
 
   private async saveRotationPolicy(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('key_rotation_policy', JSON.stringify(this.rotationPolicy));
+      await SecureStore.setItemAsync(
+        'key_rotation_policy',
+        JSON.stringify(this.rotationPolicy)
+      );
     } catch (error) {
       console.error('Failed to save rotation policy:', error);
     }
@@ -478,7 +553,10 @@ class KeyManager {
 
   private async saveAuditLogs(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('key_audit_logs', JSON.stringify(this.auditLogs));
+      await SecureStore.setItemAsync(
+        'key_audit_logs',
+        JSON.stringify(this.auditLogs)
+      );
     } catch (error) {
       console.error('Failed to save audit logs:', error);
     }

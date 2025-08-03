@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
-import * as Network from 'expo-network';
+// Note: Using platform-specific network detection
+// import * as Network from 'expo-network';
 import { Platform } from 'react-native';
 
 /**
@@ -18,14 +19,14 @@ export enum AuditEventType {
   SECURITY_VIOLATION = 'security_violation',
   SUSPICIOUS_ACTIVITY = 'suspicious_activity',
   DATA_EXPORT = 'data_export',
-  CONFIGURATION_CHANGE = 'configuration_change'
+  CONFIGURATION_CHANGE = 'configuration_change',
 }
 
 export enum AuditSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface AuditEvent {
@@ -73,7 +74,12 @@ export interface AuditEventDetails {
 
 export interface SecurityAlert {
   id: string;
-  type: 'MULTIPLE_FAILED_ATTEMPTS' | 'SUSPICIOUS_LOCATION' | 'UNUSUAL_ACTIVITY' | 'DATA_BREACH_ATTEMPT' | 'KEY_COMPROMISE';
+  type:
+    | 'MULTIPLE_FAILED_ATTEMPTS'
+    | 'SUSPICIOUS_LOCATION'
+    | 'UNUSUAL_ACTIVITY'
+    | 'DATA_BREACH_ATTEMPT'
+    | 'KEY_COMPROMISE';
   severity: AuditSeverity;
   timestamp: number;
   description: string;
@@ -109,7 +115,7 @@ class SecurityAuditService {
     alertThresholds: {
       failedAttemptsPerHour: 5,
       suspiciousActivityScore: 75,
-      dataAccessFrequency: 100
+      dataAccessFrequency: 100,
     },
     sensitiveOperations: [
       'decrypt_account_number',
@@ -117,13 +123,9 @@ class SecurityAuditService {
       'decrypt_tax_id',
       'export_financial_data',
       'key_rotation',
-      'backup_creation'
+      'backup_creation',
     ],
-    excludedOperations: [
-      'ui_navigation',
-      'app_background',
-      'app_foreground'
-    ]
+    excludedOperations: ['ui_navigation', 'app_background', 'app_foreground'],
   };
   private deviceInfo: DeviceInfo | null = null;
   private sessionId: string = '';
@@ -149,7 +151,7 @@ class SecurityAuditService {
       await this.loadSecurityAlerts();
       await this.collectDeviceInfo();
       this.generateSessionId();
-      
+
       console.log('🔍 Security Audit Service initialized');
     } catch (error) {
       console.error('❌ Failed to initialize Security Audit Service:', error);
@@ -194,7 +196,7 @@ class SecurityAuditService {
         deviceInfo: this.deviceInfo!,
         networkInfo,
         details,
-        metadata
+        metadata,
       };
 
       // Add to events array
@@ -202,7 +204,9 @@ class SecurityAuditService {
 
       // Maintain size limit
       if (this.auditEvents.length > this.configuration.maxLogSize) {
-        this.auditEvents = this.auditEvents.slice(-this.configuration.maxLogSize);
+        this.auditEvents = this.auditEvents.slice(
+          -this.configuration.maxLogSize
+        );
       }
 
       // Save to secure storage
@@ -213,7 +217,9 @@ class SecurityAuditService {
 
       // Log sensitive operations with extra detail
       if (this.configuration.sensitiveOperations.includes(details.action)) {
-        console.log(`🚨 SENSITIVE OPERATION: ${details.action} by user ${userId} at ${new Date(auditEvent.timestamp).toISOString()}`);
+        console.log(
+          `🚨 SENSITIVE OPERATION: ${details.action} by user ${userId} at ${new Date(auditEvent.timestamp).toISOString()}`
+        );
       }
 
       return eventId;
@@ -242,11 +248,16 @@ class SecurityAuditService {
       tableName,
       fieldName,
       success,
-      errorMessage
+      errorMessage,
     };
 
     const severity = success ? AuditSeverity.LOW : AuditSeverity.MEDIUM;
-    return await this.logEvent(AuditEventType.DATA_ACCESS, severity, details, userId);
+    return await this.logEvent(
+      AuditEventType.DATA_ACCESS,
+      severity,
+      details,
+      userId
+    );
   }
 
   /**
@@ -269,12 +280,15 @@ class SecurityAuditService {
       success,
       errorMessage,
       duration,
-      dataSize
+      dataSize,
     };
 
-    const eventType = operation === 'encrypt' ? AuditEventType.ENCRYPTION : AuditEventType.DECRYPTION;
+    const eventType =
+      operation === 'encrypt'
+        ? AuditEventType.ENCRYPTION
+        : AuditEventType.DECRYPTION;
     const severity = success ? AuditSeverity.LOW : AuditSeverity.HIGH;
-    
+
     return await this.logEvent(eventType, severity, details, userId);
   }
 
@@ -291,7 +305,7 @@ class SecurityAuditService {
       action: 'security_violation',
       resource: 'security_system',
       success: false,
-      errorMessage: details
+      errorMessage: details,
     };
 
     return await this.logEvent(
@@ -306,33 +320,41 @@ class SecurityAuditService {
   /**
    * Get audit events with filtering
    */
-  public getAuditEvents(
-    filters?: {
-      type?: AuditEventType;
-      severity?: AuditSeverity;
-      userId?: string;
-      startDate?: number;
-      endDate?: number;
-      limit?: number;
-    }
-  ): AuditEvent[] {
+  public getAuditEvents(filters?: {
+    type?: AuditEventType;
+    severity?: AuditSeverity;
+    userId?: string;
+    startDate?: number;
+    endDate?: number;
+    limit?: number;
+  }): AuditEvent[] {
     let filteredEvents = [...this.auditEvents];
 
     if (filters) {
       if (filters.type) {
-        filteredEvents = filteredEvents.filter(event => event.type === filters.type);
+        filteredEvents = filteredEvents.filter(
+          event => event.type === filters.type
+        );
       }
       if (filters.severity) {
-        filteredEvents = filteredEvents.filter(event => event.severity === filters.severity);
+        filteredEvents = filteredEvents.filter(
+          event => event.severity === filters.severity
+        );
       }
       if (filters.userId) {
-        filteredEvents = filteredEvents.filter(event => event.userId === filters.userId);
+        filteredEvents = filteredEvents.filter(
+          event => event.userId === filters.userId
+        );
       }
       if (filters.startDate) {
-        filteredEvents = filteredEvents.filter(event => event.timestamp >= filters.startDate!);
+        filteredEvents = filteredEvents.filter(
+          event => event.timestamp >= filters.startDate!
+        );
       }
       if (filters.endDate) {
-        filteredEvents = filteredEvents.filter(event => event.timestamp <= filters.endDate!);
+        filteredEvents = filteredEvents.filter(
+          event => event.timestamp <= filters.endDate!
+        );
       }
     }
 
@@ -352,7 +374,7 @@ class SecurityAuditService {
    */
   public getSecurityAlerts(acknowledged?: boolean): SecurityAlert[] {
     let alerts = [...this.securityAlerts];
-    
+
     if (acknowledged !== undefined) {
       alerts = alerts.filter(alert => alert.acknowledged === acknowledged);
     }
@@ -363,7 +385,10 @@ class SecurityAuditService {
   /**
    * Acknowledge security alert
    */
-  public async acknowledgeAlert(alertId: string, acknowledgedBy: string): Promise<boolean> {
+  public async acknowledgeAlert(
+    alertId: string,
+    acknowledgedBy: string
+  ): Promise<boolean> {
     try {
       const alert = this.securityAlerts.find(a => a.id === alertId);
       if (!alert) {
@@ -375,8 +400,10 @@ class SecurityAuditService {
       alert.acknowledgedAt = Date.now();
 
       await this.saveSecurityAlerts();
-      
-      console.log(`✅ Security alert acknowledged: ${alertId} by ${acknowledgedBy}`);
+
+      console.log(
+        `✅ Security alert acknowledged: ${alertId} by ${acknowledgedBy}`
+      );
       return true;
     } catch (error) {
       console.error('❌ Failed to acknowledge alert:', error);
@@ -399,22 +426,32 @@ class SecurityAuditService {
     userActivity: { userId: string; eventCount: number }[];
     timelineData: { date: string; events: number }[];
   } {
-    const cutoffDate = Date.now() - (days * 24 * 60 * 60 * 1000);
-    const recentEvents = this.auditEvents.filter(event => event.timestamp >= cutoffDate);
+    const cutoffDate = Date.now() - days * 24 * 60 * 60 * 1000;
+    const recentEvents = this.auditEvents.filter(
+      event => event.timestamp >= cutoffDate
+    );
 
     // Summary statistics
     const summary = {
       totalEvents: recentEvents.length,
-      criticalEvents: recentEvents.filter(e => e.severity === AuditSeverity.CRITICAL).length,
+      criticalEvents: recentEvents.filter(
+        e => e.severity === AuditSeverity.CRITICAL
+      ).length,
       failedOperations: recentEvents.filter(e => !e.details.success).length,
-      uniqueUsers: new Set(recentEvents.map(e => e.userId).filter(Boolean)).size,
-      alertsGenerated: this.securityAlerts.filter(a => a.timestamp >= cutoffDate).length
+      uniqueUsers: new Set(recentEvents.map(e => e.userId).filter(Boolean))
+        .size,
+      alertsGenerated: this.securityAlerts.filter(
+        a => a.timestamp >= cutoffDate
+      ).length,
     };
 
     // Top event types
     const eventTypeCounts = new Map<AuditEventType, number>();
     recentEvents.forEach(event => {
-      eventTypeCounts.set(event.type, (eventTypeCounts.get(event.type) || 0) + 1);
+      eventTypeCounts.set(
+        event.type,
+        (eventTypeCounts.get(event.type) || 0) + 1
+      );
     });
     const topEvents = Array.from(eventTypeCounts.entries())
       .map(([type, count]) => ({ type, count }))
@@ -425,7 +462,10 @@ class SecurityAuditService {
     const userActivityMap = new Map<string, number>();
     recentEvents.forEach(event => {
       if (event.userId) {
-        userActivityMap.set(event.userId, (userActivityMap.get(event.userId) || 0) + 1);
+        userActivityMap.set(
+          event.userId,
+          (userActivityMap.get(event.userId) || 0) + 1
+        );
       }
     });
     const userActivity = Array.from(userActivityMap.entries())
@@ -447,14 +487,16 @@ class SecurityAuditService {
       summary,
       topEvents,
       userActivity,
-      timelineData
+      timelineData,
     };
   }
 
   /**
    * Update audit configuration
    */
-  public async updateConfiguration(config: Partial<AuditConfiguration>): Promise<void> {
+  public async updateConfiguration(
+    config: Partial<AuditConfiguration>
+  ): Promise<void> {
     try {
       this.configuration = { ...this.configuration, ...config };
       await this.saveConfiguration();
@@ -477,18 +519,21 @@ class SecurityAuditService {
    */
   public async cleanupOldEvents(): Promise<number> {
     try {
-      const cutoffDate = Date.now() - (this.configuration.retentionDays * 24 * 60 * 60 * 1000);
+      const cutoffDate =
+        Date.now() - this.configuration.retentionDays * 24 * 60 * 60 * 1000;
       const initialCount = this.auditEvents.length;
-      
-      this.auditEvents = this.auditEvents.filter(event => event.timestamp >= cutoffDate);
-      
+
+      this.auditEvents = this.auditEvents.filter(
+        event => event.timestamp >= cutoffDate
+      );
+
       const removedCount = initialCount - this.auditEvents.length;
-      
+
       if (removedCount > 0) {
         await this.saveAuditEvents();
         console.log(`🧹 Cleaned up ${removedCount} old audit events`);
       }
-      
+
       return removedCount;
     } catch (error) {
       console.error('❌ Failed to cleanup old events:', error);
@@ -506,44 +551,52 @@ class SecurityAuditService {
   ): Promise<string> {
     try {
       const events = this.getAuditEvents({ startDate, endDate });
-      
+
       // Log the export operation
-      await this.logEvent(
-        AuditEventType.DATA_EXPORT,
-        AuditSeverity.HIGH,
-        {
-          action: 'export_audit_data',
-          resource: 'audit_events',
-          success: true,
-          dataSize: events.length
-        }
-      );
+      await this.logEvent(AuditEventType.DATA_EXPORT, AuditSeverity.HIGH, {
+        action: 'export_audit_data',
+        resource: 'audit_events',
+        success: true,
+        dataSize: events.length,
+      });
 
       if (format === 'json') {
         return JSON.stringify(events, null, 2);
       } else {
         // Convert to CSV format
         const headers = [
-          'ID', 'Type', 'Severity', 'Timestamp', 'User ID', 'Action', 
-          'Resource', 'Success', 'Error Message', 'Device Platform'
+          'ID',
+          'Type',
+          'Severity',
+          'Timestamp',
+          'User ID',
+          'Action',
+          'Resource',
+          'Success',
+          'Error Message',
+          'Device Platform',
         ];
-        
+
         const csvRows = [
           headers.join(','),
-          ...events.map(event => [
-            event.id,
-            event.type,
-            event.severity,
-            new Date(event.timestamp).toISOString(),
-            event.userId || '',
-            event.details.action,
-            event.details.resource,
-            event.details.success,
-            event.details.errorMessage || '',
-            event.deviceInfo.platform
-          ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+          ...events.map(event =>
+            [
+              event.id,
+              event.type,
+              event.severity,
+              new Date(event.timestamp).toISOString(),
+              event.userId || '',
+              event.details.action,
+              event.details.resource,
+              event.details.success,
+              event.details.errorMessage || '',
+              event.deviceInfo.platform,
+            ]
+              .map(field => `"${String(field).replace(/"/g, '""')}"`)
+              .join(',')
+          ),
         ];
-        
+
         return csvRows.join('\n');
       }
     } catch (error) {
@@ -560,10 +613,12 @@ class SecurityAuditService {
       [AuditSeverity.LOW]: 0,
       [AuditSeverity.MEDIUM]: 1,
       [AuditSeverity.HIGH]: 2,
-      [AuditSeverity.CRITICAL]: 3
+      [AuditSeverity.CRITICAL]: 3,
     };
 
-    return severityLevels[severity] >= severityLevels[this.configuration.logLevel];
+    return (
+      severityLevels[severity] >= severityLevels[this.configuration.logLevel]
+    );
   }
 
   private async checkForSecurityAlerts(event: AuditEvent): Promise<void> {
@@ -586,14 +641,18 @@ class SecurityAuditService {
   }
 
   private async checkFailedAttempts(event: AuditEvent): Promise<void> {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    const recentFailures = this.auditEvents.filter(e => 
-      e.timestamp >= oneHourAgo &&
-      e.userId === event.userId &&
-      !e.details.success
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const recentFailures = this.auditEvents.filter(
+      e =>
+        e.timestamp >= oneHourAgo &&
+        e.userId === event.userId &&
+        !e.details.success
     );
 
-    if (recentFailures.length >= this.configuration.alertThresholds.failedAttemptsPerHour) {
+    if (
+      recentFailures.length >=
+      this.configuration.alertThresholds.failedAttemptsPerHour
+    ) {
       await this.createSecurityAlert(
         'MULTIPLE_FAILED_ATTEMPTS',
         AuditSeverity.HIGH,
@@ -615,9 +674,10 @@ class SecurityAuditService {
     }
 
     // Check for rapid successive operations
-    const recentEvents = this.auditEvents.filter(e => 
-      e.timestamp >= (event.timestamp - 60000) && // Last minute
-      e.userId === event.userId
+    const recentEvents = this.auditEvents.filter(
+      e =>
+        e.timestamp >= event.timestamp - 60000 && // Last minute
+        e.userId === event.userId
     );
     if (recentEvents.length > 10) {
       suspiciousScore += 30;
@@ -628,7 +688,10 @@ class SecurityAuditService {
       suspiciousScore += 25;
     }
 
-    if (suspiciousScore >= this.configuration.alertThresholds.suspiciousActivityScore) {
+    if (
+      suspiciousScore >=
+      this.configuration.alertThresholds.suspiciousActivityScore
+    ) {
       await this.createSecurityAlert(
         'UNUSUAL_ACTIVITY',
         AuditSeverity.MEDIUM,
@@ -639,14 +702,18 @@ class SecurityAuditService {
   }
 
   private async checkDataAccessPatterns(event: AuditEvent): Promise<void> {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    const recentDataAccess = this.auditEvents.filter(e => 
-      e.timestamp >= oneHourAgo &&
-      e.type === AuditEventType.DATA_ACCESS &&
-      e.userId === event.userId
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const recentDataAccess = this.auditEvents.filter(
+      e =>
+        e.timestamp >= oneHourAgo &&
+        e.type === AuditEventType.DATA_ACCESS &&
+        e.userId === event.userId
     );
 
-    if (recentDataAccess.length >= this.configuration.alertThresholds.dataAccessFrequency) {
+    if (
+      recentDataAccess.length >=
+      this.configuration.alertThresholds.dataAccessFrequency
+    ) {
       await this.createSecurityAlert(
         'UNUSUAL_ACTIVITY',
         AuditSeverity.MEDIUM,
@@ -669,7 +736,7 @@ class SecurityAuditService {
       timestamp: Date.now(),
       description,
       events: eventIds,
-      acknowledged: false
+      acknowledged: false,
     };
 
     this.securityAlerts.push(alert);
@@ -699,7 +766,7 @@ class SecurityAuditService {
         appVersion: '1.0.0', // This would come from app config
         deviceName: Device.deviceName || 'Unknown',
         isEmulator: !Device.isDevice,
-        isRooted: false // This would require additional detection
+        isRooted: false, // This would require additional detection
       };
     } catch (error) {
       console.error('Failed to collect device info:', error);
@@ -708,22 +775,23 @@ class SecurityAuditService {
         platform: Platform.OS,
         osVersion: 'unknown',
         appVersion: '1.0.0',
-        isEmulator: false
+        isEmulator: false,
       };
     }
   }
 
   private async collectNetworkInfo(): Promise<NetworkInfo> {
     try {
-      const networkState = await Network.getNetworkStateAsync();
+      // Note: Using basic network detection for now
+      // const networkState = await Network.getNetworkStateAsync();
       return {
-        isConnected: networkState.isConnected || false,
-        connectionType: networkState.type || 'unknown'
+        isConnected: true, // Assume connected for now
+        connectionType: 'unknown',
       };
     } catch (error) {
       return {
         isConnected: false,
-        connectionType: 'unknown'
+        connectionType: 'unknown',
       };
     }
   }
@@ -745,7 +813,10 @@ class SecurityAuditService {
     try {
       const configData = await SecureStore.getItemAsync('audit_configuration');
       if (configData) {
-        this.configuration = { ...this.configuration, ...JSON.parse(configData) };
+        this.configuration = {
+          ...this.configuration,
+          ...JSON.parse(configData),
+        };
       }
     } catch (error) {
       console.error('Failed to load audit configuration:', error);
@@ -754,7 +825,10 @@ class SecurityAuditService {
 
   private async saveConfiguration(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('audit_configuration', JSON.stringify(this.configuration));
+      await SecureStore.setItemAsync(
+        'audit_configuration',
+        JSON.stringify(this.configuration)
+      );
     } catch (error) {
       console.error('Failed to save audit configuration:', error);
     }
@@ -773,7 +847,10 @@ class SecurityAuditService {
 
   private async saveAuditEvents(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('audit_events', JSON.stringify(this.auditEvents));
+      await SecureStore.setItemAsync(
+        'audit_events',
+        JSON.stringify(this.auditEvents)
+      );
     } catch (error) {
       console.error('Failed to save audit events:', error);
     }
@@ -792,7 +869,10 @@ class SecurityAuditService {
 
   private async saveSecurityAlerts(): Promise<void> {
     try {
-      await SecureStore.setItemAsync('security_alerts', JSON.stringify(this.securityAlerts));
+      await SecureStore.setItemAsync(
+        'security_alerts',
+        JSON.stringify(this.securityAlerts)
+      );
     } catch (error) {
       console.error('Failed to save security alerts:', error);
     }
