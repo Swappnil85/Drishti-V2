@@ -7,17 +7,20 @@ This guide will help you set up the Drishti development environment and start co
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js**: 18.0.0 or higher ([Download](https://nodejs.org/))
 - **npm**: 9.0.0 or higher (comes with Node.js)
 - **Git**: Latest version ([Download](https://git-scm.com/))
 - **PostgreSQL**: 15 or higher ([Download](https://postgresql.org/))
 
 ### Mobile Development (Optional)
+
 - **Expo CLI**: `npm install -g @expo/cli`
 - **Android Studio**: For Android development
 - **Xcode**: For iOS development (macOS only)
 
 ### Recommended Tools
+
 - **VS Code**: With recommended extensions
 - **Postman/Insomnia**: For API testing
 - **pgAdmin/TablePlus**: For database management
@@ -25,18 +28,21 @@ This guide will help you set up the Drishti development environment and start co
 ## Setup Instructions
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/Swappnil85/Drishti.git
 cd Drishti
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install all dependencies for the monorepo
 npm install
 ```
 
 ### 3. Database Setup
+
 ```bash
 # Start PostgreSQL service
 # macOS (with Homebrew)
@@ -54,6 +60,7 @@ psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE drishti_dev TO drishti_use
 ```
 
 ### 4. Environment Configuration
+
 ```bash
 # Copy environment template
 cp apps/api/.env.example apps/api/.env
@@ -63,6 +70,7 @@ nano apps/api/.env
 ```
 
 **Required Environment Variables:**
+
 ```env
 PORT=3000
 DATABASE_URL=postgresql://drishti_user:dev_password@localhost:5432/drishti_dev
@@ -73,16 +81,19 @@ LOG_LEVEL=debug
 ### 5. Start Development Servers
 
 #### Terminal 1 - API Backend
+
 ```bash
 npm run dev --workspace=apps/api
 ```
 
 #### Terminal 2 - Mobile App
+
 ```bash
 npm run dev --workspace=apps/mobile
 ```
 
 ### 6. Verify Setup
+
 - **API**: Visit `http://localhost:3000/health`
 - **API Docs**: Visit `http://localhost:3000/docs`
 - **Mobile**: Scan QR code with Expo Go app
@@ -90,6 +101,7 @@ npm run dev --workspace=apps/mobile
 ## Development Workflow
 
 ### 1. Create Feature Branch
+
 ```bash
 git checkout develop
 git pull origin develop
@@ -97,11 +109,13 @@ git checkout -b feature/your-feature-name
 ```
 
 ### 2. Make Changes
+
 - Follow coding standards (see [CODING_STANDARDS.md](./CODING_STANDARDS.md))
 - Write tests for new functionality
 - Update documentation as needed
 
 ### 3. Test Your Changes
+
 ```bash
 # Run all tests
 npm run test
@@ -117,6 +131,7 @@ npm run format
 ```
 
 ### 4. Commit Changes
+
 ```bash
 # Stage changes
 git add .
@@ -126,6 +141,7 @@ git commit -m "feat: add user authentication endpoint"
 ```
 
 ### 5. Push and Create PR
+
 ```bash
 # Push to your feature branch
 git push origin feature/your-feature-name
@@ -170,6 +186,7 @@ Drishti/
 ## Available Scripts
 
 ### Root Level Scripts
+
 ```bash
 # Development
 npm run dev              # Start all apps in development mode
@@ -186,6 +203,7 @@ npm run test --workspace=apps/api     # Test API only
 ```
 
 ### API Scripts
+
 ```bash
 cd apps/api
 
@@ -199,6 +217,7 @@ npm run seed             # Seed database with test data
 ```
 
 ### Mobile Scripts
+
 ```bash
 cd apps/mobile
 
@@ -213,6 +232,7 @@ npm run build            # Build for production
 ## Development Tools
 
 ### VS Code Extensions
+
 Install the following extensions for the best development experience:
 
 ```json
@@ -230,6 +250,7 @@ Install the following extensions for the best development experience:
 ```
 
 ### VS Code Settings
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -242,6 +263,7 @@ Install the following extensions for the best development experience:
 ## Debugging
 
 ### API Debugging
+
 ```typescript
 // Use built-in Fastify logger
 fastify.log.info('User logged in', { userId: user.id });
@@ -262,6 +284,7 @@ fastify.log.error('Database error', { error: error.message });
 ```
 
 ### Mobile Debugging
+
 ```bash
 # Start with debugging enabled
 npx expo start --dev-client
@@ -276,6 +299,7 @@ npx expo install react-native-flipper
 ## Testing
 
 ### Running Tests
+
 ```bash
 # Run all tests
 npm run test
@@ -291,6 +315,7 @@ npm test -- --testPathPattern=auth.test.ts
 ```
 
 ### Writing Tests
+
 ```typescript
 // API endpoint test example
 describe('POST /auth/login', () => {
@@ -315,7 +340,7 @@ describe('Button Component', () => {
     const { getByText } = render(
       <Button title="Test Button" onPress={() => {}} />
     );
-    
+
     expect(getByText('Test Button')).toBeTruthy();
   });
 });
@@ -324,6 +349,7 @@ describe('Button Component', () => {
 ## Common Tasks
 
 ### Adding a New API Endpoint
+
 1. Create route handler in `apps/api/src/routes/`
 2. Add validation schema using Zod
 3. Implement business logic in service layer
@@ -331,6 +357,7 @@ describe('Button Component', () => {
 5. Update API documentation
 
 ### Adding a New Mobile Screen
+
 1. Create screen component in `apps/mobile/src/screens/`
 2. Add navigation configuration
 3. Implement state management if needed
@@ -338,6 +365,7 @@ describe('Button Component', () => {
 5. Write component tests
 
 ### Adding Shared Types
+
 1. Define types in `packages/shared/src/types.ts`
 2. Export from `packages/shared/src/index.ts`
 3. Build shared package: `npm run build --workspace=packages/shared`
@@ -348,6 +376,7 @@ describe('Button Component', () => {
 ### Common Issues
 
 #### Port Already in Use
+
 ```bash
 # Find process using port 3000
 lsof -ti:3000
@@ -357,6 +386,7 @@ kill -9 $(lsof -ti:3000)
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Check PostgreSQL status
 brew services list | grep postgresql
@@ -366,15 +396,52 @@ brew services restart postgresql@15
 ```
 
 #### Mobile App Won't Start
+
 ```bash
 # Clear Expo cache
 npx expo start --clear
 
 # Reset Metro cache
 npx expo start --reset-cache
+
+# Fix SDK version mismatch
+npx expo install --fix
+npm install expo@~53.0.0 --legacy-peer-deps
+
+# Fix web blank screen - ensure proper entry point
+# Update package.json: "main": "index.js"
+# Create index.js with registerRootComponent
+```
+
+#### Web App Shows Blank Screen
+
+```bash
+# Install missing dependencies
+npm install react-native-web@~0.19.13 --legacy-peer-deps
+npm install expo-constants@~17.1.7 --legacy-peer-deps
+
+# Update core dependencies
+npm install react@19.0.0 react-dom@19.0.0 react-native@0.79.5 --legacy-peer-deps
+
+# Ensure proper app registration (see Troubleshooting Guide)
+```
+
+#### Expo SDK Version Mismatch
+
+```bash
+# Check Expo Go app version compatibility
+npx expo doctor
+
+# Upgrade to compatible SDK version
+npx expo install --fix
+npm install expo@~53.0.0 --legacy-peer-deps
+
+# Clear cache and restart
+npx expo start --clear --reset-cache
 ```
 
 #### TypeScript Errors
+
 ```bash
 # Clean TypeScript cache
 rm -rf node_modules/.cache
@@ -385,6 +452,8 @@ npm run build
 ```
 
 ### Getting Help
+
 - Check existing [GitHub Issues](https://github.com/Swappnil85/Drishti/issues)
-- Review [Troubleshooting Guide](../guides/TROUBLESHOOTING.md)
+- Review [Troubleshooting Guide](../guides/TROUBLESHOOTING.md) for detailed solutions
+- Check [Mobile Setup Issues](../guides/TROUBLESHOOTING.md#mobile-development-issues) for Expo/React Native problems
 - Ask questions in team chat or create new issue

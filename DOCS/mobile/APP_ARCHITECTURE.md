@@ -2,7 +2,38 @@
 
 ## Overview
 
-The Drishti mobile application is built with React Native and Expo, following modern mobile development patterns with a focus on accessibility, performance, and user experience.
+The Drishti mobile application is built with React Native and Expo SDK 53, following modern mobile development patterns with a focus on accessibility, performance, and user experience. The app supports iOS, Android, and Web platforms.
+
+## Setup Requirements
+
+### SDK Compatibility
+
+- **Expo SDK**: 53.0.0
+- **React**: 19.0.0
+- **React Native**: 0.79.5
+- **React Native Web**: 0.19.13+
+
+### Entry Point Configuration
+
+The app uses a proper entry point registration system:
+
+```javascript
+// index.js (main entry point)
+import { registerRootComponent } from 'expo';
+import App from './App';
+
+// Registers the app component with React Native
+registerRootComponent(App);
+```
+
+```json
+// package.json
+{
+  "main": "index.js"
+}
+```
+
+This ensures proper component registration for both mobile and web platforms.
 
 ## Application Structure
 
@@ -34,6 +65,7 @@ apps/mobile/
 ## Architecture Patterns
 
 ### Component Architecture
+
 ```
 ┌─────────────────┐
 │   App.tsx       │  Root component with providers
@@ -53,6 +85,7 @@ apps/mobile/
 ```
 
 ### State Management Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   UI Layer      │◄──►│  Zustand Store  │◄──►│  API Services   │
@@ -69,6 +102,7 @@ apps/mobile/
 ## Core Components
 
 ### Authentication Flow
+
 ```typescript
 // Auth context provider
 interface AuthContextType {
@@ -83,6 +117,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 ```
 
 ### Camera Integration
+
 ```typescript
 // Camera component with AI analysis
 interface CameraScreenProps {
@@ -96,7 +131,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 }) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [cameraRef, setCameraRef] = useState<Camera | null>(null);
-  
+
   // Camera permission handling
   useEffect(() => {
     (async () => {
@@ -104,19 +139,19 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       setHasPermission(status === 'granted');
     })();
   }, []);
-  
+
   // Capture and analyze image
   const captureAndAnalyze = async () => {
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
       onCapture(photo);
-      
+
       // Upload and analyze
       const analysis = await analyzeImage(photo.uri);
       onAnalysisComplete(analysis);
     }
   };
-  
+
   return (
     <Camera
       ref={setCameraRef}
@@ -132,6 +167,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 ## State Management
 
 ### Zustand Store Structure
+
 ```typescript
 interface AppState {
   // Authentication
@@ -140,21 +176,21 @@ interface AppState {
     tokens: AuthTokens | null;
     isAuthenticated: boolean;
   };
-  
+
   // Camera & Analysis
   camera: {
     isActive: boolean;
     currentImage: CameraCapture | null;
     analysisHistory: VisualAnalysis[];
   };
-  
+
   // UI State
   ui: {
     isLoading: boolean;
     activeScreen: string;
     theme: 'light' | 'dark';
   };
-  
+
   // Settings
   settings: {
     language: string;
@@ -165,6 +201,7 @@ interface AppState {
 ```
 
 ### Store Implementation
+
 ```typescript
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -177,7 +214,7 @@ const useAppStore = create<AppState>()(
         tokens: null,
         isAuthenticated: false,
       },
-      
+
       // Actions
       login: async (email: string, password: string) => {
         const response = await authService.login(email, password);
@@ -186,11 +223,11 @@ const useAppStore = create<AppState>()(
             ...state.auth,
             user: response.user,
             tokens: response.tokens,
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         }));
       },
-      
+
       logout: async () => {
         await authService.logout();
         set(state => ({
@@ -198,17 +235,17 @@ const useAppStore = create<AppState>()(
             ...state.auth,
             user: null,
             tokens: null,
-            isAuthenticated: false
-          }
+            isAuthenticated: false,
+          },
         }));
-      }
+      },
     }),
     {
       name: 'drishti-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         settings: state.settings,
         // Don't persist sensitive auth data
-      })
+      }),
     }
   )
 );
@@ -217,11 +254,12 @@ const useAppStore = create<AppState>()(
 ## Navigation Structure
 
 ### Navigation Hierarchy
+
 ```typescript
 // Root navigator
 const RootNavigator = () => {
   const { isAuthenticated } = useAuth();
-  
+
   return (
     <NavigationContainer>
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
@@ -251,6 +289,7 @@ const CameraStack = () => (
 ## Performance Optimization
 
 ### Image Handling
+
 ```typescript
 // Optimized image loading
 const OptimizedImage: React.FC<ImageProps> = ({ uri, ...props }) => {
@@ -270,12 +309,14 @@ const OptimizedImage: React.FC<ImageProps> = ({ uri, ...props }) => {
 ```
 
 ### Memory Management
+
 - Automatic image cleanup after analysis
 - Lazy loading for large lists
 - Component memoization with React.memo
 - Efficient re-renders with proper dependencies
 
 ### Bundle Optimization
+
 - Code splitting by screen
 - Dynamic imports for heavy components
 - Asset optimization
@@ -284,6 +325,7 @@ const OptimizedImage: React.FC<ImageProps> = ({ uri, ...props }) => {
 ## Accessibility Features
 
 ### Screen Reader Support
+
 ```typescript
 // Accessible camera button
 <TouchableOpacity
@@ -298,6 +340,7 @@ const OptimizedImage: React.FC<ImageProps> = ({ uri, ...props }) => {
 ```
 
 ### Voice Feedback
+
 ```typescript
 import * as Speech from 'expo-speech';
 
@@ -305,12 +348,13 @@ const speakAnalysis = (analysis: VisualAnalysis) => {
   Speech.speak(analysis.description, {
     language: 'en-US',
     pitch: 1.0,
-    rate: 0.8
+    rate: 0.8,
   });
 };
 ```
 
 ### High Contrast Mode
+
 - Dynamic color schemes
 - Increased font sizes
 - Enhanced button visibility
@@ -319,6 +363,7 @@ const speakAnalysis = (analysis: VisualAnalysis) => {
 ## Error Handling
 
 ### Error Boundaries
+
 ```typescript
 class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -346,6 +391,7 @@ class ErrorBoundary extends React.Component<Props, State> {
 ```
 
 ### Network Error Handling
+
 - Offline detection
 - Retry mechanisms
 - Graceful degradation
@@ -354,26 +400,28 @@ class ErrorBoundary extends React.Component<Props, State> {
 ## Testing Strategy
 
 ### Component Testing
+
 ```typescript
 import { render, fireEvent } from '@testing-library/react-native';
 
 describe('CameraScreen', () => {
   test('should capture photo when button pressed', async () => {
     const mockOnCapture = jest.fn();
-    
+
     const { getByTestId } = render(
       <CameraScreen onCapture={mockOnCapture} />
     );
-    
+
     const captureButton = getByTestId('capture-button');
     fireEvent.press(captureButton);
-    
+
     expect(mockOnCapture).toHaveBeenCalled();
   });
 });
 ```
 
 ### E2E Testing
+
 - User journey testing
 - Camera functionality
 - API integration

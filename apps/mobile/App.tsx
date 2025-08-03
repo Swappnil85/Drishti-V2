@@ -1,24 +1,41 @@
 import React from 'react';
-import { ThemeProvider } from './src/contexts/ThemeContext';
-import { NavigationProvider } from './src/contexts/NavigationContext';
-import { EnhancedNavigationProvider } from './src/contexts/EnhancedNavigationContext';
-import { HapticProvider } from './src/contexts/HapticContext';
-import { AuthProvider } from './src/contexts/AuthContext';
-import RootNavigator from './src/navigation';
-import EnhancedRootNavigator from './src/navigation/EnhancedRootNavigator';
+import { View, Text, StyleSheet } from 'react-native';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <HapticProvider>
-        <AuthProvider>
-          <NavigationProvider>
-            <EnhancedNavigationProvider>
-              <EnhancedRootNavigator />
-            </EnhancedNavigationProvider>
-          </NavigationProvider>
-        </AuthProvider>
-      </HapticProvider>
-    </ThemeProvider>
+    <View style={styles.container}>
+      <Text style={styles.title}>🎯 Drishti App</Text>
+      <Text style={styles.subtitle}>✅ Working Successfully!</Text>
+      <Text style={styles.info}>This is a minimal test version</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#007AFF',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#00AA00',
+    textAlign: 'center',
+    marginBottom: 15,
+    fontWeight: '600',
+  },
+  info: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+  },
+});
