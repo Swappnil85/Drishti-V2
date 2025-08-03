@@ -1,26 +1,17 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View, Text, Platform } from 'react-native';
 
-// Simple test component to verify basic functionality
-function TestApp() {
-  return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <StatusBar style='auto' />
-        <Text style={styles.title}>🎯 Drishti App</Text>
-        <Text style={styles.subtitle}>✅ Working Successfully!</Text>
-        <Text style={styles.info}>
-          This is a minimal test version with onboarding system
-        </Text>
-      </View>
-    </SafeAreaProvider>
-  );
-}
-
+// Ultra-minimal app without any Expo dependencies that might cause conflicts
 export default function App() {
-  return <TestApp />;
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>🎯 Drishti App</Text>
+      <Text style={styles.subtitle}>✅ Mobile Working!</Text>
+      <Text style={styles.info}>
+        Platform: {Platform.OS} - No SafeArea conflicts
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -30,6 +21,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    paddingTop: 60, // Manual safe area handling
   },
   title: {
     fontSize: 28,
