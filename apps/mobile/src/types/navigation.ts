@@ -78,6 +78,10 @@ export type ScenariosStackParamList = {
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   Profile: undefined;
+  EditProfile: undefined;
+  SecuritySettings: undefined;
+  Recommendations: undefined;
+  SecurityLog: undefined;
   Security: undefined;
   Notifications: undefined;
   Privacy: undefined;
@@ -85,6 +89,8 @@ export type SettingsStackParamList = {
   About: undefined;
   Help: undefined;
   Feedback: undefined;
+  HapticSettings: undefined;
+  HapticDemo: undefined;
 };
 
 // Modal Stack Parameters

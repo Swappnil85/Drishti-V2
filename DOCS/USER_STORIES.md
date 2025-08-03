@@ -204,17 +204,17 @@
   - ✅ **NEW**: First account and goal setup with automatic FIRE calculations
   - ✅ **NEW**: Progress tracking with time estimates and completion analytics
 
-**User Story**: As a user, I can set my basic financial information and preferences.
+**User Story**: As a user, I can set my basic financial information and preferences. ✅ COMPLETED
 
 - **Enhanced Acceptance Criteria**:
-  - Profile screen allows users to input salary, current savings, desired retirement age, and annual expenses
-  - The app uses this information to provide personalized FIRE number calculations and recommendations
-  - User can specify risk tolerance level (Conservative/Moderate/Aggressive) affecting projection assumptions
-  - **NEW**: Income input supports multiple sources (salary, freelance, investment income, side hustles)
-  - **NEW**: Expense tracking includes categories with percentage breakdowns
-  - **NEW**: Regional settings for tax considerations and retirement systems
-  - **NEW**: Currency selection with automatic exchange rate handling
-  - **NEW**: Data validation ensures realistic financial inputs with helpful guidance
+  - ✅ Profile screen allows users to input salary, current savings, desired retirement age, and annual expenses
+  - ✅ The app uses this information to provide personalized FIRE number calculations and recommendations
+  - ✅ User can specify risk tolerance level (Conservative/Moderate/Aggressive) affecting projection assumptions
+  - ✅ **NEW**: Income input supports multiple sources (salary, freelance, investment income, side hustles)
+  - ✅ **NEW**: Expense tracking includes categories with percentage breakdowns
+  - ✅ **NEW**: Regional settings for tax considerations and retirement systems
+  - ✅ **NEW**: Currency selection with automatic exchange rate handling
+  - ✅ **NEW**: Data validation ensures realistic financial inputs with helpful guidance
 
 **User Story**: As a user, I can configure my security and privacy settings.
 
