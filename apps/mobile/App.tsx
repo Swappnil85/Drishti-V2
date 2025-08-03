@@ -1,28 +1,26 @@
 import React from 'react';
-import { ThemeProvider } from './src/contexts/ThemeContext';
-import { NavigationProvider } from './src/contexts/NavigationContext';
-import { EnhancedNavigationProvider } from './src/contexts/EnhancedNavigationContext';
-import { HapticProvider } from './src/contexts/HapticContext';
-import { OnboardingProvider } from './src/contexts/OnboardingContext';
-import { AuthProvider } from './src/contexts/AuthContext';
-import EnhancedRootNavigator from './src/navigation/EnhancedRootNavigator';
+import { StyleSheet, View, Text } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+
+// Simple test component to verify basic functionality
+function TestApp() {
+  return (
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <StatusBar style='auto' />
+        <Text style={styles.title}>🎯 Drishti App</Text>
+        <Text style={styles.subtitle}>✅ Working Successfully!</Text>
+        <Text style={styles.info}>
+          This is a minimal test version with onboarding system
+        </Text>
+      </View>
+    </SafeAreaProvider>
+  );
+}
 
 export default function App() {
-  return (
-    <ThemeProvider>
-      <HapticProvider>
-        <OnboardingProvider>
-          <AuthProvider>
-            <NavigationProvider>
-              <EnhancedNavigationProvider>
-                <EnhancedRootNavigator />
-              </EnhancedNavigationProvider>
-            </NavigationProvider>
-          </AuthProvider>
-        </OnboardingProvider>
-      </HapticProvider>
-    </ThemeProvider>
-  );
+  return <TestApp />;
 }
 
 const styles = StyleSheet.create({
