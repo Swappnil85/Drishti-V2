@@ -9,8 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
 import { MainTabParamList } from '../types/navigation';
-import { TAB_SCREEN_OPTIONS, TAB_ICONS, ACCESSIBILITY_LABELS } from '../constants/navigation';
+import {
+  TAB_SCREEN_OPTIONS,
+  TAB_ICONS,
+  ACCESSIBILITY_LABELS,
+} from '../constants/navigation';
 import { useNavigation as useNavigationContext } from '../contexts/NavigationContext';
+import { useNavigationHaptic } from '../hooks/useHaptic';
 
 // Stack Navigators
 import DashboardNavigator from './stacks/DashboardNavigator';
@@ -23,9 +28,11 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainTabNavigator: React.FC = () => {
   const { setCurrentTab } = useNavigationContext();
+  const { switchTab } = useNavigationHaptic();
 
-  // Handle tab press
-  const handleTabPress = (tabName: keyof MainTabParamList) => {
+  // Handle tab press with haptic feedback
+  const handleTabPress = async (tabName: keyof MainTabParamList) => {
+    await switchTab();
     setCurrentTab(tabName);
   };
 
@@ -38,19 +45,13 @@ const MainTabNavigator: React.FC = () => {
   ) => {
     const iconConfig = TAB_ICONS[routeName];
     const iconName = focused ? iconConfig.focused : iconConfig.unfocused;
-    
-    return (
-      <Ionicons
-        name={iconName as any}
-        size={size}
-        color={color}
-      />
-    );
+
+    return <Ionicons name={iconName as any} size={size} color={color} />;
   };
 
   return (
     <Tab.Navigator
-      initialRouteName="Dashboard"
+      initialRouteName='Dashboard'
       screenOptions={({ route }) => ({
         ...TAB_SCREEN_OPTIONS,
         tabBarIcon: ({ focused, color, size }) =>
@@ -72,7 +73,7 @@ const MainTabNavigator: React.FC = () => {
       })}
     >
       <Tab.Screen
-        name="Dashboard"
+        name='Dashboard'
         component={DashboardNavigator}
         options={{
           title: 'Dashboard',
@@ -82,9 +83,9 @@ const MainTabNavigator: React.FC = () => {
           tabPress: () => handleTabPress('Dashboard'),
         }}
       />
-      
+
       <Tab.Screen
-        name="Accounts"
+        name='Accounts'
         component={AccountsNavigator}
         options={{
           title: 'Accounts',
@@ -94,9 +95,9 @@ const MainTabNavigator: React.FC = () => {
           tabPress: () => handleTabPress('Accounts'),
         }}
       />
-      
+
       <Tab.Screen
-        name="Goals"
+        name='Goals'
         component={GoalsNavigator}
         options={{
           title: 'Goals',
@@ -106,9 +107,9 @@ const MainTabNavigator: React.FC = () => {
           tabPress: () => handleTabPress('Goals'),
         }}
       />
-      
+
       <Tab.Screen
-        name="Scenarios"
+        name='Scenarios'
         component={ScenariosNavigator}
         options={{
           title: 'Scenarios',
@@ -118,9 +119,9 @@ const MainTabNavigator: React.FC = () => {
           tabPress: () => handleTabPress('Scenarios'),
         }}
       />
-      
+
       <Tab.Screen
-        name="Settings"
+        name='Settings'
         component={SettingsNavigator}
         options={{
           title: 'Settings',

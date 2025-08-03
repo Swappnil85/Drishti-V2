@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useTheme, getColorValue } from '../../contexts/ThemeContext';
 import { ButtonProps } from '../../types/components';
+import { useButtonHaptic } from '../../hooks/useHaptic';
 
 const Button: React.FC<ButtonProps> = ({
   children,
@@ -34,6 +35,7 @@ const Button: React.FC<ButtonProps> = ({
   accessibilityRole = 'button',
 }) => {
   const theme = useTheme();
+  const buttonHaptic = useButtonHaptic();
 
   // Get size values
   const sizeValues = {
@@ -179,14 +181,18 @@ const Button: React.FC<ButtonProps> = ({
     },
   ];
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (!disabled && !loading && onPress) {
+      // Trigger haptic feedback before executing onPress
+      await buttonHaptic();
       onPress();
     }
   };
 
-  const handleLongPress = () => {
+  const handleLongPress = async () => {
     if (!disabled && !loading && onLongPress) {
+      // Trigger haptic feedback for long press
+      await buttonHaptic();
       onLongPress();
     }
   };

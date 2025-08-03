@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useTheme, getColorValue } from '../../contexts/ThemeContext';
 import { InputProps } from '../../types/components';
+import { useFormHaptic } from '../../hooks/useHaptic';
 import Text from './Text';
 
 const Input: React.FC<InputProps> = ({
@@ -45,6 +46,7 @@ const Input: React.FC<InputProps> = ({
   accessibilityHint,
 }) => {
   const theme = useTheme();
+  const formHaptic = useFormHaptic();
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry);
   const animatedValue = useRef(
@@ -98,7 +100,7 @@ const Input: React.FC<InputProps> = ({
   const currentSize = sizeConfig[size];
 
   // Handle focus
-  const handleFocus = () => {
+  const handleFocus = async () => {
     setIsFocused(true);
     if (onFocus) onFocus();
 
@@ -111,7 +113,7 @@ const Input: React.FC<InputProps> = ({
   };
 
   // Handle blur
-  const handleBlur = () => {
+  const handleBlur = async () => {
     setIsFocused(false);
     if (onBlur) onBlur();
 
@@ -122,6 +124,18 @@ const Input: React.FC<InputProps> = ({
         duration: 200,
         useNativeDriver: false,
       }).start();
+    }
+  };
+
+  // Handle text change with validation haptic feedback
+  const handleChangeText = async (text: string) => {
+    if (onChangeText) {
+      onChangeText(text);
+    }
+
+    // Trigger haptic feedback for validation errors
+    if (error && errorMessage) {
+      await formHaptic.error();
     }
   };
 
@@ -247,7 +261,7 @@ const Input: React.FC<InputProps> = ({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
-          onChangeText={onChangeText}
+          onChangeText={handleChangeText}
           onFocus={handleFocus}
           onBlur={handleBlur}
           testID={testID}
