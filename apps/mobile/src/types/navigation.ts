@@ -12,6 +12,7 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
   Modal: NavigatorScreenParams<ModalStackParamList>;
+  Onboarding: undefined;
 };
 
 // Authentication Stack Parameters

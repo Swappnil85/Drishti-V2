@@ -1,13 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { ThemeProvider } from './src/contexts/ThemeContext';
+import { NavigationProvider } from './src/contexts/NavigationContext';
+import { EnhancedNavigationProvider } from './src/contexts/EnhancedNavigationContext';
+import { HapticProvider } from './src/contexts/HapticContext';
+import { OnboardingProvider } from './src/contexts/OnboardingContext';
+import { AuthProvider } from './src/contexts/AuthContext';
+import EnhancedRootNavigator from './src/navigation/EnhancedRootNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🎯 Drishti App</Text>
-      <Text style={styles.subtitle}>✅ Working Successfully!</Text>
-      <Text style={styles.info}>This is a minimal test version</Text>
-    </View>
+    <ThemeProvider>
+      <HapticProvider>
+        <OnboardingProvider>
+          <AuthProvider>
+            <NavigationProvider>
+              <EnhancedNavigationProvider>
+                <EnhancedRootNavigator />
+              </EnhancedNavigationProvider>
+            </NavigationProvider>
+          </AuthProvider>
+        </OnboardingProvider>
+      </HapticProvider>
+    </ThemeProvider>
   );
 }
 

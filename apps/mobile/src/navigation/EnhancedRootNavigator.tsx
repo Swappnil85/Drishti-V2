@@ -17,11 +17,15 @@ import {
 import { useNavigation as useNavigationContext } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useEnhancedNavigation } from '../contexts/EnhancedNavigationContext';
+import { useOnboarding } from '../contexts/OnboardingContext';
 
 // Navigation Stacks
 import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import ModalNavigator from './ModalNavigator';
+
+// Onboarding
+import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 
 // Loading Component
 import LoadingScreen from '../screens/common/LoadingScreen';
@@ -33,6 +37,11 @@ const EnhancedRootNavigator: React.FC = () => {
   const colorScheme = useColorScheme();
   const { state: navState, trackScreenView } = useNavigationContext();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const {
+    isOnboarding,
+    hasCompletedOnboarding,
+    loading: onboardingLoading,
+  } = useOnboarding();
   const {
     navigationRef,
     isReady,
@@ -47,7 +56,8 @@ const EnhancedRootNavigator: React.FC = () => {
   const [initialState, setInitialState] = useState();
 
   // Select theme based on color scheme
-  const theme = colorScheme === 'dark' ? DARK_NAVIGATION_THEME : NAVIGATION_THEME;
+  const theme =
+    colorScheme === 'dark' ? DARK_NAVIGATION_THEME : NAVIGATION_THEME;
 
   // Restore navigation state on mount
   useEffect(() => {
@@ -89,12 +99,12 @@ const EnhancedRootNavigator: React.FC = () => {
   // Get current route name from navigation state
   const getCurrentRouteName = (state: any): string | null => {
     if (!state.routes || state.routes.length === 0) return null;
-    
+
     const route = state.routes[state.index];
     if (route.state) {
       return getCurrentRouteName(route.state);
     }
-    
+
     return route.name;
   };
 
@@ -198,17 +208,34 @@ const EnhancedRootNavigator: React.FC = () => {
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <LoadingState
-          message="Restoring navigation..."
-          size="lg"
+          message='Restoring navigation...'
+          size='lg'
           overlay={false}
         />
       </View>
     );
   }
 
-  // Show loading screen while authenticating
-  if (authLoading || navState.isLoading) {
+  // Show loading screen while authenticating or loading onboarding
+  if (authLoading || navState.isLoading || onboardingLoading) {
     return <LoadingScreen />;
+  }
+
+  // Show onboarding if user is authenticated but hasn't completed onboarding
+  if (isAuthenticated && !hasCompletedOnboarding && isOnboarding) {
+    return (
+      <NavigationContainer
+        ref={navigationRef}
+        theme={theme}
+        onReady={handleNavigationReady}
+        onStateChange={handleNavigationStateChange}
+      >
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name='Onboarding' component={OnboardingScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
   }
 
   return (
@@ -221,7 +248,7 @@ const EnhancedRootNavigator: React.FC = () => {
       onStateChange={handleNavigationStateChange}
     >
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      
+
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
