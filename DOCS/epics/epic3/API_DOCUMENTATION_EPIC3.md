@@ -3,38 +3,25 @@
 ## Overview
 This document provides comprehensive API documentation for the financial planning endpoints implemented in Epic 3.
 
-## Base URL
-```
-Development: http://localhost:3001
-Production: https://api.drishti.app
-```
+## 🔌 API Implementation
 
-## Authentication
-All financial endpoints require JWT authentication via the `Authorization` header:
-```
-Authorization: Bearer <jwt_token>
-```
+### Core API
+**API Documentation**: See [Drishti API Documentation](../../api/API_OVERVIEW.md) for complete specifications including:
+- Base URLs and environments
+- Authentication patterns (JWT)
+- Standard response formats
+- Error handling
+- Rate limiting
 
-## Response Format
-All API responses follow a consistent format:
+### Epic 3 Financial API Extensions
+*Epic 3 introduces comprehensive financial planning endpoints*
 
-### Success Response
-```json
-{
-  "success": true,
-  "data": { ... },
-  "message": "Optional success message"
-}
-```
-
-### Error Response
-```json
-{
-  "success": false,
-  "error": "Error description",
-  "details": { ... } // Optional validation details
-}
-```
+#### Integration Notes
+- **Authentication**: Uses standard JWT authentication (see [Auth API](../../api/ENDPOINTS.md#authentication-endpoints))
+- **Error Handling**: Follows standard error format (see [Error Handling](../../api/ERROR_HANDLING.md))
+- **Rate Limiting**: Standard limits apply (see [API Overview](../../api/API_OVERVIEW.md#rate-limiting))
+- **Validation**: Zod schemas for financial data validation
+- **Business Logic**: Complex financial calculations and projections
 
 ## Financial Accounts API
 

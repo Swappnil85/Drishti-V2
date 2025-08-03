@@ -53,9 +53,8 @@ drishti/
 **Technology Stack:**
 
 - **Runtime**: Node.js 18+ (LTS)
-- **Framework**: Fastify 4.21.0 (High-performance HTTP framework)
-- **Language**: TypeScript 5.1.3+ (Strict mode)
-- **Database**: PostgreSQL (with mock implementation for development)
+- **Technology Stack**: See [Drishti Technology Stack](../../architecture/TECH_STACK.md) for complete specifications
+- **Epic 1 Focus**: Foundation setup with mock database (production PostgreSQL in Epic 2)
 
 **Security Implementation:**
 
@@ -100,8 +99,8 @@ await fastify.register(cors, {
 
 **Technology Stack:**
 
-- **Framework**: React Native with Expo SDK 49.0.0
-- **Language**: TypeScript (Strict mode)
+- **Technology Stack**: See [Mobile Stack](../../architecture/TECH_STACK.md#frontend-mobile-app) for complete specifications
+- **Epic 1 Focus**: Foundation setup and basic component structure
 - **Database**: SQLite with WatermelonDB (Offline-first)
 - **State Management**: Zustand (Lightweight, performant)
 - **Navigation**: React Navigation (Industry standard)

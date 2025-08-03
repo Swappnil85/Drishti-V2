@@ -87,18 +87,21 @@
 ## 🏗️ **Technical Architecture**
 
 ### **Technology Stack**
-- **Backend**: Node.js, Fastify, TypeScript
-- **Database**: PostgreSQL with connection pooling
-- **Mobile**: React Native, Expo, TypeScript
-- **Shared**: TypeScript, npm workspaces
+**Technology Stack**: See [Drishti Technology Stack](../../architecture/TECH_STACK.md) for complete specifications.
+
+**Epic 1 Implementation**:
+- **Backend**: Foundation API with mock database
+- **Mobile**: Basic React Native + Expo setup
+- **Shared**: Common TypeScript interfaces and utilities
+- **Infrastructure**: Monorepo with npm workspaces
 - **CI/CD**: GitHub Actions
 - **Documentation**: Markdown with structured organization
 
 ### **Infrastructure Components**
 1. **Monorepo Structure**: Organized workspace management
-2. **Database Layer**: PostgreSQL with migration system
-3. **API Layer**: Fastify with middleware stack
-4. **Mobile Layer**: React Native with Expo framework
+2. **Database Layer**: Mock PostgreSQL (production database in Epic 2)
+3. **API Layer**: Fastify foundation with basic middleware
+4. **Mobile Layer**: React Native + Expo foundation
 5. **Shared Libraries**: Common utilities and types
 6. **Development Tools**: Linting, formatting, testing
 

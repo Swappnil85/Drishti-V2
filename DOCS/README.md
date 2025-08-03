@@ -60,7 +60,7 @@ Welcome to the comprehensive documentation for the Drishti AI-powered visual ass
 #### 🔌 API Documentation
 
 - **[API Overview](./api/API_OVERVIEW.md)** - API design principles and structure
-- **[Authentication](./api/AUTHENTICATION.md)** - Auth flows and JWT implementation
+- **[Authentication Guide](./authentication/AUTHENTICATION_GUIDE.md)** - Complete authentication system documentation
 - **[Endpoints](./api/ENDPOINTS.md)** - Complete API endpoint documentation
 - **[Error Handling](./api/ERROR_HANDLING.md)** - Error codes and handling strategies
 
@@ -77,6 +77,14 @@ Welcome to the comprehensive documentation for the Drishti AI-powered visual ass
 - **[CI/CD Pipeline](./deployment/CICD.md)** - Continuous integration and deployment
 - **[Docker Configuration](./deployment/DOCKER.md)** - Containerization setup
 - **[Monitoring](./deployment/MONITORING.md)** - Application monitoring and logging
+
+#### ⚙️ Operations
+
+- **[Operations Hub](./operations/OPERATIONS_INDEX.md)** - Complete operations documentation hub
+- **[Monitoring Setup](./operations/MONITORING.md)** - Comprehensive monitoring strategy
+- **[Backup & Recovery](./operations/BACKUP_RECOVERY.md)** - Data protection and disaster recovery
+- **[Deployment Procedures](./operations/DEPLOYMENT_PROCEDURES.md)** - Safe deployment processes
+- **[Scaling Guide](./operations/SCALING_GUIDE.md)** - Strategic scaling roadmap
 
 #### 👨‍💻 Development
 
@@ -110,7 +118,11 @@ Welcome to the comprehensive documentation for the Drishti AI-powered visual ass
 
 - [Environment Setup](./deployment/ENVIRONMENT_SETUP.md) - Infrastructure setup
 - [CI/CD Pipeline](./deployment/CICD.md) - Deployment automation
-- [Monitoring](./deployment/MONITORING.md) - System monitoring
+- [Operations Hub](./operations/OPERATIONS_INDEX.md) - Complete operations guide
+- [Monitoring Setup](./operations/MONITORING.md) - Comprehensive monitoring
+- [Backup & Recovery](./operations/BACKUP_RECOVERY.md) - Data protection
+- [Deployment Procedures](./operations/DEPLOYMENT_PROCEDURES.md) - Safe deployments
+- [Scaling Guide](./operations/SCALING_GUIDE.md) - Growth planning
 
 ### For QA Engineers
 

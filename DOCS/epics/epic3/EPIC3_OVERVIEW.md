@@ -96,7 +96,8 @@
 ### **Technology Stack**
 
 - **Mobile Database**: WatermelonDB (SQLite-based)
-- **Backend Database**: PostgreSQL
+- **Backend Database**: See [Database Stack](../../architecture/TECH_STACK.md#database--orm) for specifications
+- **Epic 3 Focus**: Local database with WatermelonDB and sync capabilities
 - **Synchronization**: Custom sync protocol with conflict resolution
 - **Authentication**: JWT-based with refresh tokens
 - **Validation**: Zod schemas for data validation

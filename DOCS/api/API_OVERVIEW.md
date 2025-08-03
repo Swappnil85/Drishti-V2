@@ -1,13 +1,16 @@
-# API Overview
+# Drishti API Documentation
 
 ## Introduction
 
-The Drishti API is a RESTful service built with Fastify that provides endpoints for user management, file uploads, and AI-powered visual analysis. The API follows OpenAPI 3.0 specification and includes comprehensive documentation via Swagger UI.
+The Drishti API is a comprehensive RESTful service built with Fastify that provides endpoints for authentication, user management, financial planning, file uploads, and AI-powered visual analysis. The API follows OpenAPI 3.0 specification and includes comprehensive documentation via Swagger UI.
+
+> **📋 Note for Epic Documents**: This is the central API documentation. Epic documents should reference this file instead of duplicating API information. See [API Reference Template](../_templates/API_REFERENCE.md) for guidance.
 
 ## Base URL
 
-- **Development**: `http://localhost:3000`
-- **Production**: `https://api.drishti.com` (future)
+- **Development**: `http://localhost:3001`
+- **Staging**: `https://api-staging.drishti.app`
+- **Production**: `https://api.drishti.app`
 
 ## API Principles
 
@@ -45,10 +48,13 @@ interface ApiResponse<T> {
 
 ### Protected Routes
 Most endpoints require authentication. Public endpoints include:
-- `POST /auth/login`
-- `POST /auth/register`
-- `GET /health`
-- `GET /docs` (API documentation)
+- `POST /auth/login` - User authentication
+- `POST /auth/register` - User registration
+- `GET /health` - System health check
+- `GET /health/db` - Database health check
+- `GET /docs` - API documentation (Swagger UI)
+- `GET /auth/google` - Google OAuth initiation
+- `GET /auth/google/callback` - Google OAuth callback
 
 ## Rate Limiting
 
@@ -79,6 +85,24 @@ X-RateLimit-Reset: 1640995200
 4. Server processes and stores file
 5. Server returns file metadata and analysis
 
+## API Categories
+
+### Core System APIs
+- **[Authentication](./ENDPOINTS.md#authentication-endpoints)** - User registration, login, OAuth
+- **[User Management](./ENDPOINTS.md#user-management-endpoints)** - Profile management, preferences
+- **[Health & Status](./ENDPOINTS.md#health--status-endpoints)** - System monitoring
+
+### Business Logic APIs
+- **[Financial Planning](../epics/epic3/API_DOCUMENTATION_EPIC3.md)** - Accounts, goals, scenarios (Epic 3)
+- **[File Management](./ENDPOINTS.md#file-management-endpoints)** - Upload, storage, metadata
+- **[Visual Analysis](./ENDPOINTS.md#visual-analysis-endpoints)** - AI-powered image analysis
+
+### Epic-Specific APIs
+- **Epic 1**: Foundation APIs (health checks, basic CRUD)
+- **Epic 2**: Authentication and security APIs
+- **Epic 3**: Financial planning APIs (comprehensive)
+- **Epic 4**: Navigation and UI framework APIs
+
 ## Pagination
 
 ### Query Parameters
@@ -98,7 +122,6 @@ interface PaginatedResponse<T> {
     hasNext: boolean;
     hasPrev: boolean;
   };
-}
 ```
 
 ## API Versioning

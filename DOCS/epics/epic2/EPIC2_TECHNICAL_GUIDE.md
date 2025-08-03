@@ -9,6 +9,29 @@
 
 This guide provides detailed technical specifications and implementation roadmap for Epic 2, incorporating critical improvements identified during the Epic 1 review. The implementation is structured in phases to manage complexity and ensure quality delivery.
 
+## 🔧 Technology Implementation
+
+### Core Stack
+**Technology Stack**: See [Drishti Technology Stack](../../architecture/TECH_STACK.md) for complete specifications.
+
+### Epic 2 Specific Technologies
+*Epic 2 introduces authentication and security-focused technologies*
+
+- **@fastify/jwt**: JWT token handling and validation
+- **bcryptjs**: Password hashing and verification
+- **Expo SecureStore**: Hardware-backed secure storage for mobile
+- **Expo AuthSession**: OAuth integration for social login
+- **Expo LocalAuthentication**: Biometric authentication
+- **@fastify/rate-limit**: API rate limiting for security
+- **Real PostgreSQL**: Production database replacing Epic 1 mock
+
+### Implementation Notes
+- **Security Focus**: Enterprise-grade security implementation
+- **OAuth Integration**: Apple ID and Google authentication
+- **Biometric Auth**: Face ID/Touch ID integration
+- **Production Database**: Real PostgreSQL with connection pooling
+- **Rate Limiting**: Protection against brute force attacks
+
 ## Phase 1: Critical Infrastructure (Week 1)
 
 ### 1.1 PostgreSQL Integration (US2.1) - CRITICAL

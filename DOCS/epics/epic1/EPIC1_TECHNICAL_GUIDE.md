@@ -23,25 +23,29 @@ Drishti/
 
 ### **Technology Stack Implementation**
 
-#### **Backend API (apps/api/)**
-- **Framework**: Fastify 4.x with TypeScript
-- **Database**: PostgreSQL with pg driver
-- **Migration**: Custom migration system
-- **Middleware**: CORS, Helmet, Swagger
-- **Architecture**: Layered architecture with separation of concerns
+## 🔧 Technology Implementation
 
-#### **Mobile App (apps/mobile/)**
-- **Framework**: React Native with Expo SDK 49
-- **Navigation**: React Navigation 6
-- **State Management**: React Context + useReducer
-- **UI Components**: Custom component library
-- **Platform**: iOS and Android support
+### Core Stack
+**Technology Stack**: See [Drishti Technology Stack](../../architecture/TECH_STACK.md) for complete specifications.
 
-#### **Shared Package (packages/shared/)**
-- **Types**: Common TypeScript interfaces
-- **Utilities**: Shared utility functions
-- **Constants**: Application constants
-- **Validation**: Shared validation schemas
+### Epic 1 Specific Technologies
+*Epic 1 focuses on foundation setup with standard Drishti technologies*
+
+- **Mock Database**: Temporary PostgreSQL mock for initial development
+- **Basic Middleware**: Standard Fastify middleware stack (CORS, Helmet, Swagger)
+- **Foundation Components**: Basic React Native component structure
+- **Monorepo Setup**: npm workspaces configuration
+
+### Implementation Notes
+- **Database**: Uses mock PostgreSQL implementation for development (replaced in Epic 2)
+- **State Management**: Basic React Context setup (enhanced in later epics)
+- **Testing**: Foundation testing setup with Jest
+- **CI/CD**: GitHub Actions workflow for automated testing
+
+### Epic 1 Architecture Overview
+- **Backend API (apps/api/)**: Fastify foundation with basic endpoints
+- **Mobile App (apps/mobile/)**: React Native + Expo foundation
+- **Shared Package (packages/shared/)**: Common TypeScript interfaces and utilities
 
 ## 🗄️ **Database Implementation**
 

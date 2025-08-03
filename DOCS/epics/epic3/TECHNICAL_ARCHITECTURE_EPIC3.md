@@ -132,40 +132,29 @@ FinancialGoalService
 ScenarioService
 ```
 
-#### API Routes Structure
-```
-/auth
-  POST /register
-  POST /login
-  POST /refresh
-  POST /logout
+## 🔌 API Implementation
 
-/financial
-  /accounts
-    GET    /           # List accounts
-    POST   /           # Create account
-    GET    /:id        # Get account
-    PUT    /:id        # Update account
-    DELETE /:id        # Delete account
-    GET    /summary    # Account summary
-  
-  /goals
-    GET    /           # List goals
-    POST   /           # Create goal
-    GET    /:id        # Get goal
-    PUT    /:id        # Update goal
-    DELETE /:id        # Delete goal
-    GET    /summary    # Goal summary
-  
-  /scenarios
-    GET    /           # List scenarios
-    POST   /           # Create scenario
-    GET    /:id        # Get scenario
-    PUT    /:id        # Update scenario
-    DELETE /:id        # Delete scenario
-    GET    /default    # Get default scenario
-    POST   /:id/calculate # Calculate projections
-```
+### Financial API Architecture
+**Complete API Documentation**: See [Epic 3 Financial API Documentation](./API_DOCUMENTATION_EPIC3.md) for detailed endpoint specifications.
+
+**Core API Integration**: All endpoints follow standard patterns defined in [API Overview](../../api/API_OVERVIEW.md):
+- RESTful design principles
+- JWT authentication middleware
+- Standard response formats
+- Comprehensive error handling
+- Rate limiting and security
+
+### API Endpoint Categories
+- **Authentication**: Standard auth endpoints (see [Auth API](../../api/ENDPOINTS.md#authentication-endpoints))
+- **Financial Accounts**: CRUD operations for user accounts
+- **Financial Goals**: Goal management and progress tracking
+- **Financial Scenarios**: Planning scenarios and projections
+
+### Epic 3 API Features
+- **Zod Schema Validation**: Input validation for financial data
+- **Business Logic**: Complex financial calculations
+- **Data Relationships**: Account-Goal-Scenario associations
+- **Performance Optimization**: Efficient query patterns
 
 ### Authentication & Security
 - **JWT Tokens**: Access and refresh token pattern

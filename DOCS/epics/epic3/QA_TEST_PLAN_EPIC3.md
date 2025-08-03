@@ -40,62 +40,41 @@ This document outlines the comprehensive testing strategy for Epic 3, focusing o
 - [ ] Protected route access without authentication
 - [ ] Token refresh functionality
 
-### 2.2 Financial Account API Tests
-- [ ] **POST /financial/accounts** - Create new account
-  - Valid account creation with all required fields
-  - Invalid data validation (missing name, invalid account type)
-  - Duplicate account name handling
-  - Maximum field length validation
-- [ ] **GET /financial/accounts** - List user accounts
-  - Retrieve all accounts for authenticated user
-  - Pagination functionality
-  - Filtering by account type and status
-  - Empty result handling
-- [ ] **GET /financial/accounts/:id** - Get specific account
-  - Valid account retrieval
-  - Non-existent account (404 error)
-  - Unauthorized access to other user's account
-- [ ] **PUT /financial/accounts/:id** - Update account
-  - Valid updates (name, balance, metadata)
-  - Invalid data validation
-  - Unauthorized update attempts
-- [ ] **DELETE /financial/accounts/:id** - Soft delete account
-  - Successful account deactivation
-  - Unauthorized delete attempts
-  - Already deleted account handling
+### 2.2 Financial API Testing
+**Complete API Documentation**: See [Epic 3 Financial API Documentation](./API_DOCUMENTATION_EPIC3.md) for detailed endpoint specifications.
 
-### 2.3 Financial Goal API Tests
-- [ ] **POST /financial/goals** - Create new goal
-  - Valid goal creation with all fields
-  - Invalid data validation (negative amounts, invalid dates)
-  - Goal type validation
-  - Priority validation (1-5 range)
-- [ ] **GET /financial/goals** - List user goals
-  - Retrieve all goals with pagination
-  - Filtering by goal type and priority
-  - Sorting by target date and priority
-- [ ] **PUT /financial/goals/:id** - Update goal
-  - Progress updates
-  - Target amount modifications
-  - Goal completion handling
-- [ ] **DELETE /financial/goals/:id** - Soft delete goal
-  - Goal deactivation
-  - Associated progress data handling
+**Core API Standards**: All endpoints follow standard patterns defined in [API Overview](../../api/API_OVERVIEW.md):
+- JWT Authentication required
+- Standard response formats
+- Error handling patterns
+- Rate limiting compliance
 
-### 2.4 Scenario API Tests
-- [ ] **POST /financial/scenarios** - Create scenario
-  - Valid scenario with assumptions
-  - Default scenario handling (only one per user)
-  - Assumption validation (rates, ages)
-- [ ] **GET /financial/scenarios** - List scenarios
-  - Default scenario identification
-  - Active/inactive filtering
-- [ ] **PUT /financial/scenarios/:id** - Update scenario
-  - Assumption modifications
-  - Default scenario switching
-- [ ] **POST /financial/scenarios/:id/calculate** - Calculate projections
-  - Projection calculation accuracy
-  - Error handling for invalid assumptions
+#### Account Management API Tests
+- [ ] **Account CRUD Operations** - Create, read, update, delete accounts
+  - [ ] Valid account creation and validation
+  - [ ] User-specific account access
+  - [ ] Pagination and filtering
+  - [ ] Soft delete implementation
+
+#### Goal Management API Tests
+- [ ] **Goal CRUD Operations** - Financial goal management
+  - [ ] Goal creation with account association
+  - [ ] Progress tracking and updates
+  - [ ] Target date validation
+  - [ ] User-specific goal access
+
+#### Scenario Management API Tests
+- [ ] **Scenario Operations** - Financial planning scenarios
+  - [ ] Scenario creation and management
+  - [ ] Goal association validation
+  - [ ] Financial calculation endpoints
+  - [ ] Performance optimization testing
+
+#### API Integration Tests
+- [ ] **Cross-endpoint workflows** - Complete user journeys
+- [ ] **Data consistency** - Referential integrity
+- [ ] **Performance testing** - Response times and load
+- [ ] **Security testing** - Authentication and authorization
 
 ## 3. Mobile Database Tests (WatermelonDB)
 

@@ -7,6 +7,7 @@ This document outlines the coding standards and best practices for the Drishti p
 ## General Principles
 
 ### Code Quality
+
 - **Readability**: Write code that tells a story
 - **Simplicity**: Prefer simple solutions over complex ones
 - **Consistency**: Follow established patterns
@@ -14,6 +15,7 @@ This document outlines the coding standards and best practices for the Drishti p
 - **Performance**: Consider performance implications
 
 ### SOLID Principles
+
 - **Single Responsibility**: Each function/class has one reason to change
 - **Open/Closed**: Open for extension, closed for modification
 - **Liskov Substitution**: Subtypes must be substitutable for base types
@@ -23,6 +25,7 @@ This document outlines the coding standards and best practices for the Drishti p
 ## TypeScript Standards
 
 ### Type Definitions
+
 ```typescript
 // ✅ Good: Explicit and descriptive types
 interface UserProfile {
@@ -47,6 +50,7 @@ interface User {
 ```
 
 ### Function Signatures
+
 ```typescript
 // ✅ Good: Clear parameter and return types
 const createUser = async (
@@ -63,21 +67,22 @@ const processAnalysis = (
 };
 
 // ❌ Bad: Missing types
-const createUser = async (userData) => {
+const createUser = async userData => {
   // Implementation
 };
 ```
 
 ### Enums and Constants
+
 ```typescript
 // ✅ Good: Use const assertions for literal types
 const USER_ROLES = {
   ADMIN: 'admin',
   USER: 'user',
-  MODERATOR: 'moderator'
+  MODERATOR: 'moderator',
 } as const;
 
-type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
+type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 // ✅ Good: Use enums for related constants
 enum HttpStatus {
@@ -86,31 +91,37 @@ enum HttpStatus {
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
   NOT_FOUND = 404,
-  INTERNAL_SERVER_ERROR = 500
+  INTERNAL_SERVER_ERROR = 500,
 }
 ```
 
 ## Naming Conventions
 
 ### Variables and Functions
+
 ```typescript
 // ✅ Good: Descriptive camelCase names
 const userAuthToken = 'abc123';
 const isUserAuthenticated = true;
-const getUserProfile = async (userId: string) => { /* */ };
+const getUserProfile = async (userId: string) => {
+  /* */
+};
 
 // ❌ Bad: Unclear or abbreviated names
 const token = 'abc123';
 const auth = true;
-const getUsrProf = async (id: string) => { /* */ };
+const getUsrProf = async (id: string) => {
+  /* */
+};
 ```
 
 ### Classes and Interfaces
+
 ```typescript
 // ✅ Good: PascalCase for classes and interfaces
 class UserService {
   private readonly repository: UserRepository;
-  
+
   constructor(repository: UserRepository) {
     this.repository = repository;
   }
@@ -130,6 +141,7 @@ interface IUserRepository {
 ```
 
 ### Files and Directories
+
 ```
 // ✅ Good: kebab-case for files, PascalCase for components
 user-service.ts
@@ -149,6 +161,7 @@ src/
 ## Code Organization
 
 ### File Structure
+
 ```typescript
 // ✅ Good: Organized imports
 // External libraries first
@@ -174,6 +187,7 @@ export const UserProfile: React.FC<Props> = ({ userId, onUpdate }) => {
 ```
 
 ### Function Organization
+
 ```typescript
 // ✅ Good: Single responsibility functions
 const validateEmail = (email: string): boolean => {
@@ -182,23 +196,27 @@ const validateEmail = (email: string): boolean => {
 };
 
 const validatePassword = (password: string): boolean => {
-  return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+  return (
+    password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)
+  );
 };
 
 const validateUserInput = (userData: CreateUserRequest): ValidationResult => {
   const errors: string[] = [];
-  
+
   if (!validateEmail(userData.email)) {
     errors.push('Invalid email format');
   }
-  
+
   if (!validatePassword(userData.password)) {
-    errors.push('Password must be at least 8 characters with uppercase and number');
+    errors.push(
+      'Password must be at least 8 characters with uppercase and number'
+    );
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 ```
@@ -206,6 +224,7 @@ const validateUserInput = (userData: CreateUserRequest): ValidationResult => {
 ## Error Handling
 
 ### API Error Handling
+
 ```typescript
 // ✅ Good: Structured error handling
 class ApiError extends Error {
@@ -224,19 +243,20 @@ const handleApiError = (error: unknown): ApiResponse<never> => {
     return {
       success: false,
       error: error.message,
-      code: error.code
+      code: error.code,
     };
   }
-  
+
   return {
     success: false,
     error: 'An unexpected error occurred',
-    code: 'INTERNAL_ERROR'
+    code: 'INTERNAL_ERROR',
   };
 };
 ```
 
 ### React Error Boundaries
+
 ```typescript
 // ✅ Good: Error boundary implementation
 class ErrorBoundary extends React.Component<Props, State> {
@@ -267,6 +287,7 @@ class ErrorBoundary extends React.Component<Props, State> {
 ## React/React Native Standards
 
 ### Component Structure
+
 ```typescript
 // ✅ Good: Well-structured component
 interface ButtonProps {
@@ -288,14 +309,14 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   // Hooks at the top
   const [isPressed, setIsPressed] = useState(false);
-  
+
   // Event handlers
   const handlePress = useCallback(() => {
     if (!disabled && !loading) {
       onPress();
     }
   }, [disabled, loading, onPress]);
-  
+
   // Render
   return (
     <TouchableOpacity
@@ -311,18 +332,19 @@ export const Button: React.FC<ButtonProps> = ({
 ```
 
 ### Hooks Usage
+
 ```typescript
 // ✅ Good: Custom hook with proper dependencies
 const useApi = <T>(url: string, dependencies: unknown[] = []) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const response = await api.get<T>(url);
         setData(response.data);
@@ -332,10 +354,10 @@ const useApi = <T>(url: string, dependencies: unknown[] = []) => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [url, ...dependencies]);
-  
+
   return { data, loading, error };
 };
 ```
@@ -343,6 +365,7 @@ const useApi = <T>(url: string, dependencies: unknown[] = []) => {
 ## API Standards
 
 ### Route Handlers
+
 ```typescript
 // ✅ Good: Structured route handler
 const createUser = async (
@@ -356,29 +379,30 @@ const createUser = async (
       return reply.code(400).send({
         success: false,
         error: 'Validation failed',
-        details: validation.errors
+        details: validation.errors,
       });
     }
-    
+
     // Business logic
     const user = await userService.createUser(request.body);
-    
+
     // Success response
     return reply.code(201).send({
       success: true,
-      data: user
+      data: user,
     });
   } catch (error) {
     request.log.error('User creation failed', { error });
     return reply.code(500).send({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
     });
   }
 };
 ```
 
 ### Service Layer
+
 ```typescript
 // ✅ Good: Service with dependency injection
 class UserService {
@@ -387,28 +411,28 @@ class UserService {
     private readonly emailService: EmailService,
     private readonly logger: Logger
   ) {}
-  
+
   async createUser(userData: CreateUserRequest): Promise<User> {
     this.logger.info('Creating user', { email: userData.email });
-    
+
     // Check if user exists
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
       throw new ApiError('User already exists', 409, 'USER_EXISTS');
     }
-    
+
     // Hash password
     const hashedPassword = await bcrypt.hash(userData.password, 12);
-    
+
     // Create user
     const user = await this.userRepository.create({
       ...userData,
-      password: hashedPassword
+      password: hashedPassword,
     });
-    
+
     // Send welcome email
     await this.emailService.sendWelcomeEmail(user.email, user.name);
-    
+
     return user;
   }
 }
@@ -417,46 +441,47 @@ class UserService {
 ## Testing Standards
 
 ### Unit Tests
+
 ```typescript
 // ✅ Good: Comprehensive unit test
 describe('UserService', () => {
   let userService: UserService;
   let mockUserRepository: jest.Mocked<UserRepository>;
   let mockEmailService: jest.Mocked<EmailService>;
-  
+
   beforeEach(() => {
     mockUserRepository = {
       findByEmail: jest.fn(),
-      create: jest.fn()
+      create: jest.fn(),
     } as any;
-    
+
     mockEmailService = {
-      sendWelcomeEmail: jest.fn()
+      sendWelcomeEmail: jest.fn(),
     } as any;
-    
+
     userService = new UserService(mockUserRepository, mockEmailService, logger);
   });
-  
+
   describe('createUser', () => {
     test('should create user successfully', async () => {
       // Arrange
       const userData = {
         email: 'test@example.com',
         name: 'Test User',
-        password: 'password123'
+        password: 'password123',
       };
-      
+
       mockUserRepository.findByEmail.mockResolvedValue(null);
       mockUserRepository.create.mockResolvedValue(mockUser);
-      
+
       // Act
       const result = await userService.createUser(userData);
-      
+
       // Assert
       expect(result).toEqual(mockUser);
       expect(mockUserRepository.create).toHaveBeenCalledWith({
         ...userData,
-        password: expect.any(String) // Hashed password
+        password: expect.any(String), // Hashed password
       });
       expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalledWith(
         userData.email,
@@ -470,6 +495,7 @@ describe('UserService', () => {
 ## Documentation Standards
 
 ### Code Comments
+
 ```typescript
 // ✅ Good: Meaningful comments
 /**
@@ -487,16 +513,17 @@ const analyzeImage = async (
   if (!isValidImageUrl(imageUrl)) {
     throw new ApiError('Invalid image URL', 400, 'INVALID_IMAGE_URL');
   }
-  
+
   // Call AI service with retry logic for transient failures
   const analysis = await aiService.analyze(imageUrl, options);
-  
+
   return analysis;
 };
 ```
 
 ### JSDoc Standards
-```typescript
+
+````typescript
 /**
  * User authentication service
  * Handles user login, registration, and token management
@@ -518,18 +545,19 @@ class AuthService {
     // Implementation
   }
 }
-```
+````
 
 ## Performance Guidelines
 
 ### React Performance
+
 ```typescript
 // ✅ Good: Memoized component
 const UserList = React.memo<UserListProps>(({ users, onUserSelect }) => {
   const handleUserPress = useCallback((user: User) => {
     onUserSelect(user);
   }, [onUserSelect]);
-  
+
   return (
     <FlatList
       data={users}
@@ -548,6 +576,7 @@ const UserList = React.memo<UserListProps>(({ users, onUserSelect }) => {
 ```
 
 ### Database Queries
+
 ```typescript
 // ✅ Good: Efficient database queries
 const getUsersWithAnalyses = async (
@@ -559,7 +588,7 @@ const getUsersWithAnalyses = async (
       id: users.id,
       name: users.name,
       email: users.email,
-      analysisCount: count(analyses.id)
+      analysisCount: count(analyses.id),
     })
     .from(users)
     .leftJoin(analyses, eq(users.id, analyses.userId))

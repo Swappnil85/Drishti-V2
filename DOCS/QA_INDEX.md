@@ -10,11 +10,42 @@ This directory contains comprehensive Quality Assurance documentation for the Dr
 - **[QA_FRAMEWORK.md](./QA_FRAMEWORK.md)** - Comprehensive QA framework, processes, and standards
 - **[QA_INDEX.md](./QA_INDEX.md)** - This index file
 
-### 📊 Test Plans & Reports
-- **[QA_TEST_PLAN_EPIC1.md](./QA_TEST_PLAN_EPIC1.md)** - Detailed test plan for Epic 1
-- **[QA_TEST_REPORT_EPIC1.md](./QA_TEST_REPORT_EPIC1.md)** - Comprehensive QA test report for Epic 1
+### 📝 QA Templates
+- **[QA_TEST_PLAN_TEMPLATE.md](./_templates/QA_TEST_PLAN_TEMPLATE.md)** - Standardized test plan template
+- **[QA_TEST_REPORT_TEMPLATE.md](./_templates/QA_TEST_REPORT_TEMPLATE.md)** - Standardized test report template
 
-### 📈 Project Documentation
+### 📊 Epic Test Plans & Reports
+
+#### Epic 1: Project Infrastructure & Setup
+- **[Test Plan](./epics/epic1/EPIC1_QA_TEST_PLAN.md)** - Infrastructure testing strategy
+- **[Test Report](./epics/epic1/EPIC1_QA_TEST_REPORT.md)** - Complete testing results
+
+#### Epic 2: Authentication & Authorization
+- **[Test Plan](./epics/epic2/EPIC2_QA_TEST_PLAN.md)** - Authentication testing strategy
+- **[Test Report](./epics/epic2/EPIC2_QA_TEST_REPORT.md)** - Authentication testing results
+
+#### Epic 3: Core Data Models & Local Database
+- **[Test Plan](./epics/epic3/QA_TEST_PLAN_EPIC3.md)** - Data models testing strategy
+- **[Test Report](./epics/epic3/EPIC3_QA_TEST_REPORT.md)** - Data models testing results
+
+#### Epic 4: Navigation & Core UI Framework
+- **[Test Report](./epics/epic4/EPIC4_QA_TEST_REPORT.md)** - UI framework testing results
+
+### 📋 QA Template Usage Guidelines
+
+**For New Epic QA Documentation:**
+1. Copy the appropriate template from `_templates/`
+2. Replace all `{placeholders}` with epic-specific information
+3. Follow the standardized structure for consistency
+4. Reference central API documentation to avoid redundancy
+
+**Template Benefits:**
+- **Consistency**: Standardized format across all epics
+- **Efficiency**: Faster QA document creation
+- **Completeness**: Ensures all testing areas are covered
+- **Maintainability**: Centralized template updates
+
+### 📈 Related Documentation
 - **[USER_STORIES.md](./USER_STORIES.md)** - Complete user stories for all epics
 - **[STORY_COMPLETION_LOG.md](./STORY_COMPLETION_LOG.md)** - Development completion tracking
 - **[PRD.md](./PRD.md)** - Product Requirements Document

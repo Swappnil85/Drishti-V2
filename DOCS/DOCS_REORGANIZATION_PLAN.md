@@ -66,7 +66,7 @@ DOCS/
 │
 ├── api/                             # API documentation
 │   ├── API_OVERVIEW.md             # API overview
-│   ├── AUTHENTICATION.md           # Authentication API
+│   ├── AUTHENTICATION_GUIDE.md     # Complete authentication documentation
 │   ├── ENDPOINTS.md                # API endpoints
 │   └── ERROR_HANDLING.md           # Error handling
 │

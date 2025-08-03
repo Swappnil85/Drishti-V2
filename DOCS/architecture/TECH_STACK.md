@@ -1,8 +1,10 @@
-# Technology Stack
+# Technology Stack - Drishti
 
 ## Overview
 
-Drishti uses a modern, TypeScript-first technology stack designed for performance, developer experience, and maintainability.
+Drishti uses a modern, TypeScript-first technology stack designed for performance, developer experience, and maintainability. This document serves as the **single source of truth** for all technology decisions and specifications across the project.
+
+> **📋 Note for Epic Documentation**: Epic documents should reference this file instead of repeating technology stack information. See [Tech Stack Reference Template](../_templates/TECH_STACK_REFERENCE.md) for standardized reference patterns.
 
 ## Frontend (Mobile App)
 
@@ -140,21 +142,94 @@ Drishti uses a modern, TypeScript-first technology stack designed for performanc
 - **TypeScript**: First-class TypeScript support
 - **Plugin System**: Modular and extensible architecture
 - **Validation**: Built-in request/response validation
+- **Ecosystem**: Rich plugin ecosystem for enterprise features
 
 ### Why React Native with Expo?
 - **Cross-platform**: Single codebase for iOS and Android
 - **Developer Experience**: Hot reload, easy debugging
 - **Native APIs**: Easy access to camera, sensors, etc.
 - **Community**: Large ecosystem and community support
+- **Deployment**: Simplified build and deployment process
 
 ### Why PostgreSQL?
 - **ACID Compliance**: Data integrity and consistency
 - **JSON Support**: Flexible schema with JSONB
 - **Performance**: Excellent query performance
 - **Extensions**: Rich ecosystem of extensions
+- **Scalability**: Proven scalability for enterprise applications
 
 ### Why Zustand over Redux?
 - **Simplicity**: Less boilerplate code
 - **TypeScript**: Excellent TypeScript integration
 - **Performance**: Minimal re-renders
 - **Bundle Size**: Smaller footprint
+- **Learning Curve**: Easier for team adoption
+
+### Why Drizzle ORM?
+- **Type Safety**: Full TypeScript integration
+- **Performance**: Lightweight with minimal overhead
+- **SQL-like**: Familiar SQL-like query syntax
+- **Migration System**: Robust schema migration support
+- **Developer Experience**: Excellent IntelliSense and debugging
+
+## Version Specifications
+
+### Current Versions (Production)
+- **Node.js**: 18.19.0 LTS
+- **React Native**: 0.72.3
+- **Expo SDK**: 49.0.0
+- **TypeScript**: 5.1.3+
+- **Fastify**: 4.21.0+
+- **PostgreSQL**: 15.4+
+- **Drizzle ORM**: Latest stable
+
+### Upgrade Schedule
+- **Node.js**: Upgrade to 20 LTS in Q2 2025
+- **React Native**: Upgrade to 0.73+ when stable
+- **Expo SDK**: Upgrade to 50+ when available
+- **PostgreSQL**: Upgrade to 16+ in Q3 2025
+
+## Epic-Specific Technology Usage
+
+### Epic 1: Core Infrastructure
+- **Primary Focus**: Foundation setup, basic CRUD operations
+- **Key Technologies**: Fastify, PostgreSQL, React Native, Expo
+- **Special Considerations**: Mock database for initial development
+
+### Epic 2: Authentication & Security
+- **Primary Focus**: JWT authentication, security hardening
+- **Key Technologies**: @fastify/jwt, bcryptjs, Expo SecureStore
+- **Special Considerations**: Hardware-backed security, OAuth integration
+
+### Epic 3: Data Models & Local Database
+- **Primary Focus**: Offline-first architecture, data encryption
+- **Key Technologies**: WatermelonDB, Expo SecureStore, Custom encryption
+- **Special Considerations**: Local-first design, background sync
+
+### Epic 4: Navigation & UI Framework
+- **Primary Focus**: Navigation system, UI component library
+- **Key Technologies**: React Navigation, Custom theming, Expo Haptics
+- **Special Considerations**: Accessibility, responsive design
+
+## Technology Decision Log
+
+### Approved Technologies
+- ✅ **Fastify**: Approved for all API development
+- ✅ **React Native + Expo**: Approved for mobile development
+- ✅ **PostgreSQL**: Approved for production database
+- ✅ **TypeScript**: Mandatory for all new code
+- ✅ **Zustand**: Approved for state management
+- ✅ **Drizzle ORM**: Approved for database operations
+- ✅ **Jest**: Approved for testing framework
+
+### Under Evaluation
+- 🔄 **Docker**: Containerization for deployment
+- 🔄 **Sentry**: Error tracking and monitoring
+- 🔄 **Pino**: High-performance logging
+- 🔄 **Sharp**: Image processing capabilities
+
+### Deprecated/Avoided
+- ❌ **Express**: Replaced by Fastify for performance
+- ❌ **Redux**: Replaced by Zustand for simplicity
+- ❌ **SQLite**: Replaced by PostgreSQL for production
+- ❌ **Prisma**: Replaced by Drizzle for TypeScript integration
