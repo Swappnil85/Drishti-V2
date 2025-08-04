@@ -50,6 +50,7 @@ export type AccountsStackParamList = {
   AddAccountFromTemplate: undefined;
   EditAccount: { accountId: string };
   AccountHistory: { accountId: string };
+  BalanceHistory: { accountId: string };
   ImportAccounts: undefined;
 };
 

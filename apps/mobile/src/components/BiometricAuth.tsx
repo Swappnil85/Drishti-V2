@@ -162,7 +162,7 @@ const BiometricAuth: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#007bff' />
+        <ActivityIndicator size='small' color='#007bff' />
         <Text style={styles.loadingText}>
           Checking biometric availability...
         </Text>

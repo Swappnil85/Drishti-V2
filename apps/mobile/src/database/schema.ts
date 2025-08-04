@@ -2,7 +2,7 @@ import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 // WatermelonDB schema for offline-first financial data
 export const schema = appSchema({
-  version: 3,
+  version: 4,
   tables: [
     // Users table
     tableSchema({
@@ -186,6 +186,23 @@ export const schema = appSchema({
         { name: 'updated_at', type: 'number' },
       ],
     }),
+
+    // Balance History table (for tracking balance changes)
+    tableSchema({
+      name: 'balance_history',
+      columns: [
+        { name: 'account_id', type: 'string', isIndexed: true },
+        { name: 'previous_balance', type: 'number' },
+        { name: 'new_balance', type: 'number' },
+        { name: 'change_amount', type: 'number' },
+        { name: 'change_percentage', type: 'number' },
+        { name: 'update_method', type: 'string', isIndexed: true },
+        { name: 'notes', type: 'string', isOptional: true },
+        { name: 'metadata', type: 'string' }, // JSON string
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ],
+    }),
   ],
 });
 
@@ -198,6 +215,7 @@ export const migrations = [
 // Table names constants for type safety
 export const TABLE_NAMES = {
   USERS: 'users',
+  BALANCE_HISTORY: 'balance_history',
   FINANCIAL_ACCOUNTS: 'financial_accounts',
   FINANCIAL_INSTITUTIONS: 'financial_institutions',
   FINANCIAL_GOALS: 'financial_goals',

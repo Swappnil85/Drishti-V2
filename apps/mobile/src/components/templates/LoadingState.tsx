@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Modal,
+  Platform,
 } from 'react-native';
 import { useTheme, getColorValue } from '../../contexts/ThemeContext';
 import { LoadingStateProps } from '../../types/components';
@@ -27,16 +28,16 @@ const LoadingState: React.FC<LoadingStateProps> = ({
 }) => {
   const theme = useTheme();
 
-  // Get size values
+  // Get size values - use numeric values for better compatibility
   const sizeValues = {
     xs: 'small' as const,
     sm: 'small' as const,
-    base: 'large' as const,
-    md: 'large' as const,
-    lg: 'large' as const,
-    xl: 'large' as const,
-    '2xl': 'large' as const,
-    '3xl': 'large' as const,
+    base: 'small' as const,
+    md: 'small' as const,
+    lg: 'small' as const,
+    xl: 'small' as const,
+    '2xl': 'small' as const,
+    '3xl': 'small' as const,
   };
 
   const indicatorSize = sizeValues[size];
@@ -49,9 +50,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
     styles.container,
     overlay && styles.overlay,
     {
-      backgroundColor: overlay 
-        ? 'rgba(0, 0, 0, 0.5)' 
-        : 'transparent',
+      backgroundColor: overlay ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
     },
     style,
   ];
@@ -73,13 +72,13 @@ const LoadingState: React.FC<LoadingStateProps> = ({
       accessible={accessible}
       accessibilityLabel={accessibilityLabel || `Loading: ${message}`}
       accessibilityHint={accessibilityHint}
-      accessibilityRole="progressbar"
+      accessibilityRole='progressbar'
     >
       <Flex
-        direction="column"
-        align="center"
-        justify="center"
-        gap="base"
+        direction='column'
+        align='center'
+        justify='center'
+        gap='base'
         style={contentStyles}
       >
         <ActivityIndicator
@@ -87,12 +86,12 @@ const LoadingState: React.FC<LoadingStateProps> = ({
           color={indicatorColor}
           testID={`${testID}-indicator`}
         />
-        
+
         {message && (
           <Text
-            variant="body2"
-            color="text.secondary"
-            align="center"
+            variant='body2'
+            color='text.secondary'
+            align='center'
             style={styles.message}
           >
             {message}
@@ -105,12 +104,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
   // Render with modal overlay if needed
   if (overlay) {
     return (
-      <Modal
-        transparent
-        visible
-        animationType="fade"
-        statusBarTranslucent
-      >
+      <Modal transparent visible animationType='fade' statusBarTranslucent>
         {renderContent()}
       </Modal>
     );

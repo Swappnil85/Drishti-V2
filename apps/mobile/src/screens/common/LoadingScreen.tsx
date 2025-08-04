@@ -16,13 +16,13 @@ interface LoadingScreenProps {
   message?: string;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
-  message = 'Loading...' 
+const LoadingScreen: React.FC<LoadingScreenProps> = ({
+  message = 'Loading...',
 }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size='small' color='#007AFF' />
         <Text style={styles.message}>{message}</Text>
       </View>
     </SafeAreaView>

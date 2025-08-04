@@ -68,5 +68,26 @@ export const migrations = schemaMigrations({
         }),
       ],
     },
+    // Migration from version 3 to 4: Add balance history table
+    {
+      toVersion: 4,
+      steps: [
+        createTable({
+          name: 'balance_history',
+          columns: [
+            { name: 'account_id', type: 'string', isIndexed: true },
+            { name: 'previous_balance', type: 'number' },
+            { name: 'new_balance', type: 'number' },
+            { name: 'change_amount', type: 'number' },
+            { name: 'change_percentage', type: 'number' },
+            { name: 'update_method', type: 'string', isIndexed: true },
+            { name: 'notes', type: 'string', isOptional: true },
+            { name: 'metadata', type: 'string' }, // JSON string
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+          ],
+        }),
+      ],
+    },
   ],
 });

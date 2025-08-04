@@ -29,6 +29,8 @@ import {
   Avatar,
   FloatingActionButton,
 } from '../../components/ui';
+import QuickBalanceUpdate from '../../components/financial/QuickBalanceUpdate';
+import BulkBalanceUpdate from '../../components/financial/BulkBalanceUpdate';
 import { database } from '../../database';
 import FinancialAccount from '../../database/models/FinancialAccount';
 import { useAuth } from '../../contexts/AuthContext';
@@ -68,6 +70,12 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
     totalBalance: 0,
     accountsByType: {} as Record<AccountType, number>,
   });
+
+  // Balance update states
+  const [quickUpdateVisible, setQuickUpdateVisible] = useState(false);
+  const [bulkUpdateVisible, setBulkUpdateVisible] = useState(false);
+  const [selectedAccount, setSelectedAccount] =
+    useState<FinancialAccount | null>(null);
 
   useEffect(() => {
     loadAccounts();
@@ -274,6 +282,49 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
+  // Balance update handlers
+  const handleQuickBalanceUpdate = (account: FinancialAccount) => {
+    setSelectedAccount(account);
+    setQuickUpdateVisible(true);
+  };
+
+  const handleBulkBalanceUpdate = () => {
+    setBulkUpdateVisible(true);
+  };
+
+  const handleBalanceUpdated = (updatedAccount: FinancialAccount) => {
+    // Update the account in the local state
+    setAccounts(prevAccounts =>
+      prevAccounts.map(account =>
+        account.id === updatedAccount.id ? updatedAccount : account
+      )
+    );
+    setQuickUpdateVisible(false);
+    setSelectedAccount(null);
+  };
+
+  const handleBulkBalancesUpdated = (updatedAccounts: FinancialAccount[]) => {
+    // Update multiple accounts in the local state
+    setAccounts(prevAccounts => {
+      const updatedAccountsMap = new Map(
+        updatedAccounts.map(account => [account.id, account])
+      );
+      return prevAccounts.map(
+        account => updatedAccountsMap.get(account.id) || account
+      );
+    });
+    setBulkUpdateVisible(false);
+  };
+
+  const handleCancelQuickUpdate = () => {
+    setQuickUpdateVisible(false);
+    setSelectedAccount(null);
+  };
+
+  const handleCancelBulkUpdate = () => {
+    setBulkUpdateVisible(false);
+  };
+
   const handleSortPress = () => {
     const sortOptions = [
       { key: 'name', label: 'Name' },
@@ -458,6 +509,14 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
 
         <Flex direction='row' align='center' gap='xs'>
           <TouchableOpacity
+            onPress={handleBulkBalanceUpdate}
+            style={styles.filterButton}
+            testID='bulk-update-button'
+          >
+            <Icon name='layers-outline' size='sm' color='primary.500' />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={handleSortPress}
             style={styles.filterButton}
             testID='sort-button'
@@ -618,6 +677,18 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
             )}
           </Flex>
 
+          {/* Quick Balance Update Button */}
+          <TouchableOpacity
+            onPress={e => {
+              e.stopPropagation();
+              handleQuickBalanceUpdate(item);
+            }}
+            style={styles.quickUpdateButton}
+            testID={`quick-update-${item.id}`}
+          >
+            <Icon name='create-outline' size='sm' color='primary.500' />
+          </TouchableOpacity>
+
           {/* Chevron */}
           <Icon
             name='chevron-forward-outline'
@@ -717,6 +788,23 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           onPress={handleAddAccount}
           icon={<Icon name='add' size='md' color='white' />}
           testID='add-account-fab'
+        />
+
+        {/* Balance Update Modals */}
+        {selectedAccount && (
+          <QuickBalanceUpdate
+            account={selectedAccount}
+            onBalanceUpdated={handleBalanceUpdated}
+            onCancel={handleCancelQuickUpdate}
+            visible={quickUpdateVisible}
+          />
+        )}
+
+        <BulkBalanceUpdate
+          accounts={filteredAccounts}
+          onBalancesUpdated={handleBulkBalancesUpdated}
+          onCancel={handleCancelBulkUpdate}
+          visible={bulkUpdateVisible}
         />
       </View>
     </ScreenTemplate>
@@ -829,6 +917,11 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  quickUpdateButton: {
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 8,
   },
 });
 

@@ -14,21 +14,21 @@ export default class FinancialInstitution extends Model {
   static table = TABLE_NAMES.FINANCIAL_INSTITUTIONS;
 
   // Institution fields
-  @field('name') name: string = '';
-  @field('institution_type') institutionType: InstitutionType = 'bank';
+  @field('name') name: any;
+  @field('institution_type') institutionType: any;
   @field('routing_number') routingNumber?: string;
   @field('swift_code') swiftCode?: string;
   @field('website') website?: string;
   @field('logo_url') logoUrl?: string;
-  @field('country') country: string = '';
-  @field('is_active') isActive: boolean = true;
-  @field('default_interest_rates') defaultInterestRatesRaw: string = '{}'; // JSON string
-  @field('supported_account_types') supportedAccountTypesRaw: string = '[]'; // JSON string
-  @field('metadata') metadataRaw: string = '{}'; // JSON string
+  @field('country') country: any;
+  @field('is_active') isActive: any;
+  @field('default_interest_rates') defaultInterestRatesRaw: any; // JSON string
+  @field('supported_account_types') supportedAccountTypesRaw: any; // JSON string
+  @field('metadata') metadataRaw: any; // JSON string
 
   // Timestamps
-  @readonly @date('created_at') createdAt: Date = new Date();
-  @readonly @date('updated_at') updatedAt: Date = new Date();
+  @readonly @date('created_at') createdAt: any;
+  @readonly @date('updated_at') updatedAt: any;
   @date('synced_at') syncedAt?: Date;
 
   /**

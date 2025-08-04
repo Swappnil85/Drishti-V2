@@ -20,21 +20,21 @@ export default class Scenario extends Model {
   static table = TABLE_NAMES.SCENARIOS;
 
   // Scenario fields
-  @field('user_id') userId: string = '';
-  @field('name') name: string = '';
+  @field('user_id') userId!: string;
+  @field('name') name!: string;
   @field('description') description?: string;
-  @field('assumptions') assumptionsRaw: string = '{}'; // JSON string
-  @field('projections') projectionsRaw: string = '{}'; // JSON string
-  @field('is_active') isActive: boolean = true;
-  @field('is_default') isDefault: boolean = false;
+  @field('assumptions') assumptionsRaw!: string; // JSON string
+  @field('projections') projectionsRaw!: string; // JSON string
+  @field('is_active') isActive!: boolean;
+  @field('is_default') isDefault!: boolean;
 
   // Timestamps
-  @readonly @date('created_at') createdAt: Date = new Date();
-  @readonly @date('updated_at') updatedAt: Date = new Date();
+  @readonly @date('created_at') createdAt!: Date;
+  @readonly @date('updated_at') updatedAt!: Date;
   @date('synced_at') syncedAt?: Date;
 
   // Relationships
-  @relation(TABLE_NAMES.USERS, 'user_id') user: User = {} as User;
+  @relation(TABLE_NAMES.USERS, 'user_id') user!: User;
 
   /**
    * Get parsed assumptions
