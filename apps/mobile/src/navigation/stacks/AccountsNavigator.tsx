@@ -13,9 +13,9 @@ import { SCREEN_OPTIONS } from '../../constants/navigation';
 import AccountsListScreen from '../../screens/accounts/AccountsListScreen';
 import AccountDetailsScreen from '../../screens/accounts/AccountDetailsScreen';
 import AddAccountScreen from '../../screens/accounts/AddAccountScreen';
-import AddAccountFromTemplateScreen from '../../screens/accounts/AddAccountFromTemplateScreen';
 import EditAccountScreen from '../../screens/accounts/EditAccountScreen';
 import AccountHistoryScreen from '../../screens/accounts/AccountHistoryScreen';
+import DebtManagementScreen from '../../screens/accounts/DebtManagementScreen';
 import ImportAccountsScreen from '../../screens/accounts/ImportAccountsScreen';
 
 const Stack = createNativeStackNavigator<AccountsStackParamList>();
@@ -65,16 +65,6 @@ const AccountsNavigator: React.FC = () => {
       />
 
       <Stack.Screen
-        name='AddAccountFromTemplate'
-        component={AddAccountFromTemplateScreen}
-        options={{
-          title: 'Add from Template',
-          headerBackTitle: 'Cancel',
-          presentation: 'modal',
-        }}
-      />
-
-      <Stack.Screen
         name='EditAccount'
         component={EditAccountScreen}
         options={{
@@ -89,6 +79,15 @@ const AccountsNavigator: React.FC = () => {
         component={AccountHistoryScreen}
         options={{
           title: 'Account History',
+          headerBackTitle: 'Back',
+        }}
+      />
+
+      <Stack.Screen
+        name='DebtManagement'
+        component={DebtManagementScreen}
+        options={{
+          title: 'Debt Management',
           headerBackTitle: 'Back',
         }}
       />

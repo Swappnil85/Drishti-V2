@@ -616,6 +616,14 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => navigation.navigate('DebtManagement')}
+            style={styles.filterButton}
+            testID='debt-management-button'
+          >
+            <Icon name='card-outline' size='sm' color='error.500' />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={() => navigation.navigate('AccountRecovery')}
             style={styles.filterButton}
             testID='recovery-button'

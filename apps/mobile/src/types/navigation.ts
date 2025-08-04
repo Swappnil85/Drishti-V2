@@ -54,6 +54,7 @@ export type AccountsStackParamList = {
   TaxTreatmentDashboard: undefined;
   AccountRecovery: undefined;
   NetWorth: undefined;
+  DebtManagement: undefined;
   ImportAccounts: undefined;
 };
 
