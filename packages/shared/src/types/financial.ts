@@ -25,6 +25,27 @@ export type TransactionType =
 export type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY';
 export type Priority = 1 | 2 | 3 | 4 | 5;
 
+// Institution types
+export type InstitutionType =
+  | 'bank'
+  | 'credit_union'
+  | 'investment'
+  | 'insurance'
+  | 'fintech'
+  | 'other';
+
+// Account tax treatment types
+export type TaxTreatment =
+  | 'taxable'
+  | 'traditional_ira'
+  | 'roth_ira'
+  | 'traditional_401k'
+  | 'roth_401k'
+  | 'hsa'
+  | 'sep_ira'
+  | 'simple_ira'
+  | 'other_tax_advantaged';
+
 // Base entity interface with common fields
 export interface BaseEntity {
   id: string;
@@ -44,15 +65,37 @@ export interface FinancialUser extends BaseEntity {
   provider_id?: string;
 }
 
+// Financial Institution entity
+export interface FinancialInstitution extends BaseEntity {
+  name: string;
+  institution_type: InstitutionType;
+  routing_number?: string;
+  swift_code?: string;
+  website?: string;
+  logo_url?: string;
+  country: string;
+  is_active: boolean;
+  default_interest_rates: Record<AccountType, number>;
+  supported_account_types: AccountType[];
+  metadata: Record<string, any>;
+}
+
 // Financial Account entity
 export interface FinancialAccount extends BaseEntity {
   user_id: string;
   name: string;
   account_type: AccountType;
-  institution?: string;
+  institution_id?: string;
+  institution?: string; // For backward compatibility
   balance: number;
   currency: Currency;
   interest_rate?: number;
+  tax_treatment?: TaxTreatment;
+  account_number_encrypted?: string;
+  routing_number?: string;
+  tags: string[];
+  color?: string;
+  linked_account_ids: string[];
   is_active: boolean;
   metadata: Record<string, any>;
 }
@@ -261,6 +304,27 @@ export const ACCOUNT_TYPES: AccountType[] = [
   'credit',
   'loan',
   'other',
+];
+
+export const INSTITUTION_TYPES: InstitutionType[] = [
+  'bank',
+  'credit_union',
+  'investment',
+  'insurance',
+  'fintech',
+  'other',
+];
+
+export const TAX_TREATMENTS: TaxTreatment[] = [
+  'taxable',
+  'traditional_ira',
+  'roth_ira',
+  'traditional_401k',
+  'roth_401k',
+  'hsa',
+  'sep_ira',
+  'simple_ira',
+  'other_tax_advantaged',
 ];
 export const GOAL_TYPES: GoalType[] = [
   'savings',

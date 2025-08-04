@@ -47,6 +47,7 @@ export type AccountsStackParamList = {
   AccountsList: undefined;
   AccountDetails: { accountId: string };
   AddAccount: undefined;
+  AddAccountFromTemplate: undefined;
   EditAccount: { accountId: string };
   AccountHistory: { accountId: string };
   ImportAccounts: undefined;

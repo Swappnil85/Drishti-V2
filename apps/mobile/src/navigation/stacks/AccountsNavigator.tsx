@@ -13,6 +13,7 @@ import { SCREEN_OPTIONS } from '../../constants/navigation';
 import AccountsListScreen from '../../screens/accounts/AccountsListScreen';
 import AccountDetailsScreen from '../../screens/accounts/AccountDetailsScreen';
 import AddAccountScreen from '../../screens/accounts/AddAccountScreen';
+import AddAccountFromTemplateScreen from '../../screens/accounts/AddAccountFromTemplateScreen';
 import EditAccountScreen from '../../screens/accounts/EditAccountScreen';
 import AccountHistoryScreen from '../../screens/accounts/AccountHistoryScreen';
 import ImportAccountsScreen from '../../screens/accounts/ImportAccountsScreen';
@@ -22,7 +23,7 @@ const Stack = createNativeStackNavigator<AccountsStackParamList>();
 const AccountsNavigator: React.FC = () => {
   return (
     <Stack.Navigator
-      initialRouteName="AccountsList"
+      initialRouteName='AccountsList'
       screenOptions={{
         ...SCREEN_OPTIONS,
         headerStyle: {
@@ -32,7 +33,7 @@ const AccountsNavigator: React.FC = () => {
       }}
     >
       <Stack.Screen
-        name="AccountsList"
+        name='AccountsList'
         component={AccountsListScreen}
         options={{
           title: 'Accounts',
@@ -43,18 +44,18 @@ const AccountsNavigator: React.FC = () => {
           },
         }}
       />
-      
+
       <Stack.Screen
-        name="AccountDetails"
+        name='AccountDetails'
         component={AccountDetailsScreen}
         options={{
           title: 'Account Details',
           headerBackTitle: 'Accounts',
         }}
       />
-      
+
       <Stack.Screen
-        name="AddAccount"
+        name='AddAccount'
         component={AddAccountScreen}
         options={{
           title: 'Add Account',
@@ -62,9 +63,19 @@ const AccountsNavigator: React.FC = () => {
           presentation: 'modal',
         }}
       />
-      
+
       <Stack.Screen
-        name="EditAccount"
+        name='AddAccountFromTemplate'
+        component={AddAccountFromTemplateScreen}
+        options={{
+          title: 'Add from Template',
+          headerBackTitle: 'Cancel',
+          presentation: 'modal',
+        }}
+      />
+
+      <Stack.Screen
+        name='EditAccount'
         component={EditAccountScreen}
         options={{
           title: 'Edit Account',
@@ -72,18 +83,18 @@ const AccountsNavigator: React.FC = () => {
           presentation: 'modal',
         }}
       />
-      
+
       <Stack.Screen
-        name="AccountHistory"
+        name='AccountHistory'
         component={AccountHistoryScreen}
         options={{
           title: 'Account History',
           headerBackTitle: 'Back',
         }}
       />
-      
+
       <Stack.Screen
-        name="ImportAccounts"
+        name='ImportAccounts'
         component={ImportAccountsScreen}
         options={{
           title: 'Import Accounts',

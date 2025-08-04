@@ -24,6 +24,13 @@ export default class FinancialAccount extends Model {
   @field('balance') balance!: number;
   @field('currency') currency!: Currency;
   @field('interest_rate') interestRate?: number;
+  @field('institution_id') institutionId?: string;
+  @field('routing_number') routingNumber?: string;
+  @field('account_number_encrypted') accountNumberEncrypted?: string;
+  @field('tax_treatment') taxTreatment?: string;
+  @field('tags') tagsRaw!: string; // JSON array
+  @field('color') color?: string;
+  @field('linked_account_ids') linkedAccountIdsRaw!: string; // JSON array
   @field('is_active') isActive!: boolean;
   @field('metadata') metadataRaw!: string; // JSON string
 
@@ -51,6 +58,42 @@ export default class FinancialAccount extends Model {
    */
   set metadata(value: Record<string, any>) {
     this.metadataRaw = JSON.stringify(value);
+  }
+
+  /**
+   * Get parsed tags array
+   */
+  get tags(): string[] {
+    try {
+      return JSON.parse(this.tagsRaw || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Set tags (will be stringified)
+   */
+  set tags(value: string[]) {
+    this.tagsRaw = JSON.stringify(value || []);
+  }
+
+  /**
+   * Get parsed linked account IDs array
+   */
+  get linkedAccountIds(): string[] {
+    try {
+      return JSON.parse(this.linkedAccountIdsRaw || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Set linked account IDs (will be stringified)
+   */
+  set linkedAccountIds(value: string[]) {
+    this.linkedAccountIdsRaw = JSON.stringify(value || []);
   }
 
   /**

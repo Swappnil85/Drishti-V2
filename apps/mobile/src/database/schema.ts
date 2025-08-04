@@ -2,7 +2,7 @@ import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 // WatermelonDB schema for offline-first financial data
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
     // Users table
     tableSchema({
@@ -32,6 +32,23 @@ export const schema = appSchema({
         { name: 'balance', type: 'number' },
         { name: 'currency', type: 'string' },
         { name: 'interest_rate', type: 'number', isOptional: true },
+        {
+          name: 'institution_id',
+          type: 'string',
+          isOptional: true,
+          isIndexed: true,
+        },
+        { name: 'routing_number', type: 'string', isOptional: true },
+        { name: 'account_number_encrypted', type: 'string', isOptional: true },
+        {
+          name: 'tax_treatment',
+          type: 'string',
+          isOptional: true,
+          isIndexed: true,
+        },
+        { name: 'tags', type: 'string' }, // JSON array
+        { name: 'color', type: 'string', isOptional: true },
+        { name: 'linked_account_ids', type: 'string' }, // JSON array
         { name: 'is_active', type: 'boolean', isIndexed: true },
         { name: 'metadata', type: 'string' }, // JSON string
         { name: 'created_at', type: 'number' },
