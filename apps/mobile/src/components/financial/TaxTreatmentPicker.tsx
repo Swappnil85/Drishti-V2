@@ -14,8 +14,12 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Card, Icon, Button, Flex } from '../ui';
-import type { TaxTreatment, AccountType } from '@drishti/shared/types/financial';
+import type {
+  TaxTreatment,
+  AccountType,
+} from '@drishti/shared/types/financial';
 import { useFormHaptic } from '../../hooks/useHaptic';
+import { taxTreatmentService } from '../../services/financial/TaxTreatmentService';
 
 interface TaxTreatmentOption {
   value: TaxTreatment;
@@ -42,7 +46,14 @@ const TAX_TREATMENT_OPTIONS: TaxTreatmentOption[] = [
     label: 'Taxable',
     description: 'Regular taxable account with no tax advantages',
     icon: 'receipt-outline',
-    applicableAccountTypes: ['checking', 'savings', 'investment', 'credit', 'loan', 'other'],
+    applicableAccountTypes: [
+      'checking',
+      'savings',
+      'investment',
+      'credit',
+      'loan',
+      'other',
+    ],
   },
   {
     value: 'traditional_ira',
@@ -102,6 +113,22 @@ const TAX_TREATMENT_OPTIONS: TaxTreatmentOption[] = [
   },
 ];
 
+// Helper function to get icon for treatment type
+const getIconForTreatment = (treatment: TaxTreatment): string => {
+  const iconMap: Record<TaxTreatment, string> = {
+    taxable: 'receipt-outline',
+    traditional_ira: 'shield-outline',
+    roth_ira: 'shield-checkmark-outline',
+    traditional_401k: 'business-outline',
+    roth_401k: 'business-outline',
+    hsa: 'medical-outline',
+    sep_ira: 'briefcase-outline',
+    simple_ira: 'briefcase-outline',
+    other_tax_advantaged: 'help-circle-outline',
+  };
+  return iconMap[treatment] || 'help-circle-outline';
+};
+
 const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
   selectedTreatment,
   onTreatmentSelect,
@@ -117,11 +144,14 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
 
   // Filter options based on account type
-  const availableOptions = TAX_TREATMENT_OPTIONS.filter(option =>
-    !accountType || option.applicableAccountTypes.includes(accountType)
+  const availableOptions = TAX_TREATMENT_OPTIONS.filter(
+    option =>
+      !accountType || option.applicableAccountTypes.includes(accountType)
   );
 
-  const selectedOption = availableOptions.find(option => option.value === selectedTreatment);
+  const selectedOption = availableOptions.find(
+    option => option.value === selectedTreatment
+  );
 
   const handleTreatmentSelect = async (treatment: TaxTreatment) => {
     await formHaptic.selection();
@@ -136,39 +166,41 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
 
   const renderTreatmentOption = ({ item }: { item: TaxTreatmentOption }) => (
     <TouchableOpacity
-      style={[styles.optionItem, { borderBottomColor: theme.colors.border.primary }]}
+      style={[
+        styles.optionItem,
+        { borderBottomColor: theme.colors.border.primary },
+      ]}
       onPress={() => handleTreatmentSelect(item.value)}
       testID={`tax-treatment-${item.value}`}
     >
-      <Flex direction="row" align="center" gap="base">
+      <Flex direction='row' align='center' gap='base'>
         <View
           style={[
             styles.optionIcon,
             { backgroundColor: theme.colors.primary[100] },
           ]}
         >
-          <Icon
-            name={item.icon as any}
-            size="sm"
-            color="primary.500"
-          />
+          <Icon name={item.icon as any} size='sm' color='primary.500' />
         </View>
-        
-        <Flex direction="column" flex={1} gap="xs">
-          <Text style={[styles.optionLabel, { color: theme.colors.text.primary }]}>
+
+        <Flex direction='column' flex={1} gap='xs'>
+          <Text
+            style={[styles.optionLabel, { color: theme.colors.text.primary }]}
+          >
             {item.label}
           </Text>
-          <Text style={[styles.optionDescription, { color: theme.colors.text.secondary }]}>
+          <Text
+            style={[
+              styles.optionDescription,
+              { color: theme.colors.text.secondary },
+            ]}
+          >
             {item.description}
           </Text>
         </Flex>
 
         {selectedTreatment === item.value && (
-          <Icon
-            name="checkmark-circle"
-            size="sm"
-            color="primary.500"
-          />
+          <Icon name='checkmark-circle' size='sm' color='primary.500' />
         )}
       </Flex>
     </TouchableOpacity>
@@ -182,19 +214,19 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
 
       <TouchableOpacity onPress={openModal}>
         <Card
-          variant="outlined"
-          padding="base"
+          variant='outlined'
+          padding='base'
           style={[
             styles.selector,
             {
-              borderColor: error 
-                ? theme.colors.error[500] 
+              borderColor: error
+                ? theme.colors.error[500]
                 : theme.colors.border.primary,
             },
           ]}
         >
-          <Flex direction="row" align="center" justify="space-between">
-            <Flex direction="row" align="center" gap="base" flex={1}>
+          <Flex direction='row' align='center' justify='space-between'>
+            <Flex direction='row' align='center' gap='base' flex={1}>
               {selectedOption ? (
                 <>
                   <View
@@ -205,31 +237,42 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
                   >
                     <Icon
                       name={selectedOption.icon as any}
-                      size="sm"
-                      color="primary.500"
+                      size='sm'
+                      color='primary.500'
                     />
                   </View>
-                  <Flex direction="column" flex={1}>
-                    <Text style={[styles.selectedLabel, { color: theme.colors.text.primary }]}>
+                  <Flex direction='column' flex={1}>
+                    <Text
+                      style={[
+                        styles.selectedLabel,
+                        { color: theme.colors.text.primary },
+                      ]}
+                    >
                       {selectedOption.label}
                     </Text>
-                    <Text style={[styles.selectedDescription, { color: theme.colors.text.secondary }]}>
+                    <Text
+                      style={[
+                        styles.selectedDescription,
+                        { color: theme.colors.text.secondary },
+                      ]}
+                    >
                       {selectedOption.description}
                     </Text>
                   </Flex>
                 </>
               ) : (
-                <Text style={[styles.placeholder, { color: theme.colors.text.tertiary }]}>
+                <Text
+                  style={[
+                    styles.placeholder,
+                    { color: theme.colors.text.tertiary },
+                  ]}
+                >
                   {placeholder}
                 </Text>
               )}
             </Flex>
-            
-            <Icon
-              name="chevron-down-outline"
-              size="sm"
-              color="text.tertiary"
-            />
+
+            <Icon name='chevron-down-outline' size='sm' color='text.tertiary' />
           </Flex>
         </Card>
       </TouchableOpacity>
@@ -242,20 +285,32 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
 
       <Modal
         visible={modalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
+        animationType='slide'
+        presentationStyle='pageSheet'
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { backgroundColor: theme.colors.background.primary }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border.primary }]}>
-            <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: theme.colors.background.primary },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomColor: theme.colors.border.primary },
+            ]}
+          >
+            <Text
+              style={[styles.modalTitle, { color: theme.colors.text.primary }]}
+            >
               Select Tax Treatment
             </Text>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onPress={() => setModalVisible(false)}
-              rightIcon={<Icon name="close" size="sm" />}
+              rightIcon={<Icon name='close' size='sm' />}
             >
               Close
             </Button>
@@ -264,7 +319,7 @@ const TaxTreatmentPicker: React.FC<TaxTreatmentPickerProps> = ({
           <FlatList
             data={availableOptions}
             renderItem={renderTreatmentOption}
-            keyExtractor={(item) => item.value}
+            keyExtractor={item => item.value}
             style={styles.optionsList}
             showsVerticalScrollIndicator={false}
           />

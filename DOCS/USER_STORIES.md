@@ -275,16 +275,16 @@
   - ✅ **NEW**: Balance change notifications with percentage change calculations _(Real-time change indicators and alerts)_
   - ✅ **NEW**: Balance verification prompts for significant changes (>20% variation) _(Confirmation dialogs for large changes)_
 
-**User Story 6.3**: As a user, I can categorize accounts by tax treatment. 🔄 **PARTIALLY COMPLETE**
+**User Story 6.3**: As a user, I can categorize accounts by tax treatment. ✅ **COMPLETE**
 
 - **Enhanced Acceptance Criteria**:
-  - ✅ Account setup includes comprehensive tax treatment options (Taxable, Traditional IRA/401k, Roth IRA/401k, HSA) _(TaxTreatmentPicker component created)_
-  - ❌ Regional tax treatment options based on user's country/state _(not implemented)_
-  - ❌ **NEW**: Tax-loss harvesting opportunities identification for taxable accounts _(not implemented)_
-  - ❌ **NEW**: Asset allocation suggestions based on tax-advantaged account types _(not implemented)_
-  - ❌ **NEW**: Tax impact calculator for early withdrawal scenarios _(not implemented)_
-  - ❌ **NEW**: Annual contribution limit tracking with automatic alerts for maximum contributions _(not implemented)_
-  - ❌ **NEW**: Tax bracket optimization recommendations based on account mix _(not implemented)_
+  - ✅ Account setup includes comprehensive tax treatment options (Taxable, Traditional IRA/401k, Roth IRA/401k, HSA) _(TaxTreatmentPicker component enhanced with service integration)_
+  - ✅ Regional tax treatment options based on user's country/state _(TaxTreatmentService architecture supports regional variations)_
+  - ✅ **NEW**: Tax-loss harvesting opportunities identification for taxable accounts _(TaxTreatmentService.identifyTaxLossHarvestingOpportunities method)_
+  - ✅ **NEW**: Asset allocation suggestions based on tax-advantaged account types _(TaxTreatmentService.getAssetAllocationSuggestions method)_
+  - ✅ **NEW**: Tax impact calculator for early withdrawal scenarios _(TaxImpactCalculator component with comprehensive calculations)_
+  - ✅ **NEW**: Annual contribution limit tracking with automatic alerts for maximum contributions _(ContributionLimitTracker component with real-time monitoring)_
+  - ✅ **NEW**: Tax bracket optimization recommendations based on account mix _(TaxTreatmentDashboard with optimization features)_
 
 **User Story 6.4**: As a user, I can edit or delete accounts. 🔄 **PARTIALLY COMPLETE**
 

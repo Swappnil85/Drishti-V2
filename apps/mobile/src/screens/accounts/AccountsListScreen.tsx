@@ -509,6 +509,18 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
 
         <Flex direction='row' align='center' gap='xs'>
           <TouchableOpacity
+            onPress={() => navigation.navigate('TaxTreatmentDashboard')}
+            style={styles.filterButton}
+            testID='tax-dashboard-button'
+          >
+            <Icon
+              name='shield-checkmark-outline'
+              size='sm'
+              color='success.500'
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={handleBulkBalanceUpdate}
             style={styles.filterButton}
             testID='bulk-update-button'
