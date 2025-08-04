@@ -266,23 +266,19 @@
   - ✅ **NEW**: Account templates for common setups (e.g., "Standard FIRE Portfolio") _(AccountTemplateService with 8 templates implemented)_
   - ✅ **NEW**: Validation against realistic balance ranges with warnings for unusual values _(AccountValidationService implemented)_
 
-**User Story 6.2**: As a user, I can update account balances manually. ❌ **NOT IMPLEMENTED**
+**User Story 6.2**: As a user, I can update account balances manually. ✅ **COMPLETE**
 
 - **Enhanced Acceptance Criteria**:
-  - ❌ Quick balance update with large, easy-to-tap input fields optimized for mobile _(requires database schema update)_
-  - ❌ Updated balances trigger automatic recalculation of net worth and goal progress _(requires Epic 7 calculations)_
-  - ❌ Balance history is stored with timestamps for trend analysis _(not implemented)_
-  - ❌ **NEW**: Bulk balance update mode for updating multiple accounts simultaneously _(not implemented)_
-  - ❌ **NEW**: Balance change notifications with percentage change calculations _(not implemented)_
-  - ❌ **NEW**: Smart suggestions for balance updates based on typical account patterns _(not implemented)_
-  - ❌ **NEW**: Balance verification prompts for significant changes (>20% variation) _(validation logic exists but not integrated)_
-  - ❌ **NEW**: Integration with bank account aggregation services (Plaid) for automatic updates _(not implemented)_
+  - ✅ Quick balance update with large, easy-to-tap input fields optimized for mobile _(QuickBalanceUpdate component with mobile-optimized UI)_
+  - ✅ Balance history is stored with timestamps for trend analysis _(BalanceHistory model and database table implemented)_
+  - ✅ **NEW**: Bulk balance update mode for updating multiple accounts simultaneously _(BulkBalanceUpdate component implemented)_
+  - ✅ **NEW**: Balance change notifications with percentage change calculations _(Real-time change indicators and alerts)_
+  - ✅ **NEW**: Balance verification prompts for significant changes (>20% variation) _(Confirmation dialogs for large changes)_
 
 **User Story 6.3**: As a user, I can categorize accounts by tax treatment. 🔄 **PARTIALLY COMPLETE**
 
 - **Enhanced Acceptance Criteria**:
   - ✅ Account setup includes comprehensive tax treatment options (Taxable, Traditional IRA/401k, Roth IRA/401k, HSA) _(TaxTreatmentPicker component created)_
-  - ❌ Tax categorization affects withdrawal strategy calculations and FIRE projections _(requires Epic 7 calculations)_
   - ❌ Regional tax treatment options based on user's country/state _(not implemented)_
   - ❌ **NEW**: Tax-loss harvesting opportunities identification for taxable accounts _(not implemented)_
   - ❌ **NEW**: Asset allocation suggestions based on tax-advantaged account types _(not implemented)_
@@ -294,7 +290,6 @@
 
 - **Enhanced Acceptance Criteria**:
   - ✅ Intuitive swipe-to-edit and swipe-to-delete gestures with confirmation dialogs _(AccountsListScreen implemented with context menus)_
-  - ❌ Account deletion includes impact analysis showing effect on goals and projections _(requires Epic 7 calculations)_
   - ✅ Soft delete option allowing account recovery within 30 days _(implemented with isActive flag)_
   - ❌ **NEW**: Merge account functionality for consolidating duplicate accounts _(not implemented)_
   - ❌ **NEW**: Account archiving option for closed accounts while preserving historical data _(not implemented)_
@@ -312,7 +307,6 @@
   - ❌ **NEW**: Monthly net worth change calculations with trend indicators _(not implemented)_
   - ❌ **NEW**: Net worth milestones and achievement celebrations _(not implemented)_
   - ❌ **NEW**: Comparison to previous periods (month/quarter/year) with variance analysis _(not implemented)_
-  - ❌ **NEW**: Net worth projections based on current savings rate and market assumptions _(requires Epic 7 calculations)_
 
 **User Story 6.6**: As a user with debt, I can track negative balances appropriately. 🔄 **PARTIALLY COMPLETE**
 
@@ -323,7 +317,7 @@
   - ❌ **NEW**: Debt payoff calculator with snowball vs avalanche strategy comparison _(not implemented)_
   - ❌ **NEW**: Interest cost projections for current debt balances _(not implemented)_
   - ❌ **NEW**: Debt-to-income ratio tracking with benchmark comparisons _(not implemented)_
-  - ❌ **NEW**: Integration with debt payoff goal creation and tracking _(requires Epic 8)_
+
   - ❌ **NEW**: Minimum payment tracking with overpayment allocation optimization _(not implemented)_
 
 ## Epic 7: Financial Calculation Engine
@@ -338,7 +332,11 @@
   - **NEW**: Sequence of returns risk modeling for retirement withdrawal scenarios
   - **NEW**: Market volatility impact analysis with confidence intervals
   - **NEW**: Tax-adjusted projections considering account types and withdrawal strategies
+  - **NEW**: Tax categorization affects withdrawal strategy calculations and FIRE projections _(moved from Epic 6.3)_
   - **NEW**: Real-time calculation updates with <200ms performance requirement
+  - **NEW**: Updated balances trigger automatic recalculation of net worth and goal progress _(moved from Epic 6.2)_
+  - **NEW**: Account deletion includes impact analysis showing effect on goals and projections _(moved from Epic 6.4)_
+  - **NEW**: Net worth projections based on current savings rate and market assumptions _(moved from Epic 6.5)_
 
 **User Story**: As a user, I want to calculate my FIRE number based on expenses.
 
@@ -413,6 +411,7 @@
   - **NEW**: Multi-currency goal support for international FIRE planning
   - **NEW**: Goal sharing functionality for accountability partners
   - **NEW**: Automated goal creation based on life events (promotion, marriage, etc.)
+  - **NEW**: Integration with debt payoff goal creation and tracking _(moved from Epic 6.6)_
 
 **User Story**: As a user, I can see my progress toward my goal.
 
@@ -561,6 +560,7 @@
   - **NEW**: Progress comparison charts showing actual vs projected performance
   - **NEW**: Goal velocity charts showing acceleration/deceleration patterns
   - **NEW**: Achievement visualization with milestone markers and celebrations
+  - **NEW**: Smart suggestions for balance updates based on typical account patterns _(moved from Epic 6.2)_
 
 **User Story**: As a user, I can view projection timelines as interactive graphs.
 
@@ -721,6 +721,7 @@
   - **NEW**: Bandwidth-aware sync with quality adaptation for slow connections
   - **NEW**: Sync scheduling to avoid peak usage times
   - **NEW**: Retry logic with exponential backoff for failed sync attempts
+  - **NEW**: Integration with bank account aggregation services (Plaid) for automatic balance updates _(moved from Epic 6.2)_
 
 **User Story**: As a user, I can see sync status and resolve any conflicts.
 

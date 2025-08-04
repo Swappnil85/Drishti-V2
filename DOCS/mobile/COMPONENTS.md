@@ -7,6 +7,7 @@ The Drishti mobile app uses a component-based architecture with reusable, access
 ## Component Categories
 
 ### Common Components
+
 - **Button** - Primary, secondary, and icon buttons
 - **Input** - Text inputs with validation
 - **Card** - Content containers
@@ -15,12 +16,14 @@ The Drishti mobile app uses a component-based architecture with reusable, access
 - **Toast** - Notification messages
 
 ### Camera Components
+
 - **CameraView** - Main camera interface
 - **CameraControls** - Capture and settings controls
 - **ImagePreview** - Image preview with actions
 - **AnalysisOverlay** - AI analysis results overlay
 
 ### Form Components
+
 - **FormField** - Input field with label and validation
 - **FormButton** - Form submission buttons
 - **FormError** - Error message display
@@ -29,6 +32,7 @@ The Drishti mobile app uses a component-based architecture with reusable, access
 ## Component Specifications
 
 ### Button Component
+
 ```typescript
 interface ButtonProps {
   title: string;
@@ -69,7 +73,7 @@ const Button: React.FC<ButtonProps> = ({
       testID={testID}
     >
       {loading ? (
-        <ActivityIndicator color={getTextColor(variant)} />
+        <ActivityIndicator size="small" color={getTextColor(variant)} />
       ) : (
         <View style={styles.content}>
           {icon && <View style={styles.icon}>{icon}</View>}
@@ -82,6 +86,7 @@ const Button: React.FC<ButtonProps> = ({
 ```
 
 ### Input Component
+
 ```typescript
 interface InputProps {
   label: string;
@@ -144,6 +149,7 @@ const Input: React.FC<InputProps> = ({
 ```
 
 ### CameraView Component
+
 ```typescript
 interface CameraViewProps {
   onCapture: (image: CameraCapture) => void;
@@ -177,7 +183,7 @@ const CameraView: React.FC<CameraViewProps> = ({
           base64: false,
           exif: false
         });
-        
+
         onCapture({
           uri: photo.uri,
           width: photo.width,
@@ -227,6 +233,7 @@ const CameraView: React.FC<CameraViewProps> = ({
 ```
 
 ### AnalysisResult Component
+
 ```typescript
 interface AnalysisResultProps {
   analysis: VisualAnalysis;
@@ -244,7 +251,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   onShare
 }) => {
   const { speakText } = useSpeech();
-  
+
   const handleSpeakDescription = () => {
     speakText(analysis.description);
   };
@@ -271,15 +278,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             accessibilityLabel="Read analysis aloud"
           />
         </View>
-        
-        <Text 
+
+        <Text
           style={styles.description}
           accessible
           accessibilityRole="text"
         >
           {analysis.description}
         </Text>
-        
+
         {analysis.tags.length > 0 && (
           <View style={styles.tagsContainer}>
             <Text style={styles.tagsTitle}>Tags:</Text>
@@ -327,6 +334,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 ## Design System
 
 ### Color Palette
+
 ```typescript
 export const colors = {
   primary: {
@@ -334,47 +342,49 @@ export const colors = {
     100: '#e0f2fe',
     500: '#0ea5e9',
     600: '#0284c7',
-    900: '#0c4a6e'
+    900: '#0c4a6e',
   },
   gray: {
     50: '#f9fafb',
     100: '#f3f4f6',
     500: '#6b7280',
-    900: '#111827'
+    900: '#111827',
   },
   success: '#10b981',
   warning: '#f59e0b',
-  error: '#ef4444'
+  error: '#ef4444',
 };
 ```
 
 ### Typography
+
 ```typescript
 export const typography = {
   h1: {
     fontSize: 32,
     fontWeight: 'bold' as const,
-    lineHeight: 40
+    lineHeight: 40,
   },
   h2: {
     fontSize: 24,
     fontWeight: 'bold' as const,
-    lineHeight: 32
+    lineHeight: 32,
   },
   body: {
     fontSize: 16,
     fontWeight: 'normal' as const,
-    lineHeight: 24
+    lineHeight: 24,
   },
   caption: {
     fontSize: 12,
     fontWeight: 'normal' as const,
-    lineHeight: 16
-  }
+    lineHeight: 16,
+  },
 };
 ```
 
 ### Spacing
+
 ```typescript
 export const spacing = {
   xs: 4,
@@ -382,13 +392,14 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
-  xxl: 48
+  xxl: 48,
 };
 ```
 
 ## Component Testing
 
 ### Testing Utilities
+
 ```typescript
 // Custom render function with providers
 const renderWithProviders = (
@@ -408,13 +419,14 @@ const renderWithProviders = (
 ```
 
 ### Component Tests
+
 ```typescript
 describe('Button Component', () => {
   test('renders with correct title', () => {
     const { getByText } = renderWithProviders(
       <Button title="Test Button" onPress={() => {}} />
     );
-    
+
     expect(getByText('Test Button')).toBeTruthy();
   });
 
@@ -423,7 +435,7 @@ describe('Button Component', () => {
     const { getByRole } = renderWithProviders(
       <Button title="Test Button" onPress={mockOnPress} />
     );
-    
+
     fireEvent.press(getByRole('button'));
     expect(mockOnPress).toHaveBeenCalledTimes(1);
   });
@@ -432,7 +444,7 @@ describe('Button Component', () => {
     const { getByTestId } = renderWithProviders(
       <Button title="Test Button" onPress={() => {}} loading />
     );
-    
+
     expect(getByTestId('loading-indicator')).toBeTruthy();
   });
 });
@@ -441,18 +453,21 @@ describe('Button Component', () => {
 ## Performance Guidelines
 
 ### Component Optimization
+
 - Use React.memo for expensive components
 - Implement proper dependency arrays in useEffect
 - Avoid inline functions in render
 - Use useCallback for event handlers
 
 ### Image Optimization
+
 - Compress images before upload
 - Use appropriate image formats
 - Implement progressive loading
 - Cache frequently used images
 
 ### Memory Management
+
 - Clean up subscriptions in useEffect
 - Remove event listeners on unmount
 - Clear timers and intervals

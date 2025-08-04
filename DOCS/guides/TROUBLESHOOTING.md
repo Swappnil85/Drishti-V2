@@ -9,10 +9,12 @@ This guide covers common issues and their solutions when developing with Drishti
 **Problem**: Getting "SDK version mismatch" error when scanning QR code with Expo Go app.
 
 **Symptoms**:
+
 - QR code scan fails with version compatibility error
 - Expo Go shows "This experience was published with an unsupported SDK version"
 
 **Solution**:
+
 1. Check your Expo Go app version and supported SDK versions
 2. Upgrade your project to a compatible SDK version:
    ```bash
@@ -29,6 +31,7 @@ This guide covers common issues and their solutions when developing with Drishti
 **Problem**: Web version loads but shows blank screen in browser.
 
 **Symptoms**:
+
 - Metro bundling completes successfully
 - Browser shows white/blank screen
 - No visible content or error messages
@@ -36,6 +39,7 @@ This guide covers common issues and their solutions when developing with Drishti
 **Root Causes & Solutions**:
 
 #### 1. Missing Entry Point Registration
+
 **Error**: "main" has not been registered
 **Solution**: Ensure proper app registration:
 
@@ -48,6 +52,7 @@ registerRootComponent(App);
 ```
 
 Update package.json:
+
 ```json
 {
   "main": "index.js"
@@ -55,17 +60,22 @@ Update package.json:
 ```
 
 #### 2. Expo Router Configuration Issues
+
 **Error**: "Use static rendering with Expo Router to support running without JavaScript"
 **Solution**: For simple apps without routing, use basic React Native structure instead of Expo Router.
 
 #### 3. Missing React Native Web
+
 **Solution**: Install react-native-web:
+
 ```bash
 npm install react-native-web@~0.19.13 --legacy-peer-deps
 ```
 
 #### 4. Version Compatibility Issues
+
 **Solution**: Update core dependencies:
+
 ```bash
 npm install react@19.0.0 react-dom@19.0.0 react-native@0.79.5 --legacy-peer-deps
 ```
@@ -75,21 +85,24 @@ npm install react@19.0.0 react-dom@19.0.0 react-native@0.79.5 --legacy-peer-deps
 If you encounter both SDK mismatch and web blank screen issues:
 
 1. **Update Entry Point**:
+
    ```bash
    # Update package.json main field
    "main": "index.js"
    ```
 
 2. **Create Proper Entry Point**:
+
    ```javascript
    // index.js
    import { registerRootComponent } from 'expo';
    import App from './App';
-   
+
    registerRootComponent(App);
    ```
 
 3. **Install Missing Dependencies**:
+
    ```bash
    npm install expo-constants@~17.1.7 --legacy-peer-deps
    npm install react-native-web@~0.19.13 --legacy-peer-deps
@@ -97,6 +110,7 @@ If you encounter both SDK mismatch and web blank screen issues:
    ```
 
 4. **Create Required Assets**:
+
    ```bash
    mkdir -p assets
    # Add icon.png to assets/ directory
@@ -114,6 +128,7 @@ If you encounter both SDK mismatch and web blank screen issues:
 **Problem**: Cannot connect to PostgreSQL database.
 
 **Solutions**:
+
 ```bash
 # Check PostgreSQL status
 brew services list | grep postgresql
@@ -133,6 +148,7 @@ createdb drishti_dev
 **Problem**: API server fails to start due to port conflict.
 
 **Solution**:
+
 ```bash
 # Find process using port 3000
 lsof -ti:3000
@@ -149,6 +165,7 @@ PORT=3001
 **Problem**: Environment variables are undefined in the application.
 
 **Solutions**:
+
 1. Ensure .env file exists in correct location
 2. Check .env file format (no spaces around =)
 3. Restart development server after .env changes
@@ -156,7 +173,7 @@ PORT=3001
    ```typescript
    console.log('Environment check:', {
      port: process.env.PORT,
-     dbUrl: process.env.DATABASE_URL ? 'Set' : 'Missing'
+     dbUrl: process.env.DATABASE_URL ? 'Set' : 'Missing',
    });
    ```
 
@@ -167,6 +184,7 @@ PORT=3001
 **Problem**: TypeScript compilation errors or type checking issues.
 
 **Solutions**:
+
 ```bash
 # Clean TypeScript cache
 rm -rf node_modules/.cache
@@ -184,6 +202,7 @@ npm run type-check
 **Problem**: Dependency conflicts or installation issues.
 
 **Solutions**:
+
 ```bash
 # Clean install
 rm -rf node_modules
@@ -203,6 +222,7 @@ npm install --legacy-peer-deps
 **Problem**: Git conflicts or branch issues.
 
 **Solutions**:
+
 ```bash
 # Reset to clean state
 git stash
@@ -223,6 +243,7 @@ git push --force-with-lease origin feature/your-branch
 **Problem**: Unit tests or integration tests failing unexpectedly.
 
 **Solutions**:
+
 ```bash
 # Clear test cache
 npm test -- --clearCache
@@ -242,6 +263,7 @@ npm test -- --updateSnapshot
 **Problem**: Mocks not working correctly in tests.
 
 **Solutions**:
+
 ```typescript
 // Clear mocks between tests
 beforeEach(() => {
@@ -261,6 +283,7 @@ beforeEach(() => {
 **Problem**: Development server is slow to start or reload.
 
 **Solutions**:
+
 ```bash
 # Clear all caches
 npx expo start --clear --reset-cache
@@ -273,12 +296,53 @@ npm install -g pnpm
 pnpm install
 ```
 
+### ActivityIndicator "large" Size Error
+
+**Problem**: React Native error: "Unable to convert string to floating point value: 'large'"
+
+**Root Cause**: ActivityIndicator components using `size="large"` which is incompatible with newer React Native versions.
+
+**Solutions**:
+
+1. Replace all ActivityIndicator size props:
+
+   ```typescript
+   // Before (causes error)
+   <ActivityIndicator size="large" color="#007AFF" />
+
+   // After (fixed)
+   <ActivityIndicator size="small" color="#007AFF" />
+   ```
+
+2. Update incompatible packages:
+
+   ```bash
+   npx expo install --fix
+   npm install @types/react@~19.0.10 jest-expo@~53.0.9 typescript@~5.8.3
+   ```
+
+3. Clear all caches:
+
+   ```bash
+   rm -rf node_modules/.cache .expo
+   npx expo start --clear
+   ```
+
+4. Add required plugins to app.config.js:
+   ```javascript
+   plugins: ['expo-font', 'expo-sqlite'];
+   ```
+
+**Fixed in**: Epic 7 - See `DOCS/epics/epic7/EPIC7_BUG_FIX_COMPLETION.md`
+
 ### Large Bundle Size
 
 **Problem**: Mobile app bundle is too large.
 
 **Solutions**:
+
 1. Analyze bundle size:
+
    ```bash
    npx expo export --platform web
    npx webpack-bundle-analyzer web-build/static/js/*.js
