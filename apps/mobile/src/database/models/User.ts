@@ -21,25 +21,25 @@ export default class User extends Model {
   static table = TABLE_NAMES.USERS;
 
   // User fields
-  @field('name') name!: string;
-  @field('email') email!: string;
+  @field('name') name: string = '';
+  @field('email') email: string = '';
   @field('avatar_url') avatarUrl?: string;
-  @field('email_verified') emailVerified!: boolean;
-  @field('is_active') isActive!: boolean;
-  @field('provider') provider!: string;
+  @field('email_verified') emailVerified: boolean = false;
+  @field('is_active') isActive: boolean = true;
+  @field('provider') provider: string = '';
   @field('provider_id') providerId?: string;
   @date('last_login_at') lastLoginAt?: Date;
   @field('preferences') preferencesRaw?: string;
 
   // Timestamps
-  @readonly @date('created_at') createdAt!: Date;
-  @readonly @date('updated_at') updatedAt!: Date;
+  @readonly @date('created_at') createdAt: Date = new Date();
+  @readonly @date('updated_at') updatedAt: Date = new Date();
   @date('synced_at') syncedAt?: Date;
 
   // Relationships to financial entities
-  @children(TABLE_NAMES.FINANCIAL_ACCOUNTS) financialAccounts!: any[];
-  @children(TABLE_NAMES.FINANCIAL_GOALS) financialGoals!: any[];
-  @children(TABLE_NAMES.SCENARIOS) scenarios!: any[];
+  @children(TABLE_NAMES.FINANCIAL_ACCOUNTS) financialAccounts: any[] = [];
+  @children(TABLE_NAMES.FINANCIAL_GOALS) financialGoals: any[] = [];
+  @children(TABLE_NAMES.SCENARIOS) scenarios: any[] = [];
 
   // Computed properties
   get preferences(): UserPreferences {

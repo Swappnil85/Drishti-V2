@@ -2,7 +2,7 @@ import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 // WatermelonDB schema for offline-first financial data
 export const schema = appSchema({
-  version: 2,
+  version: 3,
   tables: [
     // Users table
     tableSchema({
@@ -50,6 +50,27 @@ export const schema = appSchema({
         { name: 'color', type: 'string', isOptional: true },
         { name: 'linked_account_ids', type: 'string' }, // JSON array
         { name: 'is_active', type: 'boolean', isIndexed: true },
+        { name: 'metadata', type: 'string' }, // JSON string
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+        { name: 'synced_at', type: 'number', isOptional: true },
+      ],
+    }),
+
+    // Financial Institutions table
+    tableSchema({
+      name: 'financial_institutions',
+      columns: [
+        { name: 'name', type: 'string' },
+        { name: 'institution_type', type: 'string', isIndexed: true },
+        { name: 'routing_number', type: 'string', isOptional: true },
+        { name: 'swift_code', type: 'string', isOptional: true },
+        { name: 'website', type: 'string', isOptional: true },
+        { name: 'logo_url', type: 'string', isOptional: true },
+        { name: 'country', type: 'string' },
+        { name: 'is_active', type: 'boolean', isIndexed: true },
+        { name: 'default_interest_rates', type: 'string' }, // JSON string
+        { name: 'supported_account_types', type: 'string' }, // JSON string
         { name: 'metadata', type: 'string' }, // JSON string
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
@@ -178,6 +199,7 @@ export const migrations = [
 export const TABLE_NAMES = {
   USERS: 'users',
   FINANCIAL_ACCOUNTS: 'financial_accounts',
+  FINANCIAL_INSTITUTIONS: 'financial_institutions',
   FINANCIAL_GOALS: 'financial_goals',
   SCENARIOS: 'scenarios',
   SCENARIO_GOALS: 'scenario_goals',

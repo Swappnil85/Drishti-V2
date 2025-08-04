@@ -1,39 +1,51 @@
 import { Database } from '@nozbe/watermelondb';
-import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import { Platform } from 'react-native';
 
-// Import models
-import User from './models/User';
-import FinancialInstitution from './models/FinancialInstitution';
-import FinancialAccount from './models/FinancialAccount';
-import FinancialGoal from './models/FinancialGoal';
-import Scenario from './models/Scenario';
+// Create database based on platform
+let database: any;
 
-// Import schemas and migrations
-import { schema } from './schema';
-import { migrations } from './migrations';
+if (Platform.OS === 'web') {
+  // Mock database for web builds to avoid SQLite dependency
+  database = {
+    get: () => ({ query: () => ({ fetch: () => Promise.resolve([]) }) }),
+    write: () => Promise.resolve(),
+    action: (fn: any) => fn(),
+  };
+} else {
+  // For mobile platforms, use the real database
+  const SQLiteAdapter = require('@nozbe/watermelondb/adapters/sqlite').default;
 
-// Database adapter configuration
-const adapter = new SQLiteAdapter({
-  schema,
-  migrations,
-  // Optional: Enable JSI for better performance (iOS/Android only)
-  jsi: Platform.OS === 'ios' || Platform.OS === 'android',
-  // Database name
-  dbName: 'drishti.db',
-});
+  // Import models
+  const User = require('./models/User').default;
+  const FinancialInstitution = require('./models/FinancialInstitution').default;
+  const FinancialAccount = require('./models/FinancialAccount').default;
+  const FinancialGoal = require('./models/FinancialGoal').default;
+  const Scenario = require('./models/Scenario').default;
 
-// Create database instance
-export const database = new Database({
-  adapter,
-  modelClasses: [
-    User,
-    FinancialInstitution,
-    FinancialAccount,
-    FinancialGoal,
-    Scenario,
-  ],
-});
+  // Import schemas and migrations
+  const { schema } = require('./schema');
+  const { migrations } = require('./migrations');
 
-// Export database for use in components
+  // Database adapter configuration
+  const adapter = new SQLiteAdapter({
+    schema,
+    migrations,
+    jsi: Platform.OS === 'ios' || Platform.OS === 'android',
+    dbName: 'drishti.db',
+  });
+
+  // Create database instance
+  database = new Database({
+    adapter,
+    modelClasses: [
+      User,
+      FinancialInstitution,
+      FinancialAccount,
+      FinancialGoal,
+      Scenario,
+    ],
+  });
+}
+
+export { database };
 export default database;
