@@ -186,12 +186,14 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
       'View Details',
       'Edit Account',
       'View History',
+      'Update Balance',
+      'Archive Account',
       'Delete Account',
       'Cancel',
     ];
 
-    const destructiveButtonIndex = 3;
-    const cancelButtonIndex = 4;
+    const destructiveButtonIndex = 5;
+    const cancelButtonIndex = 6;
 
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
@@ -220,8 +222,16 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           onPress: () => handleAccountAction(account, 2),
         },
         {
-          text: 'Delete Account',
+          text: 'Update Balance',
           onPress: () => handleAccountAction(account, 3),
+        },
+        {
+          text: 'Archive Account',
+          onPress: () => handleAccountAction(account, 4),
+        },
+        {
+          text: 'Delete Account',
+          onPress: () => handleAccountAction(account, 5),
           style: 'destructive',
         },
         { text: 'Cancel', style: 'cancel' },
@@ -243,7 +253,13 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
       case 2: // View History
         navigation.navigate('AccountHistory', { accountId: account.id });
         break;
-      case 3: // Delete Account
+      case 3: // Update Balance
+        handleQuickBalanceUpdate(account);
+        break;
+      case 4: // Archive Account
+        handleArchiveAccount(account);
+        break;
+      case 5: // Delete Account
         handleDeleteAccount(account);
         break;
     }
@@ -252,7 +268,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   const handleDeleteAccount = (account: FinancialAccount) => {
     Alert.alert(
       'Delete Account',
-      `Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${account.name}"? This will move the account to trash where it can be recovered for 30 days.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -263,11 +279,25 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
               await database.write(async () => {
                 await account.update((acc: FinancialAccount) => {
                   acc.isActive = false;
+                  acc.updatedAt = new Date();
                 });
               });
 
               await formHaptic.success();
               await loadAccounts();
+
+              // Show recovery option
+              Alert.alert(
+                'Account Deleted',
+                'Account has been moved to trash. You can recover it from the Account Recovery screen.',
+                [
+                  { text: 'OK' },
+                  {
+                    text: 'View Recovery',
+                    onPress: () => navigation.navigate('AccountRecovery'),
+                  },
+                ]
+              );
             } catch (error) {
               console.error('Error deleting account:', error);
               await formHaptic.error();
@@ -280,6 +310,61 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
         },
       ]
     );
+  };
+
+  const handleArchiveAccount = (account: FinancialAccount) => {
+    Alert.alert(
+      'Archive Account',
+      `Archive "${account.name}"? Archived accounts are hidden from the main list but preserve all historical data.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Archive',
+          onPress: async () => {
+            try {
+              await database.write(async () => {
+                await account.update((acc: FinancialAccount) => {
+                  const metadata = acc.metadata;
+                  metadata.archived = true;
+                  metadata.archivedAt = new Date().toISOString();
+                  acc.metadataRaw = JSON.stringify(metadata);
+                  acc.updatedAt = new Date();
+                });
+              });
+
+              await formHaptic.success();
+              await loadAccounts();
+
+              Alert.alert(
+                'Account Archived',
+                'Account has been archived and hidden from the main list. You can restore it from the Account Recovery screen.',
+                [
+                  { text: 'OK' },
+                  {
+                    text: 'View Recovery',
+                    onPress: () => navigation.navigate('AccountRecovery'),
+                  },
+                ]
+              );
+            } catch (error) {
+              console.error('Error archiving account:', error);
+              await formHaptic.error();
+              Alert.alert(
+                'Error',
+                'Failed to archive account. Please try again.'
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleQuickBalanceUpdate = (account: FinancialAccount) => {
+    // Navigate to a quick balance update modal or screen
+    // For now, we'll use the existing bulk balance update functionality
+    setSelectedAccounts([account]);
+    setShowBulkBalanceUpdate(true);
   };
 
   // Balance update handlers
@@ -508,6 +593,14 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
         </Flex>
 
         <Flex direction='row' align='center' gap='xs'>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AccountRecovery')}
+            style={styles.filterButton}
+            testID='recovery-button'
+          >
+            <Icon name='refresh-outline' size='sm' color='info.500' />
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => navigation.navigate('TaxTreatmentDashboard')}
             style={styles.filterButton}

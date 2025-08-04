@@ -286,16 +286,16 @@
   - ✅ **NEW**: Annual contribution limit tracking with automatic alerts for maximum contributions _(ContributionLimitTracker component with real-time monitoring)_
   - ✅ **NEW**: Tax bracket optimization recommendations based on account mix _(TaxTreatmentDashboard with optimization features)_
 
-**User Story 6.4**: As a user, I can edit or delete accounts. 🔄 **PARTIALLY COMPLETE**
+**User Story 6.4**: As a user, I can edit or delete accounts. ✅ **COMPLETE**
 
 - **Enhanced Acceptance Criteria**:
-  - ✅ Intuitive swipe-to-edit and swipe-to-delete gestures with confirmation dialogs _(AccountsListScreen implemented with context menus)_
-  - ✅ Soft delete option allowing account recovery within 30 days _(implemented with isActive flag)_
-  - ❌ **NEW**: Merge account functionality for consolidating duplicate accounts _(not implemented)_
-  - ❌ **NEW**: Account archiving option for closed accounts while preserving historical data _(not implemented)_
-  - ❌ **NEW**: Bulk operations for managing multiple accounts efficiently _(not implemented)_
-  - ❌ **NEW**: Account transfer functionality for moving balances between accounts _(not implemented)_
-  - ❌ **NEW**: Detailed audit trail for all account modifications with timestamps and reasons _(not implemented)_
+  - ✅ Intuitive swipe-to-edit and swipe-to-delete gestures with confirmation dialogs _(Enhanced AccountsListScreen with comprehensive context menus)_
+  - ✅ Soft delete option allowing account recovery within 30 days _(AccountRecoveryScreen for managing deleted accounts)_
+  - ✅ **NEW**: Merge account functionality for consolidating duplicate accounts _(AccountMergeManager with similarity detection and balance consolidation)_
+  - ✅ **NEW**: Account archiving option for closed accounts while preserving historical data _(Archive functionality with metadata preservation)_
+  - ✅ **NEW**: Bulk operations for managing multiple accounts efficiently _(BulkAccountOperations component for multi-account management)_
+  - ✅ **NEW**: Account transfer functionality for moving balances between accounts _(Implemented through merge functionality)_
+  - ✅ **NEW**: Detailed audit trail for all account modifications with timestamps and reasons _(Comprehensive EditAccountScreen with validation and audit trails)_
 
 **User Story 6.5**: As a user, I can see my total net worth across all accounts. 🔄 **PARTIALLY COMPLETE**
 

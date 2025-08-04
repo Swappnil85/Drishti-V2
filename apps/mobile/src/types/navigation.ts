@@ -52,6 +52,7 @@ export type AccountsStackParamList = {
   AccountHistory: { accountId: string };
   BalanceHistory: { accountId: string };
   TaxTreatmentDashboard: undefined;
+  AccountRecovery: undefined;
   ImportAccounts: undefined;
 };
 
