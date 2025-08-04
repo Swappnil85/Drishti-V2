@@ -85,6 +85,41 @@ export class AuthService {
    */
   private async initializeAuth(): Promise<void> {
     try {
+      // Check for development bypass
+      const devBypass = process.env.EXPO_PUBLIC_DEV_BYPASS_AUTH === 'true';
+      
+      if (devBypass) {
+        console.log('🚀 Development mode: Bypassing authentication');
+        // Create a mock user for development
+        const mockUser: User = {
+          id: 'dev-user-123',
+          email: 'dev@drishti.app',
+          name: 'Development User',
+          avatar_url: undefined,
+          email_verified: true,
+          is_active: true,
+          last_login_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        const mockTokens: AuthTokens = {
+          accessToken: 'dev-access-token',
+          refreshToken: 'dev-refresh-token',
+          expiresIn: 3600,
+        };
+        
+        this.authState = {
+          isAuthenticated: true,
+          user: mockUser,
+          tokens: mockTokens,
+          isLoading: false,
+        };
+        
+        this.notifyListeners();
+        return;
+      }
+      
       const tokens = await this.getStoredTokens();
       const user = await this.getStoredUser();
 

@@ -506,12 +506,6 @@ $10K+ MRR: Enterprise tools
 - [AWS Community](https://aws.amazon.com/developer/community/)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/devops)
 
-### Documentation Templates
-- [Incident Report Template](../templates/INCIDENT_REPORT_TEMPLATE.md)
-- [Runbook Template](../templates/RUNBOOK_TEMPLATE.md)
-- [Post-Mortem Template](../templates/POST_MORTEM_TEMPLATE.md)
-- [Change Request Template](../templates/CHANGE_REQUEST_TEMPLATE.md)
-
 ---
 
 ## 🎯 Getting Started

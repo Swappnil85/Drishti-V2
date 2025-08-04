@@ -27,7 +27,6 @@ import {
   Input,
   Badge,
   Avatar,
-  FloatingActionButton,
 } from '../../components/ui';
 import QuickBalanceUpdate from '../../components/financial/QuickBalanceUpdate';
 import BulkBalanceUpdate from '../../components/financial/BulkBalanceUpdate';
@@ -175,12 +174,12 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   }, [user?.id]);
 
   const handleAccountPress = async (account: FinancialAccount) => {
-    await formHaptic.light();
+    await formHaptic.success();
     navigation.navigate('AccountDetails', { accountId: account.id });
   };
 
   const handleAccountLongPress = async (account: FinancialAccount) => {
-    await formHaptic.medium();
+    await formHaptic.success();
 
     const options = [
       'View Details',
@@ -358,13 +357,6 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
         },
       ]
     );
-  };
-
-  const handleQuickBalanceUpdate = (account: FinancialAccount) => {
-    // Navigate to a quick balance update modal or screen
-    // For now, we'll use the existing bulk balance update functionality
-    setSelectedAccounts([account]);
-    setShowBulkBalanceUpdate(true);
   };
 
   // Balance update handlers
@@ -593,7 +585,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   const renderFilterBar = () => (
     <Card variant='outlined' padding='sm' style={styles.filterBar}>
       <Flex direction='row' align='center' justify='space-between'>
-        <Flex direction='row' align='center' gap='sm' flex={1}>
+        <Flex direction='row' align='center' gap='sm'>
           <Input
             placeholder='Search accounts...'
             value={searchTerm}
@@ -678,7 +670,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
 
       {showFilters && (
         <View style={styles.filterOptions}>
-          <Flex direction='row' wrap gap='xs' style={styles.filterTags}>
+          <Flex direction='row' gap='xs' style={styles.filterTags}>
             {(
               [
                 'all',
@@ -736,7 +728,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           {/* Account Info */}
-          <Flex direction='column' flex={1} gap='xs'>
+          <Flex direction='column' gap='xs' style={{flex: 1}}>
             <Flex direction='row' align='center' justify='space-between'>
               <Text
                 style={[
@@ -792,7 +784,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Tags */}
             {item.tags.length > 0 && (
-              <Flex direction='row' wrap gap='xs' style={styles.tags}>
+              <Flex direction='row' gap='xs' style={styles.tags}>
                 {item.tags.slice(0, 3).map((tag, index) => (
                   <Badge key={index} variant='filled' color='gray' size='xs'>
                     {tag}
@@ -918,12 +910,16 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
 
-        {/* Floating Action Button */}
-        <FloatingActionButton
-          onPress={handleAddAccount}
-          icon={<Icon name='add' size='md' color='white' />}
-          testID='add-account-fab'
-        />
+        {/* Add Account Button */}
+        <View style={styles.fabContainer}>
+          <TouchableOpacity
+            onPress={handleAddAccount}
+            style={styles.fab}
+            testID='add-account-fab'
+          >
+            <Icon name='add' size='md' color='white' />
+          </TouchableOpacity>
+        </View>
 
         {/* Balance Update Modals */}
         {selectedAccount && (
@@ -1075,6 +1071,27 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     marginRight: 8,
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2196F3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
 });
 

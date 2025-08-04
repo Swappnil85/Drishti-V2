@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { financialAccountService } from '../services/financial/FinancialAccountService';
 import { financialGoalService } from '../services/financial/FinancialGoalService';
 import { scenarioService } from '../services/financial/ScenarioService';
-import { financialInstitutionService } from '../services/financial/FinancialInstitutionService';
 import { jwtService } from '../auth/jwt';
 import { AppError, AuthErrors } from '../utils/errors';
 import { financialValidationSchemas } from '@drishti/shared/validation/financial';
@@ -289,124 +288,6 @@ export async function financialRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({
           success: false,
           error: 'Failed to fetch account summary',
-        });
-      }
-    }
-  );
-
-  // === FINANCIAL INSTITUTIONS ENDPOINTS ===
-
-  // Search financial institutions
-  fastify.get('/institutions', async (request: AuthenticatedRequest, reply) => {
-    try {
-      const query = request.query as any;
-      const institutions =
-        await financialInstitutionService.searchInstitutions(query);
-      return reply.send(institutions);
-    } catch (error) {
-      if (error instanceof AppError) {
-        return reply.code(error.statusCode).send(error.toUserResponse());
-      }
-      return reply.code(500).send({
-        success: false,
-        error: 'Failed to search financial institutions',
-      });
-    }
-  });
-
-  // Get specific financial institution
-  fastify.get(
-    '/institutions/:institutionId',
-    async (request: AuthenticatedRequest, reply) => {
-      try {
-        const { institutionId } = request.params as { institutionId: string };
-        const institution =
-          await financialInstitutionService.getInstitutionById(institutionId);
-
-        if (!institution) {
-          return reply.code(404).send({
-            success: false,
-            error: 'Financial institution not found',
-          });
-        }
-
-        return reply.send({
-          success: true,
-          data: institution,
-        });
-      } catch (error) {
-        if (error instanceof AppError) {
-          return reply.code(error.statusCode).send(error.toUserResponse());
-        }
-        return reply.code(500).send({
-          success: false,
-          error: 'Failed to fetch financial institution',
-        });
-      }
-    }
-  );
-
-  // Get institution by routing number
-  fastify.get(
-    '/institutions/routing/:routingNumber',
-    async (request: AuthenticatedRequest, reply) => {
-      try {
-        const { routingNumber } = request.params as { routingNumber: string };
-        const institution =
-          await financialInstitutionService.getInstitutionByRoutingNumber(
-            routingNumber
-          );
-
-        if (!institution) {
-          return reply.code(404).send({
-            success: false,
-            error: 'Financial institution not found for routing number',
-          });
-        }
-
-        return reply.send({
-          success: true,
-          data: institution,
-        });
-      } catch (error) {
-        if (error instanceof AppError) {
-          return reply.code(error.statusCode).send(error.toUserResponse());
-        }
-        return reply.code(500).send({
-          success: false,
-          error: 'Failed to fetch financial institution by routing number',
-        });
-      }
-    }
-  );
-
-  // Get default interest rate for account type at institution
-  fastify.get(
-    '/institutions/:institutionId/interest-rate/:accountType',
-    async (request: AuthenticatedRequest, reply) => {
-      try {
-        const { institutionId, accountType } = request.params as {
-          institutionId: string;
-          accountType: string;
-        };
-
-        const interestRate =
-          await financialInstitutionService.getDefaultInterestRate(
-            institutionId,
-            accountType as any
-          );
-
-        return reply.send({
-          success: true,
-          data: { interest_rate: interestRate },
-        });
-      } catch (error) {
-        if (error instanceof AppError) {
-          return reply.code(error.statusCode).send(error.toUserResponse());
-        }
-        return reply.code(500).send({
-          success: false,
-          error: 'Failed to fetch default interest rate',
         });
       }
     }

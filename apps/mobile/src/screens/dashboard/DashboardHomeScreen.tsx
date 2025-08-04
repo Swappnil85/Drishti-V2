@@ -2,15 +2,12 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useHaptic } from '../../contexts/HapticContext';
-import { Text } from '../../components/ui/Text';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Container } from '../../components/ui/Container';
+import { useHapticContext } from '../../contexts/HapticContext';
+import { Text, Card, Button, Container } from '../../components/ui';
 
 export default function DashboardHomeScreen() {
   const { colors } = useTheme();
-  const { triggerHaptic } = useHaptic();
+  const { trigger: triggerHaptic } = useHapticContext();
 
   const handleQuickAction = (action: string) => {
     triggerHaptic('light');
@@ -19,7 +16,7 @@ export default function DashboardHomeScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
     >
       <ScrollView
         style={styles.scrollView}
@@ -29,97 +26,97 @@ export default function DashboardHomeScreen() {
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text
-              variant='h1'
-              style={[styles.welcomeTitle, { color: colors.onBackground }]}
+              variant="h2"
+              style={[styles.welcomeTitle, { color: colors.text.primary }]}
             >
               Welcome to Drishti
             </Text>
             <Text
-              variant='body'
+              variant="body1"
               style={[
                 styles.welcomeSubtitle,
-                { color: colors.onSurfaceVariant },
+                { color: colors.text.secondary },
               ]}
             >
-              Your personal financial planning companion
+              Your personal finance companion
             </Text>
           </View>
 
-          {/* Quick Stats */}
+          {/* Stats Overview */}
           <View style={styles.statsSection}>
             <Text
-              variant='h2'
-              style={[styles.sectionTitle, { color: colors.onBackground }]}
+              variant="h3"
+              style={[styles.sectionTitle, { color: colors.text.primary }]}
             >
-              Financial Overview
+              Overview
             </Text>
 
             <View style={styles.statsGrid}>
               <Card
-                style={[styles.statCard, { backgroundColor: colors.surface }]}
+                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
               >
                 <Text
-                  variant='caption'
-                  style={[styles.statLabel, { color: colors.onSurfaceVariant }]}
+                  variant="caption"
+                  style={[styles.statLabel, { color: colors.text.secondary }]}
                 >
                   Total Balance
                 </Text>
                 <Text
-                  variant='h2'
-                  style={[styles.statValue, { color: colors.primary }]}
+                  variant="h4"
+                  style={[styles.statValue, { color: colors.primary[500] }]}
                 >
                   $12,450.00
                 </Text>
               </Card>
 
               <Card
-                style={[styles.statCard, { backgroundColor: colors.surface }]}
+                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
               >
                 <Text
-                  variant='caption'
-                  style={[styles.statLabel, { color: colors.onSurfaceVariant }]}
+                  variant="caption"
+                  style={[styles.statLabel, { color: colors.text.secondary }]}
                 >
-                  Monthly Savings
+                  Monthly Spending
                 </Text>
                 <Text
-                  variant='h2'
-                  style={[styles.statValue, { color: colors.secondary }]}
+                  variant="h4"
+                  style={[styles.statValue, { color: colors.secondary[500] }]}
                 >
-                  $1,200.00
+                  $2,340.00
                 </Text>
               </Card>
 
               <Card
-                style={[styles.statCard, { backgroundColor: colors.surface }]}
+                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
               >
                 <Text
-                  variant='caption'
-                  style={[styles.statLabel, { color: colors.onSurfaceVariant }]}
+                  variant="caption"
+                  style={[styles.statLabel, { color: colors.text.secondary }]}
                 >
-                  Active Goals
+                  Savings Goal
                 </Text>
                 <Text
-                  variant='h2'
-                  style={[styles.statValue, { color: colors.tertiary }]}
+                  variant="h4"
+                  style={[styles.statValue, { color: colors.warning[500] }]}
                 >
-                  3
+                  75%
                 </Text>
               </Card>
 
               <Card
-                style={[styles.statCard, { backgroundColor: colors.surface }]}
+                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
               >
                 <Text
-                  variant='caption'
-                  style={[styles.statLabel, { color: colors.onSurfaceVariant }]}
+                  variant="caption"
+                  style={[styles.statLabel, { color: colors.text.secondary }]}
                 >
-                  Goal Progress
+                  Investments
                 </Text>
                 <Text
-                  variant='h2'
-                  style={[styles.statValue, { color: colors.success }]}
+                  variant="h4"
+                  style={[styles.statValue, { color: colors.success[500] }]}
                 >
-                  68%
+                  $8,750.00
                 </Text>
               </Card>
             </View>
@@ -128,47 +125,43 @@ export default function DashboardHomeScreen() {
           {/* Quick Actions */}
           <View style={styles.actionsSection}>
             <Text
-              variant='h2'
-              style={[styles.sectionTitle, { color: colors.onBackground }]}
+              variant="h3"
+              style={[styles.sectionTitle, { color: colors.text.primary }]}
             >
               Quick Actions
             </Text>
 
             <View style={styles.actionsGrid}>
               <Button
-                variant='primary'
-                size='lg'
-                onPress={() => handleQuickAction('Add Account')}
+                variant="primary"
+                onPress={() => handleQuickAction('add-transaction')}
                 style={styles.actionButton}
               >
-                Add Account
+                Add Transaction
               </Button>
 
               <Button
-                variant='secondary'
-                size='lg'
-                onPress={() => handleQuickAction('Create Goal')}
+                variant="outlined"
+                onPress={() => handleQuickAction('view-accounts')}
                 style={styles.actionButton}
               >
-                Create Goal
+                View Accounts
               </Button>
 
               <Button
-                variant='outline'
-                size='lg'
-                onPress={() => handleQuickAction('View Reports')}
+                variant="outlined"
+                onPress={() => handleQuickAction('set-goal')}
+                style={styles.actionButton}
+              >
+                Set New Goal
+              </Button>
+
+              <Button
+                variant="outlined"
+                onPress={() => handleQuickAction('view-reports')}
                 style={styles.actionButton}
               >
                 View Reports
-              </Button>
-
-              <Button
-                variant='outline'
-                size='lg'
-                onPress={() => handleQuickAction('Plan Scenario')}
-                style={styles.actionButton}
-              >
-                Plan Scenario
               </Button>
             </View>
           </View>
@@ -176,27 +169,27 @@ export default function DashboardHomeScreen() {
           {/* Recent Activity */}
           <View style={styles.activitySection}>
             <Text
-              variant='h2'
-              style={[styles.sectionTitle, { color: colors.onBackground }]}
+              variant="h3"
+              style={[styles.sectionTitle, { color: colors.text.primary }]}
             >
               Recent Activity
             </Text>
 
             <Card
-              style={[styles.activityCard, { backgroundColor: colors.surface }]}
+              style={[styles.activityCard, { backgroundColor: colors.background.secondary }]}
             >
               <View style={styles.activityItem}>
                 <Text
-                  variant='body'
-                  style={[styles.activityText, { color: colors.onSurface }]}
+                  variant="body1"
+                  style={[styles.activityText, { color: colors.text.primary }]}
                 >
-                  Emergency Fund goal updated
+                  Grocery Shopping
                 </Text>
                 <Text
-                  variant='caption'
+                  variant="caption"
                   style={[
                     styles.activityTime,
-                    { color: colors.onSurfaceVariant },
+                    { color: colors.text.secondary },
                   ]}
                 >
                   2 hours ago
@@ -205,16 +198,16 @@ export default function DashboardHomeScreen() {
 
               <View style={styles.activityItem}>
                 <Text
-                  variant='body'
-                  style={[styles.activityText, { color: colors.onSurface }]}
+                  variant="body1"
+                  style={[styles.activityText, { color: colors.text.primary }]}
                 >
-                  Savings account balance synced
+                  Salary Deposit
                 </Text>
                 <Text
-                  variant='caption'
+                  variant="caption"
                   style={[
                     styles.activityTime,
-                    { color: colors.onSurfaceVariant },
+                    { color: colors.text.secondary },
                   ]}
                 >
                   1 day ago
@@ -223,16 +216,16 @@ export default function DashboardHomeScreen() {
 
               <View style={styles.activityItem}>
                 <Text
-                  variant='body'
-                  style={[styles.activityText, { color: colors.onSurface }]}
+                  variant="body1"
+                  style={[styles.activityText, { color: colors.text.primary }]}
                 >
-                  New investment scenario created
+                  Investment Purchase
                 </Text>
                 <Text
-                  variant='caption'
+                  variant="caption"
                   style={[
                     styles.activityTime,
-                    { color: colors.onSurfaceVariant },
+                    { color: colors.text.secondary },
                   ]}
                 >
                   3 days ago
