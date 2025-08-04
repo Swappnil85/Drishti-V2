@@ -252,7 +252,7 @@
   - ✅ **NEW**: Goal milestone suggestions based on FIRE methodology best practices
   - ✅ **NEW**: Risk-adjusted recommendations based on market conditions and user age
 
-## Epic 6: Financial Account Management 🔄 **IN PROGRESS (70% Complete)**
+## Epic 6: Financial Account Management 🔄 **IN PROGRESS (85% Complete)**
 
 **User Story 6.1**: As a user, I can add multiple financial accounts (checking, savings, investment, retirement). ✅ **COMPLETE**
 
@@ -297,16 +297,16 @@
   - ✅ **NEW**: Account transfer functionality for moving balances between accounts _(Implemented through merge functionality)_
   - ✅ **NEW**: Detailed audit trail for all account modifications with timestamps and reasons _(Comprehensive EditAccountScreen with validation and audit trails)_
 
-**User Story 6.5**: As a user, I can see my total net worth across all accounts. 🔄 **PARTIALLY COMPLETE**
+**User Story 6.5**: As a user, I can see my total net worth across all accounts. ✅ **COMPLETE**
 
 - **Enhanced Acceptance Criteria**:
-  - ✅ Dashboard displays real-time net worth with smooth animated updates _(AccountsListScreen shows summary card)_
-  - ✅ Net worth calculation correctly handles negative balances and different currencies _(basic calculation implemented)_
-  - ❌ Historical net worth chart shows trends over time with interactive data points _(not implemented)_
-  - ❌ **NEW**: Net worth breakdown by account type with visual percentage representations _(not implemented)_
-  - ❌ **NEW**: Monthly net worth change calculations with trend indicators _(not implemented)_
-  - ❌ **NEW**: Net worth milestones and achievement celebrations _(not implemented)_
-  - ❌ **NEW**: Comparison to previous periods (month/quarter/year) with variance analysis _(not implemented)_
+  - ✅ Dashboard displays real-time net worth with smooth animated updates _(Enhanced AccountsListScreen with comprehensive net worth overview card)_
+  - ✅ Net worth calculation correctly handles negative balances and different currencies _(NetWorthService with comprehensive asset/liability calculation)_
+  - ✅ Historical net worth chart shows trends over time with interactive data points _(NetWorthTrendsChart with touch interactions and period selection)_
+  - ✅ **NEW**: Net worth breakdown by account type with visual percentage representations _(NetWorthBreakdown with detailed account type analysis and visual indicators)_
+  - ✅ **NEW**: Monthly net worth change calculations with trend indicators _(Monthly view in trends chart with comprehensive trend analysis)_
+  - ✅ **NEW**: Net worth milestones and achievement celebrations _(NetWorthMilestones with progress tracking and achievement celebrations)_
+  - ✅ **NEW**: Comparison to previous periods (month/quarter/year) with variance analysis _(Period comparisons in dashboard with detailed variance analysis)_
 
 **User Story 6.6**: As a user with debt, I can track negative balances appropriately. 🔄 **PARTIALLY COMPLETE**
 

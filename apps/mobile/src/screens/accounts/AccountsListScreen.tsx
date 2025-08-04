@@ -540,40 +540,54 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const renderSummaryCard = () => (
-    <Card variant='filled' padding='base' style={styles.summaryCard}>
-      <Flex direction='row' justify='space-around'>
-        <Flex direction='column' align='center'>
-          <Text
-            style={[styles.summaryNumber, { color: theme.colors.primary[600] }]}
-          >
-            {summary.totalAccounts}
-          </Text>
-          <Text
-            style={[
-              styles.summaryLabel,
-              { color: theme.colors.text.secondary },
-            ]}
-          >
-            Accounts
-          </Text>
+    <TouchableOpacity
+      onPress={() => navigation.navigate('NetWorth')}
+      style={styles.summaryCardTouchable}
+    >
+      <Card variant='filled' padding='base' style={styles.summaryCard}>
+        <Flex direction='row' justify='space-between' align='center'>
+          <Flex direction='column'>
+            <Text
+              style={[
+                styles.summaryTitle,
+                { color: theme.colors.primary[600] },
+              ]}
+            >
+              Net Worth Overview
+            </Text>
+            <Text
+              style={[
+                styles.summaryNumber,
+                { color: theme.colors.success[600] },
+              ]}
+            >
+              {formatBalance(summary.totalBalance)}
+            </Text>
+            <Text
+              style={[
+                styles.summarySubtitle,
+                { color: theme.colors.text.secondary },
+              ]}
+            >
+              {summary.totalAccounts} accounts •{' '}
+              {Object.keys(summary.accountsByType).length} types
+            </Text>
+          </Flex>
+
+          <Flex direction='column' align='center' gap='xs'>
+            <Icon name='trending-up-outline' size='lg' color='success.500' />
+            <Text
+              style={[
+                styles.viewDetailsText,
+                { color: theme.colors.primary[600] },
+              ]}
+            >
+              View Details
+            </Text>
+          </Flex>
         </Flex>
-        <Flex direction='column' align='center'>
-          <Text
-            style={[styles.summaryNumber, { color: theme.colors.success[600] }]}
-          >
-            {formatBalance(summary.totalBalance)}
-          </Text>
-          <Text
-            style={[
-              styles.summaryLabel,
-              { color: theme.colors.text.secondary },
-            ]}
-          >
-            Total Balance
-          </Text>
-        </Flex>
-      </Flex>
-    </Card>
+      </Card>
+    </TouchableOpacity>
   );
 
   const renderFilterBar = () => (
@@ -593,6 +607,14 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
         </Flex>
 
         <Flex direction='row' align='center' gap='xs'>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('NetWorth')}
+            style={styles.filterButton}
+            testID='net-worth-button'
+          >
+            <Icon name='trending-up-outline' size='sm' color='success.500' />
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => navigation.navigate('AccountRecovery')}
             style={styles.filterButton}
@@ -924,17 +946,35 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
+  summaryCardTouchable: {
+    // No additional styles needed, TouchableOpacity handles touch feedback
+  },
   summaryCard: {
     backgroundColor: '#F8F9FA',
+  },
+  summaryTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
   },
   summaryNumber: {
     fontSize: 24,
     fontWeight: '700',
+    marginBottom: 4,
+  },
+  summarySubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   summaryLabel: {
     fontSize: 14,
     fontWeight: '500',
     marginTop: 4,
+  },
+  viewDetailsText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   filterBar: {
     // Card handles styling

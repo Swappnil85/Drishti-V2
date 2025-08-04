@@ -1,0 +1,489 @@
+/**
+ * NetWorthDashboard Component
+ * Comprehensive net worth visualization with trends and breakdowns
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { Card, Button, Icon, Flex, Badge } from '../ui';
+import { netWorthService, NetWorthData, NetWorthComparison, NetWorthMilestone } from '../../services/financial/NetWorthService';
+import { useFormHaptic } from '../../hooks/useHaptic';
+
+interface NetWorthDashboardProps {
+  onViewDetails?: () => void;
+  onViewTrends?: () => void;
+  compact?: boolean;
+}
+
+const { width: screenWidth } = Dimensions.get('window');
+
+const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
+  onViewDetails,
+  onViewTrends,
+  compact = false,
+}) => {
+  const { theme } = useTheme();
+  const { user } = useAuth();
+  const haptic = useFormHaptic();
+
+  const [netWorthData, setNetWorthData] = useState<NetWorthData | null>(null);
+  const [comparisons, setComparisons] = useState<NetWorthComparison[]>([]);
+  const [milestones, setMilestones] = useState<NetWorthMilestone[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+
+  useEffect(() => {
+    if (user?.id) {
+      loadNetWorthData();
+    }
+  }, [user?.id]);
+
+  const loadNetWorthData = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      
+      const [netWorth, netWorthComparisons, netWorthMilestones] = await Promise.all([
+        netWorthService.calculateNetWorth(user.id),
+        netWorthService.getNetWorthComparisons(user.id),
+        netWorthService.getNetWorthMilestones(user.id),
+      ]);
+
+      setNetWorthData(netWorth);
+      setComparisons(netWorthComparisons);
+      setMilestones(netWorthMilestones);
+    } catch (error) {
+      console.error('Error loading net worth data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatPercentage = (percentage: number) => {
+    const sign = percentage >= 0 ? '+' : '';
+    return `${sign}${percentage.toFixed(1)}%`;
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return theme.colors.success;
+    if (change < 0) return theme.colors.error;
+    return theme.colors.textSecondary;
+  };
+
+  const getSelectedComparison = () => {
+    return comparisons.find(comp => comp.period === selectedPeriod);
+  };
+
+  const getNextMilestone = () => {
+    return milestones.find(milestone => !milestone.achieved);
+  };
+
+  const renderNetWorthHeader = () => {
+    if (!netWorthData) return null;
+
+    const selectedComparison = getSelectedComparison();
+
+    return (
+      <Card variant="filled" padding="lg" style={styles.headerCard}>
+        <Flex direction="column" align="center" gap="sm">
+          <Text style={[styles.netWorthLabel, { color: theme.colors.onPrimary }]}>
+            Total Net Worth
+          </Text>
+          <Text style={[styles.netWorthAmount, { color: theme.colors.onPrimary }]}>
+            {formatCurrency(netWorthData.totalNetWorth)}
+          </Text>
+          
+          {selectedComparison && (
+            <Flex direction="row" align="center" gap="xs">
+              <Icon
+                name={selectedComparison.change >= 0 ? 'trending-up' : 'trending-down'}
+                size="sm"
+                color={selectedComparison.change >= 0 ? 'success' : 'error'}
+              />
+              <Text style={[styles.changeText, { color: getChangeColor(selectedComparison.change) }]}>
+                {formatCurrency(Math.abs(selectedComparison.change))} ({formatPercentage(selectedComparison.changePercentage)})
+              </Text>
+              <Text style={[styles.periodText, { color: theme.colors.onPrimary }]}>
+                {selectedComparison.periodLabel}
+              </Text>
+            </Flex>
+          )}
+        </Flex>
+      </Card>
+    );
+  };
+
+  const renderPeriodSelector = () => {
+    const periods: Array<{ key: 'month' | 'quarter' | 'year'; label: string }> = [
+      { key: 'month', label: 'Month' },
+      { key: 'quarter', label: 'Quarter' },
+      { key: 'year', label: 'Year' },
+    ];
+
+    return (
+      <Card variant="outlined" padding="sm" style={styles.periodSelector}>
+        <Flex direction="row" gap="xs">
+          {periods.map(period => (
+            <TouchableOpacity
+              key={period.key}
+              style={[
+                styles.periodButton,
+                selectedPeriod === period.key && {
+                  backgroundColor: theme.colors.primary,
+                },
+              ]}
+              onPress={() => {
+                haptic.light();
+                setSelectedPeriod(period.key);
+              }}
+            >
+              <Text
+                style={[
+                  styles.periodButtonText,
+                  {
+                    color: selectedPeriod === period.key
+                      ? theme.colors.onPrimary
+                      : theme.colors.textSecondary,
+                  },
+                ]}
+              >
+                {period.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </Flex>
+      </Card>
+    );
+  };
+
+  const renderAccountBreakdown = () => {
+    if (!netWorthData || compact) return null;
+
+    const topAccountTypes = netWorthData.accountBreakdown.slice(0, 4);
+
+    return (
+      <Card variant="outlined" padding="lg" style={styles.breakdownCard}>
+        <Flex direction="row" justify="space-between" align="center" style={styles.breakdownHeader}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Account Breakdown
+          </Text>
+          <TouchableOpacity onPress={onViewDetails}>
+            <Text style={[styles.viewAllText, { color: theme.colors.primary }]}>
+              View All
+            </Text>
+          </TouchableOpacity>
+        </Flex>
+
+        {topAccountTypes.map((accountType, index) => (
+          <View key={accountType.accountType} style={styles.breakdownItem}>
+            <Flex direction="row" justify="space-between" align="center">
+              <Flex direction="row" align="center" gap="sm">
+                <View
+                  style={[
+                    styles.breakdownIndicator,
+                    { backgroundColor: getAccountTypeColor(accountType.accountType, index) },
+                  ]}
+                />
+                <View>
+                  <Text style={[styles.accountTypeName, { color: theme.colors.text }]}>
+                    {formatAccountTypeName(accountType.accountType)}
+                  </Text>
+                  <Text style={[styles.accountCount, { color: theme.colors.textSecondary }]}>
+                    {accountType.accountCount} account{accountType.accountCount !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              </Flex>
+
+              <Flex direction="column" align="flex-end">
+                <Text style={[styles.breakdownAmount, { color: theme.colors.text }]}>
+                  {formatCurrency(accountType.totalBalance)}
+                </Text>
+                <Text style={[styles.breakdownPercentage, { color: theme.colors.textSecondary }]}>
+                  {accountType.percentage.toFixed(1)}%
+                </Text>
+              </Flex>
+            </Flex>
+          </View>
+        ))}
+      </Card>
+    );
+  };
+
+  const renderMilestones = () => {
+    if (!milestones.length || compact) return null;
+
+    const nextMilestone = getNextMilestone();
+    const achievedCount = milestones.filter(m => m.achieved).length;
+
+    return (
+      <Card variant="outlined" padding="lg" style={styles.milestonesCard}>
+        <Flex direction="row" justify="space-between" align="center" style={styles.milestonesHeader}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Net Worth Milestones
+          </Text>
+          <Badge variant="filled" color="primary" size="sm">
+            {achievedCount}/{milestones.length}
+          </Badge>
+        </Flex>
+
+        {nextMilestone && (
+          <View style={styles.nextMilestone}>
+            <Flex direction="row" justify="space-between" align="center">
+              <View>
+                <Text style={[styles.milestoneLabel, { color: theme.colors.text }]}>
+                  Next: {nextMilestone.label}
+                </Text>
+                <Text style={[styles.milestoneAmount, { color: theme.colors.textSecondary }]}>
+                  {formatCurrency(nextMilestone.amount)}
+                </Text>
+              </View>
+              <View style={styles.progressContainer}>
+                <Text style={[styles.progressText, { color: theme.colors.textSecondary }]}>
+                  {Math.round(nextMilestone.progress * 100)}%
+                </Text>
+                <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        backgroundColor: theme.colors.primary,
+                        width: `${nextMilestone.progress * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            </Flex>
+          </View>
+        )}
+      </Card>
+    );
+  };
+
+  const renderActionButtons = () => {
+    if (compact) return null;
+
+    return (
+      <Card variant="outlined" padding="lg" style={styles.actionsCard}>
+        <Flex direction="row" gap="sm">
+          <Button
+            variant="outline"
+            onPress={onViewTrends}
+            leftIcon={<Icon name="trending-up" size="sm" />}
+            style={styles.actionButton}
+          >
+            View Trends
+          </Button>
+          <Button
+            variant="outline"
+            onPress={onViewDetails}
+            leftIcon={<Icon name="pie-chart" size="sm" />}
+            style={styles.actionButton}
+          >
+            Detailed View
+          </Button>
+        </Flex>
+      </Card>
+    );
+  };
+
+  const getAccountTypeColor = (accountType: string, index: number) => {
+    const colors = [
+      theme.colors.primary,
+      theme.colors.success,
+      theme.colors.warning,
+      theme.colors.info,
+      theme.colors.error,
+    ];
+    return colors[index % colors.length];
+  };
+
+  const formatAccountTypeName = (accountType: string) => {
+    return accountType
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  if (loading) {
+    return (
+      <Card variant="outlined" padding="lg">
+        <Flex direction="column" align="center" gap="base">
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+            Loading net worth data...
+          </Text>
+        </Flex>
+      </Card>
+    );
+  }
+
+  if (!netWorthData) {
+    return (
+      <Card variant="outlined" padding="lg">
+        <Flex direction="column" align="center" gap="base">
+          <Icon name="alert-circle-outline" size="lg" color="error" />
+          <Text style={[styles.errorText, { color: theme.colors.text }]}>
+            Unable to load net worth data
+          </Text>
+          <Button variant="outline" onPress={loadNetWorthData}>
+            Retry
+          </Button>
+        </Flex>
+      </Card>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {renderNetWorthHeader()}
+      {!compact && renderPeriodSelector()}
+      {renderAccountBreakdown()}
+      {renderMilestones()}
+      {renderActionButtons()}
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerCard: {
+    marginBottom: 16,
+  },
+  netWorthLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  netWorthAmount: {
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  changeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  periodText: {
+    fontSize: 12,
+  },
+  periodSelector: {
+    marginBottom: 16,
+  },
+  periodButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  periodButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  breakdownCard: {
+    marginBottom: 16,
+  },
+  breakdownHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  breakdownItem: {
+    marginBottom: 12,
+  },
+  breakdownIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  accountTypeName: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  accountCount: {
+    fontSize: 12,
+  },
+  breakdownAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  breakdownPercentage: {
+    fontSize: 12,
+  },
+  milestonesCard: {
+    marginBottom: 16,
+  },
+  milestonesHeader: {
+    marginBottom: 16,
+  },
+  nextMilestone: {
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    borderRadius: 8,
+  },
+  milestoneLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  milestoneAmount: {
+    fontSize: 12,
+  },
+  progressContainer: {
+    alignItems: 'flex-end',
+  },
+  progressText: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  progressBar: {
+    width: 80,
+    height: 4,
+    borderRadius: 2,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  actionsCard: {
+    marginBottom: 16,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});
+
+export default NetWorthDashboard;
