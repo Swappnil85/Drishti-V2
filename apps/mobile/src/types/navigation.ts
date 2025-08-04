@@ -81,6 +81,9 @@ export type SettingsStackParamList = {
   EditProfile: undefined;
   SecuritySettings: undefined;
   Recommendations: undefined;
+  AdvancedRecommendations: undefined;
+  PrivacyDashboard: undefined;
+  PhotoUpload: undefined;
   SecurityLog: undefined;
   Security: undefined;
   Notifications: undefined;

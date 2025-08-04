@@ -10,7 +10,18 @@ export interface PersonalInformation {
   phone?: string;
   dateOfBirth: string;
   profilePicture?: string;
+  profilePictureMetadata?: ProfilePictureMetadata;
   emergencyContact?: EmergencyContact;
+  twoFactorEnabled?: boolean;
+  twoFactorBackupCodes?: string[];
+}
+
+export interface ProfilePictureMetadata {
+  originalSize: number;
+  compressedSize: number;
+  dimensions: { width: number; height: number };
+  uploadedAt: number;
+  format: 'jpeg' | 'png' | 'webp';
 }
 
 export interface EmergencyContact {
@@ -20,23 +31,85 @@ export interface EmergencyContact {
   email?: string;
 }
 
+export interface BulkImportData {
+  accounts: BulkAccountData[];
+  importedAt: number;
+  source: 'csv' | 'manual';
+  validationErrors: string[];
+}
+
+export interface BulkAccountData {
+  accountName: string;
+  accountType: string;
+  balance: number;
+  currency: string;
+  lastUpdated?: string;
+}
+
+export interface PrivacyDashboard {
+  dataCollected: DataCollectionInfo[];
+  dataUsage: DataUsageInfo[];
+  thirdPartySharing: ThirdPartyInfo[];
+  retentionPolicy: RetentionPolicyInfo;
+  userRights: UserRightsInfo;
+}
+
+export interface DataCollectionInfo {
+  category: string;
+  description: string;
+  purpose: string;
+  frequency: string;
+  enabled: boolean;
+  required: boolean;
+}
+
+export interface DataUsageInfo {
+  purpose: string;
+  description: string;
+  dataTypes: string[];
+  frequency: string;
+}
+
+export interface ThirdPartyInfo {
+  name: string;
+  purpose: string;
+  dataShared: string[];
+  privacyPolicy: string;
+  enabled: boolean;
+}
+
+export interface RetentionPolicyInfo {
+  category: string;
+  retentionPeriod: number; // in days
+  deletionMethod: string;
+  exceptions: string[];
+}
+
+export interface UserRightsInfo {
+  canExport: boolean;
+  canDelete: boolean;
+  canCorrect: boolean;
+  canRestrict: boolean;
+  canPortability: boolean;
+}
+
 export interface FinancialInformation {
   // Basic Information
   age: number;
   currentSavings: number;
   desiredRetirementAge: number;
   riskTolerance: 'conservative' | 'moderate' | 'aggressive';
-  
+
   // Income Sources
   primaryIncome: IncomeSource;
   additionalIncomes: IncomeSource[];
   totalAnnualIncome: number;
-  
+
   // Expenses
   monthlyExpenses: number;
   annualExpenses: number;
   expenseCategories: ExpenseCategory[];
-  
+
   // Calculated Values
   savingsRate: number;
   fireNumber: number;
@@ -101,7 +174,13 @@ export interface PrivacySettings {
 
 export interface SecurityEvent {
   id: string;
-  type: 'login' | 'logout' | 'failed_login' | 'password_change' | 'settings_change' | 'data_export';
+  type:
+    | 'login'
+    | 'logout'
+    | 'failed_login'
+    | 'password_change'
+    | 'settings_change'
+    | 'data_export';
   timestamp: number;
   deviceInfo: string;
   ipAddress?: string;
@@ -136,7 +215,14 @@ export interface ProfileChangeHistory {
 
 export interface PersonalizedRecommendation {
   id: string;
-  type: 'savings_rate' | 'investment_allocation' | 'expense_reduction' | 'income_increase' | 'goal_adjustment';
+  type:
+    | 'savings_rate'
+    | 'investment_allocation'
+    | 'expense_reduction'
+    | 'income_increase'
+    | 'goal_adjustment'
+    | 'milestone'
+    | 'risk_adjustment';
   title: string;
   description: string;
   rationale: string;
@@ -145,14 +231,53 @@ export interface PersonalizedRecommendation {
     timeToFire?: number;
     additionalSavings?: number;
     riskReduction?: number;
+    confidenceIncrease?: number;
   };
   priority: 'low' | 'medium' | 'high';
   confidence: number; // 0-1
+  mlScore?: number; // ML model confidence score
+  peerComparison?: PeerComparison;
+  marketConditions?: MarketConditionData;
   createdAt: number;
   expiresAt?: number;
   accepted?: boolean;
   dismissed?: boolean;
   feedback?: string;
+  implementationTracking?: ImplementationTracking;
+}
+
+export interface PeerComparison {
+  userPercentile: number; // 0-100
+  averageValue: number;
+  topPercentileValue: number;
+  category: string;
+  sampleSize: number;
+  anonymous: boolean;
+}
+
+export interface MarketConditionData {
+  marketTrend: 'bull' | 'bear' | 'neutral';
+  volatilityIndex: number;
+  recommendedAdjustment: string;
+  confidenceLevel: number;
+  lastUpdated: number;
+}
+
+export interface ImplementationTracking {
+  started: boolean;
+  startedAt?: number;
+  progress: number; // 0-1
+  milestones: ImplementationMilestone[];
+  estimatedCompletion?: number;
+}
+
+export interface ImplementationMilestone {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  completedAt?: number;
+  dueDate?: number;
 }
 
 export interface RecommendationEngine {
