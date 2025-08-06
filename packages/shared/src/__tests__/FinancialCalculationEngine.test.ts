@@ -9,6 +9,8 @@ import {
   AccountProjectionParams,
   MonteCarloParams,
   FIRECalculationParams,
+  FIRENumberCalculationParams,
+  FIRENumberCalculationResult,
   DebtPayoffParams,
 } from '../types/financial';
 
@@ -528,4 +530,316 @@ describe('FinancialCalculationEngine', () => {
       }).toThrow();
     });
   });
+
+  // FIRE Number Calculation Tests (Story 2)
+  describe('FIRE Number Calculations', () => {
+    describe('calculateFIRENumber', () => {
+      test('should calculate basic FIRE number with 4% rule', () => {
+        const params = {
+          monthlyExpenses: 5000,
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.fireNumber).toBe(1500000); // 60,000 / 0.04
+        expect(result.annualExpenses).toBe(60000);
+        expect(result.withdrawalRate).toBe(0.04);
+        expect(result.leanFireNumber).toBe(1050000); // 70% of expenses
+        expect(result.fatFireNumber).toBe(3000000); // 200% of expenses
+      });
+
+      test('should handle annual expenses input', () => {
+        const params = {
+          annualExpenses: 48000,
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.fireNumber).toBe(1200000); // 48,000 / 0.04
+        expect(result.annualExpenses).toBe(48000);
+      });
+
+      test('should apply custom withdrawal rate', () => {
+        const params = {
+          monthlyExpenses: 4000,
+          withdrawalRate: 0.035, // 3.5% rule
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.fireNumber).toBeCloseTo(1371428.57, 2); // 48,000 / 0.035
+        expect(result.withdrawalRate).toBe(0.035);
+      });
+
+      test('should apply safety margin', () => {
+        const params = {
+          monthlyExpenses: 5000,
+          safetyMargin: 0.2, // 20% safety margin
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.fireNumber).toBe(1800000); // 1,500,000 * 1.2
+        expect(result.safetyMargin).toBe(0.2);
+      });
+
+      test('should apply geographic cost of living adjustment', () => {
+        const params = {
+          monthlyExpenses: 4000,
+          costOfLivingMultiplier: 1.5, // 50% higher cost area
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.fireNumber).toBe(1800000); // 1,200,000 * 1.5
+        expect(result.costOfLivingAdjustment).toBe(1.5);
+      });
+
+      test('should include healthcare cost projections', () => {
+        const params = {
+          monthlyExpenses: 4000,
+          healthcareExpenses: {
+            monthlyPremium: 800,
+            annualDeductible: 5000,
+            outOfPocketMax: 8000,
+            inflationRate: 0.06,
+          },
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.healthcareCosts).toBeDefined();
+        expect(result.healthcareCosts!.annualCost).toBe(14600); // 800*12 + 5000
+        expect(result.healthcareCosts!.coverageGapYears).toBe(10);
+      });
+
+      test('should include Social Security impact', () => {
+        const params = {
+          monthlyExpenses: 5000,
+          socialSecurity: {
+            estimatedBenefit: 2500,
+            startAge: 67,
+            inflationAdjusted: true,
+          },
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.socialSecurityImpact).toBeDefined();
+        expect(result.socialSecurityImpact!.annualBenefit).toBe(30000); // 2500 * 12
+        expect(
+          result.socialSecurityImpact!.fireNumberReduction
+        ).toBeGreaterThan(0);
+      });
+
+      test('should generate stress test results', () => {
+        const params = {
+          monthlyExpenses: 4000,
+          stressTestScenarios: [
+            {
+              name: 'Market Crash',
+              marketReturnAdjustment: -0.02,
+              inflationAdjustment: 0.01,
+              expenseAdjustment: 0.1,
+            },
+          ],
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.stressTestResults).toHaveLength(1);
+        expect(result.stressTestResults[0].scenario).toBe('Market Crash');
+        expect(result.stressTestResults[0].adjustedFireNumber).toBeGreaterThan(
+          result.fireNumber
+        );
+        expect(result.stressTestResults[0].riskLevel).toBeDefined();
+      });
+
+      test('should provide optimization recommendations', () => {
+        const params = {
+          monthlyExpenses: 6000,
+          withdrawalRate: 0.05, // High withdrawal rate
+        };
+
+        const result = engine.calculateFIRENumber(params);
+
+        expect(result.recommendations).toContainEqual(
+          expect.objectContaining({
+            category: 'Withdrawal Rate',
+            priority: 'high',
+          })
+        );
+      });
+
+      test('should throw error for invalid input', () => {
+        expect(() => {
+          engine.calculateFIRENumber({
+            monthlyExpenses: 0,
+          });
+        }).toThrow(
+          'Monthly or annual expenses must be provided and greater than 0'
+        );
+      });
+    });
+
+    describe('calculateExpenseBasedFIRE', () => {
+      test('should calculate FIRE with expense categories', () => {
+        const params = {
+          expenseCategories: [
+            {
+              category: 'Housing',
+              monthlyAmount: 2000,
+              inflationRate: 0.03,
+              essential: true,
+              geographicSensitive: true,
+            },
+            {
+              category: 'Food',
+              monthlyAmount: 600,
+              inflationRate: 0.025,
+              essential: true,
+              geographicSensitive: false,
+            },
+          ],
+          costOfLivingIndex: 1.2,
+          projectionYears: 10,
+        };
+
+        const result = engine.calculateExpenseBasedFIRE(params);
+
+        expect(result.totalFireNumber).toBeGreaterThan(0);
+        expect(result.categoryBreakdown).toHaveLength(2);
+        expect(result.geographicAdjustments.costOfLivingIndex).toBe(1.2);
+        expect(result.inflationImpact.inflationIncrease).toBeGreaterThan(0);
+      });
+
+      test('should apply geographic adjustments correctly', () => {
+        const params = {
+          expenseCategories: [
+            {
+              category: 'Housing',
+              monthlyAmount: 2000,
+              inflationRate: 0.03,
+              essential: true,
+              geographicSensitive: true,
+            },
+          ],
+          costOfLivingIndex: 1.5,
+          geographicLocation: 'San Francisco',
+        };
+
+        const result = engine.calculateExpenseBasedFIRE(params);
+
+        expect(result.categoryBreakdown[0].geographicAdjustment).toBeCloseTo(
+          1.8,
+          1
+        ); // 1.5 * 1.2 for housing
+        expect(result.geographicAdjustments.location).toBe('San Francisco');
+      });
+
+      test('should generate optimization suggestions', () => {
+        const params = {
+          expenseCategories: [
+            {
+              category: 'Entertainment',
+              monthlyAmount: 1000,
+              inflationRate: 0.02,
+              essential: false,
+              geographicSensitive: false,
+            },
+          ],
+        };
+
+        const result = engine.calculateExpenseBasedFIRE(params);
+
+        expect(result.optimizationSuggestions).toContainEqual(
+          expect.objectContaining({
+            category: 'Entertainment',
+            difficulty: 'easy',
+          })
+        );
+      });
+    });
+
+    // Performance Tests for FIRE calculations
+    describe('Performance Tests', () => {
+      test('FIRE number calculation should complete within 50ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateFIRENumber({
+          monthlyExpenses: 5000,
+          expenseCategories: Array.from({ length: 10 }, (_, i) => ({
+            category: `Category ${i}`,
+            monthlyAmount: 500,
+            inflationRate: 0.03,
+            essential: i < 5,
+          })),
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(50);
+      });
+
+      test('Expense-based FIRE calculation should complete within 30ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateExpenseBasedFIRE({
+          expenseCategories: Array.from({ length: 20 }, (_, i) => ({
+            category: `Category ${i}`,
+            monthlyAmount: 300,
+            inflationRate: 0.025,
+            essential: i < 10,
+            geographicSensitive: i % 2 === 0,
+          })),
+          projectionYears: 15,
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(30);
+      });
+
+      test('Healthcare projections should complete within 40ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateHealthcareCostProjections({
+          currentAge: 35,
+          retirementAge: 50,
+          currentHealthcareCost: 8000,
+          chronicConditions: Array.from({ length: 5 }, (_, i) => ({
+            condition: `Condition ${i}`,
+            annualCost: 2000,
+            inflationRate: 0.05,
+          })),
+          medicareAge: 65,
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(40);
+      });
+
+      test('Social Security and stress testing should complete within 60ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateSocialSecurityAndStressTesting({
+          currentAge: 40,
+          currentIncome: 80000,
+          retirementAge: 55,
+          baseFireNumber: 1500000,
+          stressTestScenarios: Array.from({ length: 10 }, (_, i) => ({
+            name: `Scenario ${i}`,
+            marketReturnAdjustment: -0.01 * i,
+            inflationAdjustment: 0.005 * i,
+            socialSecurityAdjustment: -0.05 * i,
+            healthcareInflationAdjustment: 0.01 * i,
+          })),
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(60);
+      });
+    });
+  });
 });
+
+// Export for use in other test files
+export { engine };

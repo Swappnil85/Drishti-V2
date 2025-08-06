@@ -450,6 +450,113 @@ export interface FIRECalculationResult {
   }>;
 }
 
+// Enhanced FIRE Number Calculation Parameters (Story 2)
+export interface FIRENumberCalculationParams {
+  // Basic expense information
+  monthlyExpenses: number;
+  annualExpenses?: number; // Alternative to monthly
+
+  // FIRE calculation settings
+  withdrawalRate?: number; // Default 0.04 (4% rule)
+  safetyMargin?: number; // Additional buffer percentage
+
+  // Geographic and lifestyle adjustments
+  geographicLocation?: string;
+  costOfLivingMultiplier?: number;
+  lifestyleInflationRate?: number;
+
+  // Expense categories with individual inflation rates
+  expenseCategories?: Array<{
+    category: string;
+    monthlyAmount: number;
+    inflationRate: number;
+    essential: boolean;
+  }>;
+
+  // Healthcare considerations
+  healthcareExpenses?: {
+    monthlyPremium: number;
+    annualDeductible: number;
+    outOfPocketMax: number;
+    inflationRate: number;
+  };
+
+  // Social Security integration
+  socialSecurity?: {
+    estimatedBenefit: number;
+    startAge: number;
+    inflationAdjusted: boolean;
+  };
+
+  // Stress testing parameters
+  stressTestScenarios?: Array<{
+    name: string;
+    marketReturnAdjustment: number;
+    inflationAdjustment: number;
+    expenseAdjustment: number;
+  }>;
+}
+
+// Enhanced FIRE Number Calculation Result
+export interface FIRENumberCalculationResult {
+  // Basic FIRE numbers
+  fireNumber: number;
+  leanFireNumber: number;
+  fatFireNumber: number;
+  coastFireNumber: number;
+  baristaFireNumber: number;
+
+  // Calculation details
+  annualExpenses: number;
+  withdrawalRate: number;
+  safetyMargin: number;
+
+  // Geographic adjustments
+  costOfLivingAdjustment: number;
+  adjustedFireNumber: number;
+
+  // Healthcare projections
+  healthcareCosts?: {
+    annualCost: number;
+    inflationAdjustedCost: number;
+    coverageGapYears: number;
+    totalGapCost: number;
+  };
+
+  // Social Security impact
+  socialSecurityImpact?: {
+    annualBenefit: number;
+    presentValue: number;
+    fireNumberReduction: number;
+  };
+
+  // Stress test results
+  stressTestResults: Array<{
+    scenario: string;
+    adjustedFireNumber: number;
+    percentageIncrease: number;
+    riskLevel: 'low' | 'medium' | 'high';
+  }>;
+
+  // Recommendations
+  recommendations: Array<{
+    category: string;
+    suggestion: string;
+    impact: number;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+
+  // Expense breakdown
+  expenseBreakdown: Array<{
+    category: string;
+    monthlyAmount: number;
+    annualAmount: number;
+    inflationRate: number;
+    fireContribution: number;
+    essential: boolean;
+  }>;
+}
+
 // Debt Payoff Calculation Parameters
 export interface DebtPayoffParams {
   debts: Array<{

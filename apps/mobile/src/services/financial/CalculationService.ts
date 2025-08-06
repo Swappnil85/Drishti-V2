@@ -14,6 +14,8 @@ import {
   MonteCarloResult,
   FIRECalculationParams,
   FIRECalculationResult,
+  FIRENumberCalculationParams,
+  FIRENumberCalculationResult,
   DebtPayoffParams,
   DebtPayoffResult,
   GoalProjectionParams,
@@ -508,6 +510,22 @@ export class CalculationService {
                 false
               );
               break;
+            case 'fire_number':
+              result = financialCalculationEngine.calculateFIRENumber(
+                calculation.params
+              );
+              break;
+            case 'expense_fire':
+              result = financialCalculationEngine.calculateExpenseBasedFIRE(
+                calculation.params
+              );
+              break;
+            case 'healthcare_projections':
+              result =
+                financialCalculationEngine.calculateHealthcareCostProjections(
+                  calculation.params
+                );
+              break;
             default:
               throw new Error(
                 `Unsupported calculation type: ${calculation.type}`
@@ -533,6 +551,228 @@ export class CalculationService {
     } finally {
       this.isProcessingQueue = false;
       await this.saveQueueToStorage();
+    }
+  }
+
+  /**
+   * Calculate FIRE number based on expenses (Story 2)
+   */
+  async calculateFIRENumber(
+    params: FIRENumberCalculationParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<FIRENumberCalculationResult> {
+    const { priority = 'normal', useCache = true, timeout = 10000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `fire_number_${JSON.stringify(params)}`;
+        const cached = await this.getCachedResult(cacheKey);
+        if (cached) {
+          this.notifySubscribers('fire_number', cached);
+          return cached;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<FIRENumberCalculationResult>(
+        (resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('FIRE calculation timeout'));
+          }, timeout);
+
+          this.calculationQueue.push({
+            id: Date.now().toString(),
+            type: 'fire_number',
+            params,
+            priority,
+            resolve: result => {
+              clearTimeout(timeoutId);
+              resolve(result);
+            },
+            reject: error => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
+          });
+
+          this.processQueue();
+        }
+      );
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `fire_number_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('fire_number', result);
+
+      return result;
+    } catch (error) {
+      console.error('FIRE number calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate expense-based FIRE with category analysis
+   */
+  async calculateExpenseBasedFIRE(
+    params: {
+      expenseCategories: Array<{
+        category: string;
+        monthlyAmount: number;
+        inflationRate: number;
+        essential: boolean;
+        geographicSensitive: boolean;
+      }>;
+      geographicLocation?: string;
+      costOfLivingIndex?: number;
+      withdrawalRate?: number;
+      projectionYears?: number;
+    },
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any> {
+    const { priority = 'normal', useCache = true, timeout = 8000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `expense_fire_${JSON.stringify(params)}`;
+        const cached = await this.getCachedResult(cacheKey);
+        if (cached) {
+          this.notifySubscribers('expense_fire', cached);
+          return cached;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<any>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error('Expense FIRE calculation timeout'));
+        }, timeout);
+
+        this.calculationQueue.push({
+          id: Date.now().toString(),
+          type: 'expense_fire',
+          params,
+          priority,
+          resolve: result => {
+            clearTimeout(timeoutId);
+            resolve(result);
+          },
+          reject: error => {
+            clearTimeout(timeoutId);
+            reject(error);
+          },
+        });
+
+        this.processQueue();
+      });
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `expense_fire_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('expense_fire', result);
+
+      return result;
+    } catch (error) {
+      console.error('Expense-based FIRE calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate healthcare cost projections for early retirement
+   */
+  async calculateHealthcareCostProjections(
+    params: {
+      currentAge: number;
+      retirementAge: number;
+      currentHealthcareCost: number;
+      healthcareInflationRate?: number;
+      employerCoverage?: any;
+      marketplacePlans?: any[];
+      medicareAge?: number;
+      chronicConditions?: any[];
+      emergencyFund?: number;
+    },
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any> {
+    const { priority = 'normal', useCache = true, timeout = 5000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `healthcare_${JSON.stringify(params)}`;
+        const cached = await this.getCachedResult(cacheKey);
+        if (cached) {
+          this.notifySubscribers('healthcare_projections', cached);
+          return cached;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<any>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error('Healthcare calculation timeout'));
+        }, timeout);
+
+        this.calculationQueue.push({
+          id: Date.now().toString(),
+          type: 'healthcare_projections',
+          params,
+          priority,
+          resolve: result => {
+            clearTimeout(timeoutId);
+            resolve(result);
+          },
+          reject: error => {
+            clearTimeout(timeoutId);
+            reject(error);
+          },
+        });
+
+        this.processQueue();
+      });
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `healthcare_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('healthcare_projections', result);
+
+      return result;
+    } catch (error) {
+      console.error('Healthcare cost projection failed:', error);
+      throw error;
     }
   }
 

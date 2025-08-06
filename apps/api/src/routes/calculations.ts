@@ -10,6 +10,8 @@ import {
   AccountProjectionParams,
   MonteCarloParams,
   FIRECalculationParams,
+  FIRENumberCalculationParams,
+  FIRENumberCalculationResult,
   DebtPayoffParams,
   GoalProjectionParams,
   CalculationRequest,
@@ -703,6 +705,245 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
           status: 'unhealthy',
           timestamp: new Date().toISOString(),
           error: error.message,
+        });
+      }
+    }
+  );
+
+  // FIRE Number Calculation Endpoint (Story 2)
+  fastify.post<{
+    Body: FIRENumberCalculationParams;
+    Reply: CalculationResponse;
+  }>(
+    '/fire-number',
+    {
+      schema: {
+        description: 'Calculate comprehensive FIRE number based on expenses',
+        tags: ['calculations', 'fire'],
+        body: {
+          type: 'object',
+          required: ['monthlyExpenses'],
+          properties: {
+            monthlyExpenses: { type: 'number', minimum: 0 },
+            annualExpenses: { type: 'number', minimum: 0 },
+            withdrawalRate: { type: 'number', minimum: 0.01, maximum: 0.1 },
+            safetyMargin: { type: 'number', minimum: 0, maximum: 1 },
+            geographicLocation: { type: 'string' },
+            costOfLivingMultiplier: {
+              type: 'number',
+              minimum: 0.1,
+              maximum: 5,
+            },
+            lifestyleInflationRate: {
+              type: 'number',
+              minimum: 0,
+              maximum: 0.2,
+            },
+            expenseCategories: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: [
+                  'category',
+                  'monthlyAmount',
+                  'inflationRate',
+                  'essential',
+                ],
+                properties: {
+                  category: { type: 'string' },
+                  monthlyAmount: { type: 'number', minimum: 0 },
+                  inflationRate: { type: 'number', minimum: 0, maximum: 0.5 },
+                  essential: { type: 'boolean' },
+                },
+              },
+            },
+            healthcareExpenses: {
+              type: 'object',
+              properties: {
+                monthlyPremium: { type: 'number', minimum: 0 },
+                annualDeductible: { type: 'number', minimum: 0 },
+                outOfPocketMax: { type: 'number', minimum: 0 },
+                inflationRate: { type: 'number', minimum: 0, maximum: 0.5 },
+              },
+            },
+            socialSecurity: {
+              type: 'object',
+              properties: {
+                estimatedBenefit: { type: 'number', minimum: 0 },
+                startAge: { type: 'number', minimum: 62, maximum: 70 },
+                inflationAdjusted: { type: 'boolean' },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  fireNumber: { type: 'number' },
+                  leanFireNumber: { type: 'number' },
+                  fatFireNumber: { type: 'number' },
+                  coastFireNumber: { type: 'number' },
+                  baristaFireNumber: { type: 'number' },
+                  annualExpenses: { type: 'number' },
+                  withdrawalRate: { type: 'number' },
+                  recommendations: { type: 'array' },
+                  expenseBreakdown: { type: 'array' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const startTime = performance.now();
+
+      try {
+        // Validate required parameters
+        if (!request.body.monthlyExpenses && !request.body.annualExpenses) {
+          return reply.code(400).send({
+            success: false,
+            error: 'Either monthlyExpenses or annualExpenses is required',
+            executionTime: performance.now() - startTime,
+            cacheHit: false,
+            metadata: {
+              calculationType: 'fire_number',
+              timestamp: new Date().toISOString(),
+              version: '1.0.0',
+              confidence: 1.0,
+            },
+          });
+        }
+
+        const result = financialCalculationEngine.calculateFIRENumber(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        const response: CalculationResponse = {
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false, // Would need to check cache
+          metadata: {
+            calculationType: 'fire_number',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0',
+            confidence: 0.95,
+          },
+        };
+
+        reply.code(200).send(response);
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+
+        const response: CalculationResponse = {
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'fire_number',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0',
+            confidence: 0.8,
+          },
+        };
+
+        reply.code(400).send(response);
+      }
+    }
+  );
+
+  // Expense-Based FIRE Calculation Endpoint
+  fastify.post<{
+    Body: {
+      expenseCategories: Array<{
+        category: string;
+        monthlyAmount: number;
+        inflationRate: number;
+        essential: boolean;
+        geographicSensitive: boolean;
+      }>;
+      geographicLocation?: string;
+      costOfLivingIndex?: number;
+      withdrawalRate?: number;
+      projectionYears?: number;
+    };
+  }>(
+    '/fire-expense-analysis',
+    {
+      schema: {
+        description:
+          'Calculate FIRE number with detailed expense category analysis',
+        tags: ['calculations', 'fire', 'expenses'],
+        body: {
+          type: 'object',
+          required: ['expenseCategories'],
+          properties: {
+            expenseCategories: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: [
+                  'category',
+                  'monthlyAmount',
+                  'inflationRate',
+                  'essential',
+                  'geographicSensitive',
+                ],
+                properties: {
+                  category: { type: 'string' },
+                  monthlyAmount: { type: 'number', minimum: 0 },
+                  inflationRate: { type: 'number', minimum: 0, maximum: 0.5 },
+                  essential: { type: 'boolean' },
+                  geographicSensitive: { type: 'boolean' },
+                },
+              },
+            },
+            geographicLocation: { type: 'string' },
+            costOfLivingIndex: { type: 'number', minimum: 0.1, maximum: 5 },
+            withdrawalRate: { type: 'number', minimum: 0.01, maximum: 0.1 },
+            projectionYears: { type: 'number', minimum: 1, maximum: 50 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const startTime = performance.now();
+
+      try {
+        const result = financialCalculationEngine.calculateExpenseBasedFIRE(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.code(200).send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'expense_based_fire',
+            categoriesAnalyzed: request.body.expenseCategories.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
         });
       }
     }
