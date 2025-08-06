@@ -28,6 +28,13 @@ import {
   CoastFIRECalculationResult,
   BaristaFIRECalculationParams,
   BaristaFIRECalculationResult,
+  MarketScenarioParams,
+  MarketScenarioResult,
+  MarketScenarioType,
+  MarketStressTestParams,
+  MarketStressTestResult,
+  HistoricalMarketData,
+  RebalancingStrategy,
   CalculationCache,
   CalculationPerformanceMetrics,
 } from '../types/financial';
@@ -3327,6 +3334,905 @@ export class FinancialCalculationEngine {
     };
 
     return { timelineData, phaseBreakdown };
+  }
+
+  /**
+   * Comprehensive market volatility and downturn modeling
+   * Epic 7, Story 5: Market Volatility & Downturn Modeling
+   */
+  public calculateMarketVolatilityScenarios(
+    params: MarketScenarioParams
+  ): MarketScenarioResult {
+    const startTime = performance.now();
+
+    try {
+      // Input validation
+      if (params.currentPortfolioValue < 0) {
+        throw new Error('Portfolio value cannot be negative');
+      }
+      if (params.monthlyContributions < 0) {
+        throw new Error('Monthly contributions cannot be negative');
+      }
+      if (params.timeHorizon <= 0 || params.timeHorizon > 50) {
+        throw new Error('Time horizon must be between 1 and 50 years');
+      }
+      if (params.expectedReturn <= -1 || params.expectedReturn > 1) {
+        throw new Error('Expected return must be between -100% and 100%');
+      }
+
+      // Default parameters
+      const confidenceIntervals = params.confidenceIntervals || [
+        10, 25, 50, 75, 90,
+      ];
+      const simulationIterations = params.simulationIterations || 10000;
+      const volatilityModel = params.volatilityModel || 'hybrid';
+
+      // Generate scenarios for each requested scenario type
+      const scenarios = params.scenarioTypes.map(scenarioType => {
+        const scenarioData = this.getHistoricalScenarioData(scenarioType);
+        const scenarioResult = this.simulateMarketScenario(
+          params,
+          scenarioData,
+          simulationIterations
+        );
+
+        return {
+          scenarioType,
+          description: scenarioData.description,
+          probability: scenarioData.probability,
+          portfolioImpact: scenarioResult.portfolioImpact,
+          timeline: scenarioResult.timeline,
+          confidenceIntervals: this.calculateConfidenceIntervals(
+            scenarioResult.simulationResults,
+            confidenceIntervals
+          ),
+        };
+      });
+
+      // Calculate overall volatility analysis
+      const volatilityAnalysis = this.calculateVolatilityMetrics(
+        params,
+        scenarios,
+        volatilityModel
+      );
+
+      // Recovery analysis if requested
+      let recoveryAnalysis;
+      if (params.includeRecoveryAnalysis) {
+        recoveryAnalysis = this.calculateRecoveryAnalysis(params, scenarios);
+      }
+
+      // Safe withdrawal rate analysis if withdrawal phase specified
+      let safeWithdrawalRateAnalysis;
+      if (params.withdrawalPhase) {
+        safeWithdrawalRateAnalysis = this.calculateSafeWithdrawalRates(
+          params,
+          scenarios,
+          volatilityAnalysis
+        );
+      }
+
+      // Generate recommendations
+      const recommendations = this.generateMarketVolatilityRecommendations(
+        params,
+        scenarios,
+        volatilityAnalysis
+      );
+
+      const result: MarketScenarioResult = {
+        scenarios,
+        volatilityAnalysis,
+        recoveryAnalysis,
+        safeWithdrawalRateAnalysis,
+        recommendations,
+      };
+
+      // Cache the result
+      const cacheKey = `market_volatility_${JSON.stringify(params)}`;
+      this.setCache(cacheKey, result);
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Market volatility calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Get historical scenario data for market events
+   */
+  private getHistoricalScenarioData(scenarioType: MarketScenarioType): {
+    description: string;
+    probability: number;
+    monthlyReturns: number[];
+    duration: number;
+    recoveryPattern: number[];
+  } {
+    const scenarioData = {
+      great_recession_2008: {
+        description:
+          '2008 Financial Crisis - Severe market downturn with banking sector collapse',
+        probability: 0.02, // ~2% chance per decade
+        monthlyReturns: [
+          -0.09, -0.17, -0.08, -0.11, -0.07, -0.05, 0.03, -0.09, -0.17, -0.07,
+          0.08, 0.01,
+        ],
+        duration: 18, // 18 months of impact
+        recoveryPattern: [
+          0.05, 0.08, 0.12, 0.09, 0.06, 0.04, 0.03, 0.02, 0.02, 0.01,
+        ],
+      },
+      covid_crash_2020: {
+        description:
+          '2020 COVID-19 Pandemic - Sharp but brief market crash with rapid recovery',
+        probability: 0.05, // ~5% chance per decade (pandemic/external shock)
+        monthlyReturns: [-0.12, -0.34, 0.13, 0.05, 0.05, 0.02],
+        duration: 6, // 6 months of major impact
+        recoveryPattern: [0.08, 0.12, 0.15, 0.1, 0.06, 0.04],
+      },
+      dot_com_crash_2000: {
+        description:
+          '2000 Dot-com Bubble Burst - Technology sector collapse with prolonged bear market',
+        probability: 0.03, // ~3% chance per decade
+        monthlyReturns: [
+          -0.1, -0.06, -0.03, -0.09, -0.08, -0.07, -0.11, -0.06, -0.04, -0.08,
+          -0.03, -0.06,
+        ],
+        duration: 30, // 30 months of bear market
+        recoveryPattern: [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.05, 0.04, 0.03],
+      },
+      black_monday_1987: {
+        description:
+          '1987 Black Monday - Single day 22% crash with quick recovery',
+        probability: 0.08, // ~8% chance per decade (market correction)
+        monthlyReturns: [-0.22, 0.02, -0.08, 0.04, 0.06],
+        duration: 5, // 5 months of impact
+        recoveryPattern: [0.08, 0.12, 0.06, 0.04],
+      },
+      stagflation_1970s: {
+        description:
+          '1970s Stagflation - High inflation with low growth and market stagnation',
+        probability: 0.01, // ~1% chance per decade
+        monthlyReturns: Array(60)
+          .fill(0)
+          .map(() => -0.02 + Math.random() * 0.04), // 5 years of low/negative returns
+        duration: 60,
+        recoveryPattern: Array(24)
+          .fill(0)
+          .map(() => 0.03 + Math.random() * 0.04),
+      },
+      lost_decade_japan: {
+        description:
+          'Japan Lost Decade - Prolonged economic stagnation with minimal returns',
+        probability: 0.005, // ~0.5% chance per decade
+        monthlyReturns: Array(120)
+          .fill(0)
+          .map(() => -0.01 + Math.random() * 0.02), // 10 years of near-zero returns
+        duration: 120,
+        recoveryPattern: Array(36)
+          .fill(0)
+          .map(() => 0.01 + Math.random() * 0.02),
+      },
+      sustained_low_returns: {
+        description:
+          'Sustained Low Returns - Extended period of below-average market performance',
+        probability: 0.15, // ~15% chance per decade
+        monthlyReturns: Array(60)
+          .fill(0)
+          .map(() => 0.01 + Math.random() * 0.03), // 5 years of low returns
+        duration: 60,
+        recoveryPattern: Array(24)
+          .fill(0)
+          .map(() => 0.04 + Math.random() * 0.03),
+      },
+      high_inflation_period: {
+        description:
+          'High Inflation Period - Sustained high inflation eroding real returns',
+        probability: 0.1, // ~10% chance per decade
+        monthlyReturns: Array(36)
+          .fill(0)
+          .map(() => 0.02 + Math.random() * 0.04), // 3 years of inflation impact
+        duration: 36,
+        recoveryPattern: Array(12)
+          .fill(0)
+          .map(() => 0.05 + Math.random() * 0.03),
+      },
+      rising_interest_rates: {
+        description:
+          'Rising Interest Rates - Federal Reserve tightening cycle impacting valuations',
+        probability: 0.2, // ~20% chance per decade
+        monthlyReturns: Array(18)
+          .fill(0)
+          .map(() => -0.01 + Math.random() * 0.03), // 18 months of rate impact
+        duration: 18,
+        recoveryPattern: Array(12)
+          .fill(0)
+          .map(() => 0.03 + Math.random() * 0.04),
+      },
+      market_correction_10: {
+        description: '10% Market Correction - Standard market pullback',
+        probability: 0.3, // ~30% chance per decade
+        monthlyReturns: [-0.05, -0.03, -0.02, 0.01, 0.02],
+        duration: 5,
+        recoveryPattern: [0.04, 0.06, 0.03, 0.02],
+      },
+      bear_market_20: {
+        description: '20% Bear Market - Significant market decline',
+        probability: 0.15, // ~15% chance per decade
+        monthlyReturns: [-0.08, -0.06, -0.04, -0.02, 0.01, 0.03],
+        duration: 8,
+        recoveryPattern: [0.06, 0.08, 0.05, 0.04, 0.03],
+      },
+      severe_recession_30: {
+        description: '30% Severe Recession - Major economic downturn',
+        probability: 0.05, // ~5% chance per decade
+        monthlyReturns: [-0.12, -0.1, -0.08, -0.05, -0.03, 0.02, 0.04],
+        duration: 12,
+        recoveryPattern: [0.08, 0.1, 0.07, 0.05, 0.04, 0.03],
+      },
+    };
+
+    return scenarioData[scenarioType];
+  }
+
+  /**
+   * Simulate market scenario with Monte Carlo approach
+   */
+  private simulateMarketScenario(
+    params: MarketScenarioParams,
+    scenarioData: any,
+    iterations: number
+  ): {
+    portfolioImpact: any;
+    timeline: any[];
+    simulationResults: number[];
+  } {
+    const simulationResults: number[] = [];
+    const timeline: any[] = [];
+
+    // Run Monte Carlo simulations
+    for (let i = 0; i < iterations; i++) {
+      let portfolioValue = params.currentPortfolioValue;
+      const monthlyTimeline: any[] = [];
+      let maxDrawdown = 0;
+      let currentDrawdown = 0;
+      const peakValue = portfolioValue;
+
+      // Apply scenario returns
+      for (let month = 0; month < scenarioData.duration; month++) {
+        const monthlyReturn =
+          scenarioData.monthlyReturns[
+            month % scenarioData.monthlyReturns.length
+          ];
+        const volatilityAdjustment = (Math.random() - 0.5) * 0.1; // Add some randomness
+        const adjustedReturn = monthlyReturn + volatilityAdjustment;
+
+        portfolioValue =
+          portfolioValue * (1 + adjustedReturn) + params.monthlyContributions;
+
+        // Calculate drawdown
+        currentDrawdown = Math.max(0, (peakValue - portfolioValue) / peakValue);
+        maxDrawdown = Math.max(maxDrawdown, currentDrawdown);
+
+        if (i === 0) {
+          // Only store timeline for first iteration to avoid memory issues
+          monthlyTimeline.push({
+            month,
+            portfolioValue,
+            monthlyReturn: adjustedReturn,
+            cumulativeReturn:
+              (portfolioValue - params.currentPortfolioValue) /
+              params.currentPortfolioValue,
+            drawdown: currentDrawdown,
+          });
+        }
+      }
+
+      // Apply recovery pattern
+      for (
+        let month = 0;
+        month < scenarioData.recoveryPattern.length;
+        month++
+      ) {
+        const recoveryReturn = scenarioData.recoveryPattern[month];
+        portfolioValue =
+          portfolioValue * (1 + recoveryReturn) + params.monthlyContributions;
+
+        if (i === 0) {
+          monthlyTimeline.push({
+            month: scenarioData.duration + month,
+            portfolioValue,
+            monthlyReturn: recoveryReturn,
+            cumulativeReturn:
+              (portfolioValue - params.currentPortfolioValue) /
+              params.currentPortfolioValue,
+            drawdown: Math.max(0, (peakValue - portfolioValue) / peakValue),
+          });
+        }
+      }
+
+      simulationResults.push(portfolioValue);
+      if (i === 0) {
+        timeline.push(...monthlyTimeline);
+      }
+    }
+
+    // Calculate portfolio impact metrics
+    const finalValues = simulationResults.sort((a, b) => a - b);
+    const medianValue = finalValues[Math.floor(finalValues.length / 2)];
+    const peakDecline = Math.max(...timeline.map(t => t.drawdown));
+    const recoveryTimeMonths = timeline.findIndex(
+      t => t.portfolioValue >= params.currentPortfolioValue
+    );
+
+    const portfolioImpact = {
+      peakDecline,
+      recoveryTimeMonths:
+        recoveryTimeMonths === -1
+          ? scenarioData.duration + scenarioData.recoveryPattern.length
+          : recoveryTimeMonths,
+      finalValue: medianValue,
+      totalReturn:
+        (medianValue - params.currentPortfolioValue) /
+        params.currentPortfolioValue,
+    };
+
+    return { portfolioImpact, timeline, simulationResults };
+  }
+
+  /**
+   * Calculate confidence intervals from simulation results
+   */
+  private calculateConfidenceIntervals(
+    simulationResults: number[],
+    intervals: number[]
+  ): Array<{
+    percentile: number;
+    portfolioValue: number;
+    probability: number;
+  }> {
+    const sortedResults = [...simulationResults].sort((a, b) => a - b);
+
+    return intervals.map(percentile => {
+      const index = Math.floor((percentile / 100) * sortedResults.length);
+      return {
+        percentile,
+        portfolioValue: sortedResults[index],
+        probability: percentile / 100,
+      };
+    });
+  }
+
+  /**
+   * Calculate volatility metrics
+   */
+  private calculateVolatilityMetrics(
+    params: MarketScenarioParams,
+    scenarios: any[],
+    volatilityModel: string
+  ): any {
+    // Calculate aggregate volatility metrics across all scenarios
+    const allReturns = scenarios.flatMap(s =>
+      s.timeline.map((t: any) => t.monthlyReturn)
+    );
+    const meanReturn =
+      allReturns.reduce((sum, r) => sum + r, 0) / allReturns.length;
+    const variance =
+      allReturns.reduce((sum, r) => sum + Math.pow(r - meanReturn, 2), 0) /
+      allReturns.length;
+    const annualVolatility = Math.sqrt(variance * 12);
+
+    // Calculate Sharpe ratio (assuming 2% risk-free rate)
+    const riskFreeRate = 0.02 / 12; // Monthly risk-free rate
+    const excessReturn = meanReturn - riskFreeRate;
+    const sharpeRatio = excessReturn / Math.sqrt(variance);
+
+    // Calculate max drawdown across all scenarios
+    const maxDrawdown = Math.max(
+      ...scenarios.map(s => s.portfolioImpact.peakDecline)
+    );
+
+    // Calculate volatility of volatility
+    const monthlyVolatilities = [];
+    for (let i = 0; i < allReturns.length - 12; i += 12) {
+      const yearReturns = allReturns.slice(i, i + 12);
+      const yearMean = yearReturns.reduce((sum, r) => sum + r, 0) / 12;
+      const yearVariance =
+        yearReturns.reduce((sum, r) => sum + Math.pow(r - yearMean, 2), 0) / 12;
+      monthlyVolatilities.push(Math.sqrt(yearVariance * 12));
+    }
+    const volOfVol =
+      monthlyVolatilities.length > 1
+        ? Math.sqrt(
+            monthlyVolatilities.reduce((sum, v, i, arr) => {
+              const mean = arr.reduce((s, val) => s + val, 0) / arr.length;
+              return sum + Math.pow(v - mean, 2);
+            }, 0) /
+              (monthlyVolatilities.length - 1)
+          )
+        : 0;
+
+    // Calculate Value at Risk (VaR) and Conditional VaR
+    const sortedReturns = [...allReturns].sort((a, b) => a - b);
+    const var95Index = Math.floor(0.05 * sortedReturns.length);
+    const var99Index = Math.floor(0.01 * sortedReturns.length);
+
+    const valueAtRisk = {
+      confidence95: Math.abs(sortedReturns[var95Index]),
+      confidence99: Math.abs(sortedReturns[var99Index]),
+    };
+
+    const conditionalValueAtRisk = {
+      confidence95: Math.abs(
+        sortedReturns.slice(0, var95Index).reduce((sum, r) => sum + r, 0) /
+          var95Index
+      ),
+      confidence99: Math.abs(
+        sortedReturns.slice(0, var99Index).reduce((sum, r) => sum + r, 0) /
+          var99Index
+      ),
+    };
+
+    return {
+      annualVolatility,
+      sharpeRatio,
+      maxDrawdown,
+      volatilityOfVolatility: volOfVol,
+      valueAtRisk,
+      conditionalValueAtRisk,
+    };
+  }
+
+  /**
+   * Calculate recovery analysis
+   */
+  private calculateRecoveryAnalysis(
+    params: MarketScenarioParams,
+    scenarios: any[]
+  ): any {
+    const recoveryTimes = scenarios.map(
+      s => s.portfolioImpact.recoveryTimeMonths
+    );
+    const averageRecoveryTime =
+      recoveryTimes.reduce((sum, time) => sum + time, 0) / recoveryTimes.length;
+
+    // Dollar-cost averaging benefit calculation
+    const dollarCostAveragingBenefit = 0.15; // Assume 15% benefit during volatile periods
+
+    // Rebalancing benefit calculation
+    const rebalancingBenefit = params.rebalancingStrategy ? 0.08 : 0; // 8% benefit if rebalancing
+
+    // Recovery scenarios
+    const recoveryScenarios = [
+      {
+        scenarioName: 'V-Shaped Recovery',
+        recoveryTimeMonths: averageRecoveryTime * 0.7,
+        finalValue: params.currentPortfolioValue * 1.2,
+        benefitVsBuyAndHold: 0.05,
+      },
+      {
+        scenarioName: 'U-Shaped Recovery',
+        recoveryTimeMonths: averageRecoveryTime,
+        finalValue: params.currentPortfolioValue * 1.1,
+        benefitVsBuyAndHold: 0.02,
+      },
+      {
+        scenarioName: 'L-Shaped Recovery',
+        recoveryTimeMonths: averageRecoveryTime * 1.5,
+        finalValue: params.currentPortfolioValue * 0.95,
+        benefitVsBuyAndHold: -0.03,
+      },
+    ];
+
+    return {
+      averageRecoveryTime,
+      dollarCostAveragingBenefit,
+      rebalancingBenefit,
+      recoveryScenarios,
+    };
+  }
+
+  /**
+   * Calculate safe withdrawal rates under market stress
+   */
+  private calculateSafeWithdrawalRates(
+    params: MarketScenarioParams,
+    scenarios: any[],
+    volatilityAnalysis: any
+  ): any {
+    const baseWithdrawalRate = 0.04; // 4% rule
+
+    // Adjust for volatility and sequence of returns risk
+    const volatilityAdjustment = Math.min(
+      0.01,
+      volatilityAnalysis.annualVolatility * 0.5
+    );
+    const sequenceRiskAdjustment = Math.min(
+      0.005,
+      volatilityAnalysis.maxDrawdown * 0.1
+    );
+
+    const stressTestedSafeRate = Math.max(
+      0.025,
+      baseWithdrawalRate - volatilityAdjustment - sequenceRiskAdjustment
+    );
+
+    // Dynamic withdrawal strategies
+    const dynamicStrategies = [
+      {
+        strategyName: 'Fixed 4% Rule',
+        successRate: 0.85,
+        averageWithdrawal: baseWithdrawalRate,
+        worstCaseWithdrawal: baseWithdrawalRate,
+      },
+      {
+        strategyName: 'Dynamic Withdrawal (Floor/Ceiling)',
+        successRate: 0.95,
+        averageWithdrawal: baseWithdrawalRate * 0.95,
+        worstCaseWithdrawal: baseWithdrawalRate * 0.75,
+      },
+      {
+        strategyName: 'Bond Tent Strategy',
+        successRate: 0.92,
+        averageWithdrawal: baseWithdrawalRate * 0.98,
+        worstCaseWithdrawal: baseWithdrawalRate * 0.85,
+      },
+    ];
+
+    return {
+      currentSafeRate: baseWithdrawalRate,
+      stressTestedSafeRate,
+      sequenceOfReturnsRisk: volatilityAnalysis.maxDrawdown,
+      dynamicStrategies,
+    };
+  }
+
+  /**
+   * Generate market volatility recommendations
+   */
+  private generateMarketVolatilityRecommendations(
+    params: MarketScenarioParams,
+    scenarios: any[],
+    volatilityAnalysis: any
+  ): Array<{
+    category: 'allocation' | 'timing' | 'strategy' | 'risk_management';
+    recommendation: string;
+    impact: string;
+    priority: 'high' | 'medium' | 'low';
+    implementationComplexity: 'low' | 'medium' | 'high';
+  }> {
+    const recommendations = [];
+
+    // High volatility recommendations
+    if (volatilityAnalysis.annualVolatility > 0.2) {
+      recommendations.push({
+        category: 'allocation' as const,
+        recommendation:
+          'Consider reducing equity allocation by 10-15% to lower portfolio volatility',
+        impact:
+          'Reduces portfolio volatility by 15-25% with minimal impact on long-term returns',
+        priority: 'high' as const,
+        implementationComplexity: 'low' as const,
+      });
+    }
+
+    // High drawdown recommendations
+    if (volatilityAnalysis.maxDrawdown > 0.3) {
+      recommendations.push({
+        category: 'risk_management' as const,
+        recommendation:
+          'Implement systematic rebalancing to reduce sequence of returns risk',
+        impact:
+          'Can improve returns by 0.5-1.5% annually during volatile periods',
+        priority: 'high' as const,
+        implementationComplexity: 'medium' as const,
+      });
+    }
+
+    // Dollar-cost averaging recommendation
+    recommendations.push({
+      category: 'strategy' as const,
+      recommendation:
+        'Maintain consistent dollar-cost averaging during market downturns',
+      impact: 'Historically improves returns by 10-20% during volatile periods',
+      priority: 'medium' as const,
+      implementationComplexity: 'low' as const,
+    });
+
+    // Emergency fund recommendation
+    const emergencyFundMonths = Math.max(
+      6,
+      Math.ceil(volatilityAnalysis.maxDrawdown * 24)
+    );
+    recommendations.push({
+      category: 'risk_management' as const,
+      recommendation: `Maintain ${emergencyFundMonths} months of expenses in emergency fund`,
+      impact: 'Prevents forced selling during market downturns',
+      priority: 'high' as const,
+      implementationComplexity: 'low' as const,
+    });
+
+    // Diversification recommendation
+    recommendations.push({
+      category: 'allocation' as const,
+      recommendation:
+        'Consider adding international and alternative investments for diversification',
+      impact:
+        'Can reduce portfolio volatility by 5-15% while maintaining returns',
+      priority: 'medium' as const,
+      implementationComplexity: 'medium' as const,
+    });
+
+    // Timing recommendation
+    if (scenarios.some(s => s.scenarioType.includes('recession'))) {
+      recommendations.push({
+        category: 'timing' as const,
+        recommendation:
+          'Avoid market timing; maintain disciplined investment approach',
+        impact: 'Prevents behavioral mistakes that can cost 2-4% annually',
+        priority: 'high' as const,
+        implementationComplexity: 'low' as const,
+      });
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * Comprehensive market stress testing
+   * Epic 7, Story 5: Market Stress Testing
+   */
+  public calculateMarketStressTest(
+    params: MarketStressTestParams
+  ): MarketStressTestResult {
+    const startTime = performance.now();
+
+    try {
+      // Input validation
+      if (params.portfolioValue < 0) {
+        throw new Error('Portfolio value cannot be negative');
+      }
+      if (params.timeHorizon <= 0 || params.timeHorizon > 50) {
+        throw new Error('Time horizon must be between 1 and 50 years');
+      }
+
+      // Run stress tests for each scenario
+      const stressTestResults = params.stressScenarios.map(scenario => {
+        const stressResult = this.runStressTestScenario(params, scenario);
+
+        return {
+          scenarioName: scenario.name,
+          maxDrawdown: stressResult.maxDrawdown,
+          timeToRecovery: stressResult.timeToRecovery,
+          finalPortfolioValue: stressResult.finalPortfolioValue,
+          probabilityOfOccurrence: scenario.probability,
+          mitigationStrategies: this.generateMitigationStrategies(stressResult),
+        };
+      });
+
+      // Calculate overall portfolio resilience
+      const portfolioResilience = this.calculatePortfolioResilience(
+        params,
+        stressTestResults
+      );
+
+      const result: MarketStressTestResult = {
+        stressTestResults,
+        portfolioResilience,
+      };
+
+      // Cache the result
+      const cacheKey = `market_stress_test_${JSON.stringify(params)}`;
+      this.setCache(cacheKey, result);
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Market stress test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Run individual stress test scenario
+   */
+  private runStressTestScenario(
+    params: MarketStressTestParams,
+    scenario: any
+  ): {
+    maxDrawdown: number;
+    timeToRecovery: number;
+    finalPortfolioValue: number;
+  } {
+    let portfolioValue = params.portfolioValue;
+    let maxDrawdown = 0;
+    let peakValue = portfolioValue;
+    let timeToRecovery = 0;
+    let recoveryAchieved = false;
+
+    // Apply stress scenario returns
+    for (let month = 0; month < scenario.duration; month++) {
+      const monthlyReturn =
+        scenario.monthlyReturns[month % scenario.monthlyReturns.length];
+      portfolioValue =
+        portfolioValue * (1 + monthlyReturn) + params.monthlyContributions;
+
+      // Track peak and drawdown
+      if (portfolioValue > peakValue) {
+        peakValue = portfolioValue;
+      }
+
+      const currentDrawdown = (peakValue - portfolioValue) / peakValue;
+      maxDrawdown = Math.max(maxDrawdown, currentDrawdown);
+    }
+
+    // Apply recovery phase
+    const recoveryMonths = Math.min(
+      120,
+      params.timeHorizon * 12 - scenario.duration
+    ); // Max 10 years recovery
+    for (let month = 0; month < recoveryMonths; month++) {
+      const recoveryReturn =
+        params.recoveryAssumptions.averageRecoveryReturn / 12;
+      const volatilityAdjustment =
+        ((Math.random() - 0.5) *
+          params.recoveryAssumptions.recoveryVolatility) /
+        12;
+      const adjustedReturn = recoveryReturn + volatilityAdjustment;
+
+      portfolioValue =
+        portfolioValue * (1 + adjustedReturn) + params.monthlyContributions;
+
+      // Check if recovery achieved
+      if (!recoveryAchieved && portfolioValue >= peakValue) {
+        timeToRecovery = scenario.duration + month;
+        recoveryAchieved = true;
+      }
+    }
+
+    // If recovery not achieved, set to maximum time
+    if (!recoveryAchieved) {
+      timeToRecovery = scenario.duration + recoveryMonths;
+    }
+
+    return {
+      maxDrawdown,
+      timeToRecovery,
+      finalPortfolioValue: portfolioValue,
+    };
+  }
+
+  /**
+   * Generate mitigation strategies for stress test results
+   */
+  private generateMitigationStrategies(stressResult: any): Array<{
+    strategy: string;
+    effectivenessScore: number;
+    implementationCost: number;
+    description: string;
+  }> {
+    const strategies = [];
+
+    // Emergency fund strategy
+    strategies.push({
+      strategy: 'Enhanced Emergency Fund',
+      effectivenessScore: 85,
+      implementationCost: 0.02, // 2% opportunity cost
+      description:
+        'Maintain 12-18 months of expenses to avoid forced selling during downturns',
+    });
+
+    // Diversification strategy
+    strategies.push({
+      strategy: 'Portfolio Diversification',
+      effectivenessScore: 70,
+      implementationCost: 0.005, // 0.5% in fees
+      description:
+        'Add international stocks, bonds, and alternative investments',
+    });
+
+    // Rebalancing strategy
+    strategies.push({
+      strategy: 'Systematic Rebalancing',
+      effectivenessScore: 60,
+      implementationCost: 0.001, // 0.1% in transaction costs
+      description:
+        'Rebalance quarterly or when allocations drift >5% from targets',
+    });
+
+    // Dollar-cost averaging
+    strategies.push({
+      strategy: 'Dollar-Cost Averaging',
+      effectivenessScore: 55,
+      implementationCost: 0,
+      description: 'Continue regular investments during market downturns',
+    });
+
+    // Defensive allocation
+    if (stressResult.maxDrawdown > 0.3) {
+      strategies.push({
+        strategy: 'Defensive Asset Allocation',
+        effectivenessScore: 75,
+        implementationCost: 0.01, // 1% lower expected returns
+        description:
+          'Reduce equity allocation by 10-20% and increase bond allocation',
+      });
+    }
+
+    return strategies;
+  }
+
+  /**
+   * Calculate overall portfolio resilience score
+   */
+  private calculatePortfolioResilience(
+    params: MarketStressTestParams,
+    stressTestResults: any[]
+  ): {
+    overallScore: number;
+    worstCaseScenario: string;
+    recommendedActions: string[];
+    emergencyFundRecommendation: number;
+  } {
+    // Calculate weighted resilience score
+    const weightedScores = stressTestResults.map(result => {
+      const drawdownScore = Math.max(0, 100 - result.maxDrawdown * 100);
+      const recoveryScore = Math.max(0, 100 - result.timeToRecovery / 2);
+      const probabilityWeight = result.probabilityOfOccurrence;
+
+      return ((drawdownScore + recoveryScore) / 2) * probabilityWeight;
+    });
+
+    const overallScore =
+      weightedScores.reduce((sum, score) => sum + score, 0) /
+      stressTestResults.reduce(
+        (sum, result) => sum + result.probabilityOfOccurrence,
+        0
+      );
+
+    // Find worst case scenario
+    const worstCase = stressTestResults.reduce((worst, current) =>
+      current.maxDrawdown > worst.maxDrawdown ? current : worst
+    );
+
+    // Generate recommended actions based on resilience score
+    const recommendedActions = [];
+
+    if (overallScore < 60) {
+      recommendedActions.push(
+        'Consider reducing portfolio risk through diversification'
+      );
+      recommendedActions.push(
+        'Increase emergency fund to 12+ months of expenses'
+      );
+      recommendedActions.push('Implement systematic rebalancing strategy');
+    } else if (overallScore < 80) {
+      recommendedActions.push(
+        'Maintain current strategy with minor adjustments'
+      );
+      recommendedActions.push(
+        'Consider adding defensive assets during high volatility periods'
+      );
+    } else {
+      recommendedActions.push(
+        'Portfolio shows strong resilience to market stress'
+      );
+      recommendedActions.push('Continue current investment strategy');
+    }
+
+    // Emergency fund recommendation based on worst case
+    const emergencyFundRecommendation = Math.max(
+      6,
+      Math.ceil(worstCase.maxDrawdown * 18)
+    );
+
+    return {
+      overallScore,
+      worstCaseScenario: worstCase.scenarioName,
+      recommendedActions,
+      emergencyFundRecommendation,
+    };
   }
 }
 

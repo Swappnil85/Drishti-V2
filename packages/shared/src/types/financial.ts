@@ -1199,6 +1199,215 @@ export interface BaristaFIRECalculationResult {
   };
 }
 
+// Market Volatility & Downturn Modeling (Story 5)
+export interface MarketScenarioParams {
+  // Basic portfolio information
+  currentPortfolioValue: number;
+  monthlyContributions: number;
+  expectedReturn: number;
+  timeHorizon: number; // Years
+
+  // Scenario configuration
+  scenarioTypes: MarketScenarioType[];
+  includeHistoricalData?: boolean;
+  confidenceIntervals?: number[]; // Default: [10, 25, 50, 75, 90]
+
+  // Volatility settings
+  volatilityModel?: 'historical' | 'monte_carlo' | 'hybrid';
+  simulationIterations?: number; // Default: 10000
+
+  // Recovery analysis
+  includeRecoveryAnalysis?: boolean;
+  dollarCostAveragingAnalysis?: boolean;
+  rebalancingStrategy?: RebalancingStrategy;
+
+  // Withdrawal phase analysis
+  withdrawalPhase?: {
+    startAge: number;
+    annualWithdrawal: number;
+    withdrawalStrategy: 'fixed' | 'dynamic' | 'floor_ceiling';
+  };
+}
+
+export interface MarketScenarioResult {
+  // Scenario analysis results
+  scenarios: Array<{
+    scenarioType: MarketScenarioType;
+    description: string;
+    probability: number; // Historical probability of occurrence
+
+    // Impact analysis
+    portfolioImpact: {
+      peakDecline: number; // Maximum drawdown percentage
+      recoveryTimeMonths: number;
+      finalValue: number;
+      totalReturn: number;
+    };
+
+    // Timeline analysis
+    timeline: Array<{
+      month: number;
+      portfolioValue: number;
+      monthlyReturn: number;
+      cumulativeReturn: number;
+      drawdown: number;
+    }>;
+
+    // Confidence intervals
+    confidenceIntervals: Array<{
+      percentile: number;
+      portfolioValue: number;
+      probability: number;
+    }>;
+  }>;
+
+  // Volatility analysis
+  volatilityAnalysis: {
+    annualVolatility: number;
+    sharpeRatio: number;
+    maxDrawdown: number;
+    volatilityOfVolatility: number;
+
+    // Risk metrics
+    valueAtRisk: {
+      confidence95: number;
+      confidence99: number;
+    };
+    conditionalValueAtRisk: {
+      confidence95: number;
+      confidence99: number;
+    };
+  };
+
+  // Recovery analysis
+  recoveryAnalysis?: {
+    averageRecoveryTime: number;
+    dollarCostAveragingBenefit: number;
+    rebalancingBenefit: number;
+
+    // Recovery scenarios
+    recoveryScenarios: Array<{
+      scenarioName: string;
+      recoveryTimeMonths: number;
+      finalValue: number;
+      benefitVsBuyAndHold: number;
+    }>;
+  };
+
+  // Safe withdrawal rate analysis
+  safeWithdrawalRateAnalysis?: {
+    currentSafeRate: number;
+    stressTestedSafeRate: number;
+    sequenceOfReturnsRisk: number;
+
+    // Dynamic withdrawal strategies
+    dynamicStrategies: Array<{
+      strategyName: string;
+      successRate: number;
+      averageWithdrawal: number;
+      worstCaseWithdrawal: number;
+    }>;
+  };
+
+  // Recommendations
+  recommendations: Array<{
+    category: 'allocation' | 'timing' | 'strategy' | 'risk_management';
+    recommendation: string;
+    impact: string;
+    priority: 'high' | 'medium' | 'low';
+    implementationComplexity: 'low' | 'medium' | 'high';
+  }>;
+}
+
+// Market scenario types based on historical events
+export type MarketScenarioType =
+  | 'great_recession_2008'
+  | 'covid_crash_2020'
+  | 'dot_com_crash_2000'
+  | 'black_monday_1987'
+  | 'stagflation_1970s'
+  | 'lost_decade_japan'
+  | 'sustained_low_returns'
+  | 'high_inflation_period'
+  | 'rising_interest_rates'
+  | 'market_correction_10'
+  | 'bear_market_20'
+  | 'severe_recession_30';
+
+// Rebalancing strategies
+export interface RebalancingStrategy {
+  type: 'none' | 'calendar' | 'threshold' | 'hybrid';
+  frequency?: 'monthly' | 'quarterly' | 'annually';
+  thresholdPercentage?: number; // For threshold-based rebalancing
+  targetAllocation: {
+    stocks: number;
+    bonds: number;
+    alternatives?: number;
+    cash?: number;
+  };
+}
+
+// Historical market data point
+export interface HistoricalMarketData {
+  date: string; // ISO date string
+  spyReturn: number; // S&P 500 monthly return
+  bondReturn: number; // Bond index monthly return
+  inflationRate: number; // Monthly inflation rate
+  interestRate: number; // Risk-free rate
+  volatilityIndex: number; // VIX or similar volatility measure
+}
+
+// Market stress test parameters
+export interface MarketStressTestParams {
+  portfolioValue: number;
+  monthlyContributions: number;
+  timeHorizon: number;
+
+  // Stress test scenarios
+  stressScenarios: Array<{
+    name: string;
+    duration: number; // Months
+    monthlyReturns: number[];
+    probability: number;
+  }>;
+
+  // Recovery assumptions
+  recoveryAssumptions: {
+    averageRecoveryReturn: number;
+    recoveryVolatility: number;
+    correlationWithCrash: number;
+  };
+}
+
+// Market stress test result
+export interface MarketStressTestResult {
+  stressTestResults: Array<{
+    scenarioName: string;
+
+    // Impact metrics
+    maxDrawdown: number;
+    timeToRecovery: number;
+    finalPortfolioValue: number;
+    probabilityOfOccurrence: number;
+
+    // Mitigation analysis
+    mitigationStrategies: Array<{
+      strategy: string;
+      effectivenessScore: number; // 0-100
+      implementationCost: number;
+      description: string;
+    }>;
+  }>;
+
+  // Overall portfolio resilience
+  portfolioResilience: {
+    overallScore: number; // 0-100
+    worstCaseScenario: string;
+    recommendedActions: string[];
+    emergencyFundRecommendation: number;
+  };
+}
+
 // Batch Calculation Request
 export interface BatchCalculationRequest {
   calculations: CalculationRequest[];

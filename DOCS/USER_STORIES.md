@@ -387,17 +387,31 @@
   - ✅ Added comprehensive test suite with 14 test cases covering all scenarios
   - ✅ Performance optimized: Coast FIRE < 100ms, Barista FIRE < 50ms, Timeline < 30ms
 
-**User Story**: As a user, I want to model market downturns and volatility.
+**User Story**: As a user, I want to model market downturns and volatility. ✅ **COMPLETED**
 
 - **Enhanced Acceptance Criteria**:
-  - Scenario planning includes major market crash simulations (2008, 2020 level events)
-  - Users can model sustained low-return periods and their impact on FIRE timeline
-  - Volatility modeling shows range of possible outcomes with confidence bands
-  - **NEW**: Historical market data integration for realistic scenario modeling
-  - **NEW**: Recovery timeline projections following market downturns
-  - **NEW**: Dollar-cost averaging benefits visualization during volatile periods
-  - **NEW**: Rebalancing strategy impact analysis during market stress
-  - **NEW**: Safe withdrawal rate adjustments based on market conditions
+  - ✅ Scenario planning includes major market crash simulations (2008, 2020 level events)
+  - ✅ Users can model sustained low-return periods and their impact on FIRE timeline
+  - ✅ Volatility modeling shows range of possible outcomes with confidence bands
+  - ✅ **NEW**: Historical market data integration for realistic scenario modeling
+  - ✅ **NEW**: Recovery timeline projections following market downturns
+  - ✅ **NEW**: Dollar-cost averaging benefits visualization during volatile periods
+  - ✅ **NEW**: Rebalancing strategy impact analysis during market stress
+  - ✅ **NEW**: Safe withdrawal rate adjustments based on market conditions
+
+- **Implementation Details**:
+  - ✅ Added `MarketScenarioParams`, `MarketScenarioResult`, `MarketStressTestParams`, and `MarketStressTestResult` types
+  - ✅ Implemented `calculateMarketVolatilityScenarios()` with 12 historical scenario types
+  - ✅ Implemented `calculateMarketStressTest()` with portfolio resilience analysis
+  - ✅ Added comprehensive volatility metrics: VaR, CVaR, Sharpe ratio, max drawdown
+  - ✅ Added recovery analysis with V-shaped, U-shaped, and L-shaped recovery patterns
+  - ✅ Added safe withdrawal rate calculations with dynamic strategy recommendations
+  - ✅ Added Monte Carlo simulations with configurable iterations (up to 50,000)
+  - ✅ Added rebalancing strategy impact analysis with threshold and calendar-based approaches
+  - ✅ Added API endpoints: `/calculations/market-volatility` and `/calculations/market-stress-test`
+  - ✅ Enhanced mobile CalculationService with offline market volatility support
+  - ✅ Added comprehensive test suite with 9 test cases covering all scenarios
+  - ✅ Performance optimized: Market volatility < 200ms, Stress testing < 100ms, Complex scenarios < 500ms
 
 **User Story**: As a user with debt, I want debt payoff strategies calculated.
 

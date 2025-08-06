@@ -1553,6 +1553,357 @@ describe('FinancialCalculationEngine', () => {
         });
       });
 
+      // Market Volatility & Downturn Modeling Tests (Story 5)
+      describe('Market Volatility & Downturn Modeling', () => {
+        describe('calculateMarketVolatilityScenarios', () => {
+          test('should calculate basic market volatility scenarios', () => {
+            const params = {
+              currentPortfolioValue: 500000,
+              monthlyContributions: 3000,
+              expectedReturn: 0.07,
+              timeHorizon: 20,
+              scenarioTypes: [
+                'great_recession_2008',
+                'covid_crash_2020',
+                'market_correction_10',
+              ],
+              includeHistoricalData: true,
+              confidenceIntervals: [10, 25, 50, 75, 90],
+              volatilityModel: 'hybrid' as const,
+              simulationIterations: 1000,
+              includeRecoveryAnalysis: true,
+            };
+
+            const result = engine.calculateMarketVolatilityScenarios(params);
+
+            expect(result.scenarios).toHaveLength(3);
+            expect(result.scenarios[0].scenarioType).toBe(
+              'great_recession_2008'
+            );
+            expect(result.scenarios[0].description).toContain(
+              '2008 Financial Crisis'
+            );
+            expect(result.scenarios[0].probability).toBeGreaterThan(0);
+            expect(result.scenarios[0].portfolioImpact).toBeDefined();
+            expect(
+              result.scenarios[0].portfolioImpact.peakDecline
+            ).toBeGreaterThan(0);
+            expect(result.scenarios[0].timeline).toBeDefined();
+            expect(result.scenarios[0].confidenceIntervals).toHaveLength(5);
+
+            expect(result.volatilityAnalysis).toBeDefined();
+            expect(result.volatilityAnalysis.annualVolatility).toBeGreaterThan(
+              0
+            );
+            expect(result.volatilityAnalysis.sharpeRatio).toBeDefined();
+            expect(result.volatilityAnalysis.maxDrawdown).toBeGreaterThan(0);
+            expect(result.volatilityAnalysis.valueAtRisk).toBeDefined();
+            expect(
+              result.volatilityAnalysis.conditionalValueAtRisk
+            ).toBeDefined();
+
+            expect(result.recoveryAnalysis).toBeDefined();
+            expect(
+              result.recoveryAnalysis!.averageRecoveryTime
+            ).toBeGreaterThan(0);
+            expect(result.recoveryAnalysis!.recoveryScenarios).toHaveLength(3);
+
+            expect(result.recommendations).toBeDefined();
+            expect(result.recommendations.length).toBeGreaterThan(0);
+          });
+
+          test('should handle withdrawal phase analysis', () => {
+            const params = {
+              currentPortfolioValue: 1000000,
+              monthlyContributions: 0,
+              expectedReturn: 0.07,
+              timeHorizon: 30,
+              scenarioTypes: ['sustained_low_returns', 'high_inflation_period'],
+              withdrawalPhase: {
+                startAge: 65,
+                annualWithdrawal: 40000,
+                withdrawalStrategy: 'dynamic' as const,
+              },
+            };
+
+            const result = engine.calculateMarketVolatilityScenarios(params);
+
+            expect(result.safeWithdrawalRateAnalysis).toBeDefined();
+            expect(result.safeWithdrawalRateAnalysis!.currentSafeRate).toBe(
+              0.04
+            );
+            expect(
+              result.safeWithdrawalRateAnalysis!.stressTestedSafeRate
+            ).toBeLessThan(0.04);
+            expect(
+              result.safeWithdrawalRateAnalysis!.dynamicStrategies
+            ).toHaveLength(3);
+            expect(
+              result.safeWithdrawalRateAnalysis!.dynamicStrategies[0]
+                .strategyName
+            ).toBe('Fixed 4% Rule');
+          });
+
+          test('should handle rebalancing strategy analysis', () => {
+            const params = {
+              currentPortfolioValue: 750000,
+              monthlyContributions: 2000,
+              expectedReturn: 0.07,
+              timeHorizon: 15,
+              scenarioTypes: ['bear_market_20'],
+              rebalancingStrategy: {
+                type: 'threshold' as const,
+                frequency: 'quarterly' as const,
+                thresholdPercentage: 5,
+                targetAllocation: {
+                  stocks: 0.7,
+                  bonds: 0.3,
+                },
+              },
+              includeRecoveryAnalysis: true,
+            };
+
+            const result = engine.calculateMarketVolatilityScenarios(params);
+
+            expect(result.recoveryAnalysis).toBeDefined();
+            expect(result.recoveryAnalysis!.rebalancingBenefit).toBe(0.08); // 8% benefit
+            expect(
+              result.recommendations.some(r => r.category === 'strategy')
+            ).toBe(true);
+          });
+
+          test('should validate input parameters', () => {
+            expect(() => {
+              engine.calculateMarketVolatilityScenarios({
+                currentPortfolioValue: -10000, // Negative portfolio
+                monthlyContributions: 1000,
+                expectedReturn: 0.07,
+                timeHorizon: 10,
+                scenarioTypes: ['market_correction_10'],
+              });
+            }).toThrow('Portfolio value cannot be negative');
+
+            expect(() => {
+              engine.calculateMarketVolatilityScenarios({
+                currentPortfolioValue: 100000,
+                monthlyContributions: -500, // Negative contributions
+                expectedReturn: 0.07,
+                timeHorizon: 10,
+                scenarioTypes: ['market_correction_10'],
+              });
+            }).toThrow('Monthly contributions cannot be negative');
+
+            expect(() => {
+              engine.calculateMarketVolatilityScenarios({
+                currentPortfolioValue: 100000,
+                monthlyContributions: 1000,
+                expectedReturn: 0.07,
+                timeHorizon: 0, // Invalid time horizon
+                scenarioTypes: ['market_correction_10'],
+              });
+            }).toThrow('Time horizon must be between 1 and 50 years');
+
+            expect(() => {
+              engine.calculateMarketVolatilityScenarios({
+                currentPortfolioValue: 100000,
+                monthlyContributions: 1000,
+                expectedReturn: 1.5, // Invalid return
+                timeHorizon: 10,
+                scenarioTypes: ['market_correction_10'],
+              });
+            }).toThrow('Expected return must be between -100% and 100%');
+          });
+
+          test('should handle all scenario types', () => {
+            const allScenarioTypes = [
+              'great_recession_2008',
+              'covid_crash_2020',
+              'dot_com_crash_2000',
+              'black_monday_1987',
+              'stagflation_1970s',
+              'lost_decade_japan',
+              'sustained_low_returns',
+              'high_inflation_period',
+              'rising_interest_rates',
+              'market_correction_10',
+              'bear_market_20',
+              'severe_recession_30',
+            ];
+
+            const params = {
+              currentPortfolioValue: 300000,
+              monthlyContributions: 1500,
+              expectedReturn: 0.07,
+              timeHorizon: 25,
+              scenarioTypes: allScenarioTypes,
+              simulationIterations: 500, // Reduced for test performance
+            };
+
+            const result = engine.calculateMarketVolatilityScenarios(params);
+
+            expect(result.scenarios).toHaveLength(12);
+
+            // Verify each scenario has required properties
+            result.scenarios.forEach(scenario => {
+              expect(scenario.scenarioType).toBeDefined();
+              expect(scenario.description).toBeDefined();
+              expect(scenario.probability).toBeGreaterThan(0);
+              expect(scenario.portfolioImpact).toBeDefined();
+              expect(scenario.timeline).toBeDefined();
+              expect(scenario.confidenceIntervals).toBeDefined();
+            });
+
+            // Verify specific scenario characteristics
+            const recession2008 = result.scenarios.find(
+              s => s.scenarioType === 'great_recession_2008'
+            );
+            expect(recession2008!.portfolioImpact.peakDecline).toBeGreaterThan(
+              0.1
+            ); // Significant decline
+
+            const covidCrash = result.scenarios.find(
+              s => s.scenarioType === 'covid_crash_2020'
+            );
+            expect(covidCrash!.portfolioImpact.recoveryTimeMonths).toBeLessThan(
+              24
+            ); // Quick recovery
+          });
+        });
+
+        describe('calculateMarketStressTest', () => {
+          test('should perform comprehensive stress testing', () => {
+            const params = {
+              portfolioValue: 600000,
+              monthlyContributions: 2500,
+              timeHorizon: 20,
+              stressScenarios: [
+                {
+                  name: 'Severe Market Crash',
+                  duration: 12,
+                  monthlyReturns: [
+                    -0.15, -0.12, -0.08, -0.05, -0.03, 0.02, 0.05, 0.03, 0.01,
+                    -0.02, 0.04, 0.06,
+                  ],
+                  probability: 0.05,
+                },
+                {
+                  name: 'Extended Bear Market',
+                  duration: 24,
+                  monthlyReturns: Array(24).fill(-0.02),
+                  probability: 0.1,
+                },
+              ],
+              recoveryAssumptions: {
+                averageRecoveryReturn: 0.08,
+                recoveryVolatility: 0.15,
+                correlationWithCrash: -0.3,
+              },
+            };
+
+            const result = engine.calculateMarketStressTest(params);
+
+            expect(result.stressTestResults).toHaveLength(2);
+
+            const severeMarketCrash = result.stressTestResults[0];
+            expect(severeMarketCrash.scenarioName).toBe('Severe Market Crash');
+            expect(severeMarketCrash.maxDrawdown).toBeGreaterThan(0);
+            expect(severeMarketCrash.timeToRecovery).toBeGreaterThan(0);
+            expect(severeMarketCrash.finalPortfolioValue).toBeGreaterThan(0);
+            expect(severeMarketCrash.probabilityOfOccurrence).toBe(0.05);
+            expect(severeMarketCrash.mitigationStrategies).toBeDefined();
+            expect(
+              severeMarketCrash.mitigationStrategies.length
+            ).toBeGreaterThan(0);
+
+            expect(result.portfolioResilience).toBeDefined();
+            expect(
+              result.portfolioResilience.overallScore
+            ).toBeGreaterThanOrEqual(0);
+            expect(result.portfolioResilience.overallScore).toBeLessThanOrEqual(
+              100
+            );
+            expect(result.portfolioResilience.worstCaseScenario).toBeDefined();
+            expect(result.portfolioResilience.recommendedActions).toBeDefined();
+            expect(
+              result.portfolioResilience.emergencyFundRecommendation
+            ).toBeGreaterThan(0);
+          });
+
+          test('should generate appropriate mitigation strategies', () => {
+            const params = {
+              portfolioValue: 400000,
+              monthlyContributions: 1000,
+              timeHorizon: 15,
+              stressScenarios: [
+                {
+                  name: 'High Volatility Period',
+                  duration: 18,
+                  monthlyReturns: Array(18)
+                    .fill(0)
+                    .map(() => (Math.random() - 0.5) * 0.2),
+                  probability: 0.15,
+                },
+              ],
+              recoveryAssumptions: {
+                averageRecoveryReturn: 0.06,
+                recoveryVolatility: 0.12,
+                correlationWithCrash: -0.2,
+              },
+            };
+
+            const result = engine.calculateMarketStressTest(params);
+
+            const mitigationStrategies =
+              result.stressTestResults[0].mitigationStrategies;
+
+            // Verify all expected mitigation strategies are present
+            const strategyNames = mitigationStrategies.map(s => s.strategy);
+            expect(strategyNames).toContain('Enhanced Emergency Fund');
+            expect(strategyNames).toContain('Portfolio Diversification');
+            expect(strategyNames).toContain('Systematic Rebalancing');
+            expect(strategyNames).toContain('Dollar-Cost Averaging');
+
+            // Verify strategy properties
+            mitigationStrategies.forEach(strategy => {
+              expect(strategy.effectivenessScore).toBeGreaterThanOrEqual(0);
+              expect(strategy.effectivenessScore).toBeLessThanOrEqual(100);
+              expect(strategy.implementationCost).toBeGreaterThanOrEqual(0);
+              expect(strategy.description).toBeDefined();
+            });
+          });
+
+          test('should validate stress test parameters', () => {
+            expect(() => {
+              engine.calculateMarketStressTest({
+                portfolioValue: -50000, // Negative portfolio
+                monthlyContributions: 1000,
+                timeHorizon: 10,
+                stressScenarios: [],
+                recoveryAssumptions: {
+                  averageRecoveryReturn: 0.06,
+                  recoveryVolatility: 0.12,
+                  correlationWithCrash: -0.2,
+                },
+              });
+            }).toThrow('Portfolio value cannot be negative');
+
+            expect(() => {
+              engine.calculateMarketStressTest({
+                portfolioValue: 100000,
+                monthlyContributions: 1000,
+                timeHorizon: 0, // Invalid time horizon
+                stressScenarios: [],
+                recoveryAssumptions: {
+                  averageRecoveryReturn: 0.06,
+                  recoveryVolatility: 0.12,
+                  correlationWithCrash: -0.2,
+                },
+              });
+            }).toThrow('Time horizon must be between 1 and 50 years');
+          });
+        });
+      });
+
       // Performance Tests for Coast FIRE calculations
       describe('Coast FIRE Performance Tests', () => {
         test('Coast FIRE calculation should complete within 100ms', () => {
@@ -1626,6 +1977,104 @@ describe('FinancialCalculationEngine', () => {
 
           const executionTime = performance.now() - startTime;
           expect(executionTime).toBeLessThan(30);
+        });
+
+        test('Market volatility calculation should complete within 200ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateMarketVolatilityScenarios({
+            currentPortfolioValue: 500000,
+            monthlyContributions: 2000,
+            expectedReturn: 0.07,
+            timeHorizon: 20,
+            scenarioTypes: [
+              'great_recession_2008',
+              'covid_crash_2020',
+              'market_correction_10',
+            ],
+            simulationIterations: 1000,
+            includeRecoveryAnalysis: true,
+            withdrawalPhase: {
+              startAge: 65,
+              annualWithdrawal: 30000,
+              withdrawalStrategy: 'dynamic',
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(200);
+        });
+
+        test('Market stress test should complete within 100ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateMarketStressTest({
+            portfolioValue: 400000,
+            monthlyContributions: 1500,
+            timeHorizon: 15,
+            stressScenarios: [
+              {
+                name: 'Market Crash',
+                duration: 12,
+                monthlyReturns: Array(12).fill(-0.08),
+                probability: 0.05,
+              },
+              {
+                name: 'Bear Market',
+                duration: 18,
+                monthlyReturns: Array(18).fill(-0.03),
+                probability: 0.1,
+              },
+            ],
+            recoveryAssumptions: {
+              averageRecoveryReturn: 0.08,
+              recoveryVolatility: 0.15,
+              correlationWithCrash: -0.3,
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(100);
+        });
+
+        test('Complex market scenario analysis should complete within 500ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateMarketVolatilityScenarios({
+            currentPortfolioValue: 750000,
+            monthlyContributions: 3000,
+            expectedReturn: 0.07,
+            timeHorizon: 30,
+            scenarioTypes: [
+              'great_recession_2008',
+              'covid_crash_2020',
+              'dot_com_crash_2000',
+              'stagflation_1970s',
+              'sustained_low_returns',
+              'high_inflation_period',
+            ],
+            simulationIterations: 2000,
+            includeRecoveryAnalysis: true,
+            dollarCostAveragingAnalysis: true,
+            rebalancingStrategy: {
+              type: 'threshold',
+              frequency: 'quarterly',
+              thresholdPercentage: 5,
+              targetAllocation: {
+                stocks: 0.7,
+                bonds: 0.25,
+                alternatives: 0.05,
+              },
+            },
+            withdrawalPhase: {
+              startAge: 60,
+              annualWithdrawal: 50000,
+              withdrawalStrategy: 'floor_ceiling',
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(500);
         });
       });
     });

@@ -30,6 +30,10 @@ import {
   CoastFIRECalculationResult,
   BaristaFIRECalculationParams,
   BaristaFIRECalculationResult,
+  MarketScenarioParams,
+  MarketScenarioResult,
+  MarketStressTestParams,
+  MarketStressTestResult,
   CalculationResponse,
   BatchCalculationRequest,
   BatchCalculationResponse,
@@ -558,6 +562,17 @@ export class CalculationService {
               break;
             case 'barista_fire':
               result = financialCalculationEngine.calculateBaristaFIREAnalysis(
+                calculation.params
+              );
+              break;
+            case 'market_volatility':
+              result =
+                financialCalculationEngine.calculateMarketVolatilityScenarios(
+                  calculation.params
+                );
+              break;
+            case 'market_stress_test':
+              result = financialCalculationEngine.calculateMarketStressTest(
                 calculation.params
               );
               break;
@@ -1186,6 +1201,154 @@ export class CalculationService {
       return result;
     } catch (error) {
       console.error('Barista FIRE calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate market volatility scenarios with offline support
+   * Epic 7, Story 5: Market Volatility & Downturn Modeling
+   */
+  async calculateMarketVolatility(
+    params: MarketScenarioParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<MarketScenarioResult> {
+    const { priority = 'normal', useCache = true, timeout = 45000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `market_volatility_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<MarketScenarioResult>(
+        (resolve, reject) => {
+          const queueItem = {
+            id: `market_volatility_${Date.now()}_${Math.random()}`,
+            type: 'market_volatility',
+            params,
+            priority,
+            resolve,
+            reject,
+          };
+
+          // Insert based on priority
+          if (priority === 'high') {
+            this.calculationQueue.unshift(queueItem);
+          } else {
+            this.calculationQueue.push(queueItem);
+          }
+
+          // Process queue
+          this.processQueue();
+        }
+      );
+
+      // Apply timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Market volatility calculation timeout')),
+          timeout
+        )
+      );
+
+      const result = await Promise.race([calculationPromise, timeoutPromise]);
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `market_volatility_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('market_volatility', result);
+
+      return result;
+    } catch (error) {
+      console.error('Market volatility calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate market stress test with offline support
+   * Epic 7, Story 5: Market Stress Testing
+   */
+  async calculateMarketStressTest(
+    params: MarketStressTestParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<MarketStressTestResult> {
+    const { priority = 'normal', useCache = true, timeout = 30000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `market_stress_test_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<MarketStressTestResult>(
+        (resolve, reject) => {
+          const queueItem = {
+            id: `market_stress_test_${Date.now()}_${Math.random()}`,
+            type: 'market_stress_test',
+            params,
+            priority,
+            resolve,
+            reject,
+          };
+
+          // Insert based on priority
+          if (priority === 'high') {
+            this.calculationQueue.unshift(queueItem);
+          } else {
+            this.calculationQueue.push(queueItem);
+          }
+
+          // Process queue
+          this.processQueue();
+        }
+      );
+
+      // Apply timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Market stress test calculation timeout')),
+          timeout
+        )
+      );
+
+      const result = await Promise.race([calculationPromise, timeoutPromise]);
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `market_stress_test_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('market_stress_test', result);
+
+      return result;
+    } catch (error) {
+      console.error('Market stress test calculation failed:', error);
       throw error;
     }
   }

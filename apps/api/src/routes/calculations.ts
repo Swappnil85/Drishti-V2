@@ -24,6 +24,10 @@ import {
   CoastFIRECalculationResult,
   BaristaFIRECalculationParams,
   BaristaFIRECalculationResult,
+  MarketScenarioParams,
+  MarketScenarioResult,
+  MarketStressTestParams,
+  MarketStressTestResult,
   CalculationRequest,
   BatchCalculationRequest,
   CalculationResponse,
@@ -1568,6 +1572,287 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
           metadata: {
             calculationType: 'barista_fire',
             scenariosAnalyzed: result.scenarios.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Market Volatility Scenario Analysis Endpoint (Story 5)
+  fastify.post<{
+    Body: MarketScenarioParams;
+    Reply: CalculationResponse;
+  }>(
+    '/market-volatility',
+    {
+      schema: {
+        description:
+          'Analyze market volatility scenarios with historical data and stress testing',
+        tags: ['calculations', 'market', 'volatility', 'risk'],
+        body: {
+          type: 'object',
+          required: [
+            'currentPortfolioValue',
+            'monthlyContributions',
+            'expectedReturn',
+            'timeHorizon',
+            'scenarioTypes',
+          ],
+          properties: {
+            currentPortfolioValue: { type: 'number', minimum: 0 },
+            monthlyContributions: { type: 'number', minimum: 0 },
+            expectedReturn: { type: 'number', minimum: -1, maximum: 1 },
+            timeHorizon: { type: 'number', minimum: 1, maximum: 50 },
+            scenarioTypes: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'string',
+                enum: [
+                  'great_recession_2008',
+                  'covid_crash_2020',
+                  'dot_com_crash_2000',
+                  'black_monday_1987',
+                  'stagflation_1970s',
+                  'lost_decade_japan',
+                  'sustained_low_returns',
+                  'high_inflation_period',
+                  'rising_interest_rates',
+                  'market_correction_10',
+                  'bear_market_20',
+                  'severe_recession_30',
+                ],
+              },
+            },
+            includeHistoricalData: { type: 'boolean' },
+            confidenceIntervals: {
+              type: 'array',
+              items: { type: 'number', minimum: 1, maximum: 99 },
+            },
+            volatilityModel: {
+              type: 'string',
+              enum: ['historical', 'monte_carlo', 'hybrid'],
+            },
+            simulationIterations: {
+              type: 'number',
+              minimum: 1000,
+              maximum: 50000,
+            },
+            includeRecoveryAnalysis: { type: 'boolean' },
+            dollarCostAveragingAnalysis: { type: 'boolean' },
+            rebalancingStrategy: {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['none', 'calendar', 'threshold', 'hybrid'],
+                },
+                frequency: {
+                  type: 'string',
+                  enum: ['monthly', 'quarterly', 'annually'],
+                },
+                thresholdPercentage: {
+                  type: 'number',
+                  minimum: 1,
+                  maximum: 20,
+                },
+                targetAllocation: {
+                  type: 'object',
+                  required: ['stocks', 'bonds'],
+                  properties: {
+                    stocks: { type: 'number', minimum: 0, maximum: 1 },
+                    bonds: { type: 'number', minimum: 0, maximum: 1 },
+                    alternatives: { type: 'number', minimum: 0, maximum: 1 },
+                    cash: { type: 'number', minimum: 0, maximum: 1 },
+                  },
+                },
+              },
+            },
+            withdrawalPhase: {
+              type: 'object',
+              properties: {
+                startAge: { type: 'number', minimum: 50, maximum: 100 },
+                annualWithdrawal: { type: 'number', minimum: 0 },
+                withdrawalStrategy: {
+                  type: 'string',
+                  enum: ['fixed', 'dynamic', 'floor_ceiling'],
+                },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  scenarios: { type: 'array' },
+                  volatilityAnalysis: { type: 'object' },
+                  recoveryAnalysis: { type: 'object' },
+                  safeWithdrawalRateAnalysis: { type: 'object' },
+                  recommendations: { type: 'array' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: MarketScenarioParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        const result =
+          financialCalculationEngine.calculateMarketVolatilityScenarios(
+            request.body
+          );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'market_volatility',
+            scenariosAnalyzed: result.scenarios.length,
+            simulationIterations: request.body.simulationIterations || 10000,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Market Stress Testing Endpoint (Story 5)
+  fastify.post<{
+    Body: MarketStressTestParams;
+    Reply: CalculationResponse;
+  }>(
+    '/market-stress-test',
+    {
+      schema: {
+        description:
+          'Comprehensive market stress testing with portfolio resilience analysis',
+        tags: ['calculations', 'market', 'stress-test', 'risk'],
+        body: {
+          type: 'object',
+          required: [
+            'portfolioValue',
+            'monthlyContributions',
+            'timeHorizon',
+            'stressScenarios',
+            'recoveryAssumptions',
+          ],
+          properties: {
+            portfolioValue: { type: 'number', minimum: 0 },
+            monthlyContributions: { type: 'number', minimum: 0 },
+            timeHorizon: { type: 'number', minimum: 1, maximum: 50 },
+            stressScenarios: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: ['name', 'duration', 'monthlyReturns', 'probability'],
+                properties: {
+                  name: { type: 'string' },
+                  duration: { type: 'number', minimum: 1, maximum: 120 },
+                  monthlyReturns: {
+                    type: 'array',
+                    items: { type: 'number', minimum: -0.5, maximum: 0.5 },
+                  },
+                  probability: { type: 'number', minimum: 0, maximum: 1 },
+                },
+              },
+            },
+            recoveryAssumptions: {
+              type: 'object',
+              required: [
+                'averageRecoveryReturn',
+                'recoveryVolatility',
+                'correlationWithCrash',
+              ],
+              properties: {
+                averageRecoveryReturn: {
+                  type: 'number',
+                  minimum: 0,
+                  maximum: 0.5,
+                },
+                recoveryVolatility: { type: 'number', minimum: 0, maximum: 1 },
+                correlationWithCrash: {
+                  type: 'number',
+                  minimum: -1,
+                  maximum: 1,
+                },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  stressTestResults: { type: 'array' },
+                  portfolioResilience: { type: 'object' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: MarketStressTestParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        const result = financialCalculationEngine.calculateMarketStressTest(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'market_stress_test',
+            scenariosAnalyzed: result.stressTestResults.length,
+            portfolioResilienceScore: result.portfolioResilience.overallScore,
             timestamp: new Date().toISOString(),
           },
         });
