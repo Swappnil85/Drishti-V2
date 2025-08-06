@@ -42,6 +42,16 @@ Epic 7 successfully implements a comprehensive Financial Calculation Engine that
 - Comprehensive stress testing under market crash and economic scenarios
 - Timeline visualization with contribution and coast phases
 
+**Story 5**: ✅ COMPLETED - "As a user, I want to model market downturns and volatility"
+
+- Historical market scenario modeling with 12 major market events (2008 crisis, COVID crash, etc.)
+- Advanced volatility analysis with VaR, CVaR, Sharpe ratio, and max drawdown calculations
+- Monte Carlo simulations with up to 50,000 configurable iterations for robust statistical analysis
+- Portfolio stress testing with resilience scoring and automated mitigation strategy recommendations
+- Safe withdrawal rate analysis with dynamic strategy recommendations and sequence of returns risk
+- Recovery timeline projections with V-shaped, U-shaped, and L-shaped recovery pattern modeling
+- Rebalancing strategy impact analysis during market stress periods with cost-benefit analysis
+
 ## 🎯 Key Achievements
 
 ### ✅ Core Features Implemented

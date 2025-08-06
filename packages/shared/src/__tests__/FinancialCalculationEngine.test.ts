@@ -1904,6 +1904,491 @@ describe('FinancialCalculationEngine', () => {
         });
       });
 
+      // Debt Payoff Strategy Calculator Tests (Story 6)
+      describe('Enhanced Debt Payoff Strategy Calculator', () => {
+        describe('calculateDebtPayoff with enhanced features', () => {
+          test('should calculate basic debt payoff strategies', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'cc1',
+                  name: 'Credit Card 1',
+                  type: 'credit_card' as const,
+                  balance: 5000,
+                  interestRate: 0.18,
+                  minimumPayment: 150,
+                  creditLimit: 8000,
+                  reportedToCredit: true,
+                },
+                {
+                  id: 'loan1',
+                  name: 'Personal Loan',
+                  type: 'personal_loan' as const,
+                  balance: 10000,
+                  interestRate: 0.12,
+                  minimumPayment: 300,
+                  reportedToCredit: true,
+                },
+                {
+                  id: 'cc2',
+                  name: 'Credit Card 2',
+                  type: 'credit_card' as const,
+                  balance: 3000,
+                  interestRate: 0.22,
+                  minimumPayment: 90,
+                  creditLimit: 5000,
+                  reportedToCredit: true,
+                },
+              ],
+              extraPayment: 500,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 6000,
+              monthlyExpenses: 4000,
+              emergencyFund: 5000,
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            // Legacy compatibility
+            expect(result.strategy).toBeDefined();
+            expect(result.totalInterest).toBeGreaterThan(0);
+            expect(result.totalTime).toBeGreaterThan(0);
+            expect(result.payoffSchedule).toBeDefined();
+            expect(result.debtOrder).toBeDefined();
+
+            // Enhanced features
+            expect(result.strategies).toBeDefined();
+            expect(result.strategies.length).toBeGreaterThan(0);
+            expect(result.recommendations).toBeDefined();
+            expect(result.recommendations.length).toBeGreaterThan(0);
+
+            // Verify strategy comparison
+            const avalancheStrategy = result.strategies.find(
+              s => s.strategyType === 'avalanche'
+            );
+            const snowballStrategy = result.strategies.find(
+              s => s.strategyType === 'snowball'
+            );
+
+            expect(avalancheStrategy).toBeDefined();
+            expect(snowballStrategy).toBeDefined();
+            expect(avalancheStrategy!.strategyName).toBe('Debt Avalanche');
+            expect(snowballStrategy!.strategyName).toBe('Debt Snowball');
+          });
+
+          test('should include consolidation analysis when requested', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'cc1',
+                  name: 'Credit Card 1',
+                  type: 'credit_card' as const,
+                  balance: 8000,
+                  interestRate: 0.2,
+                  minimumPayment: 200,
+                  creditLimit: 10000,
+                },
+                {
+                  id: 'cc2',
+                  name: 'Credit Card 2',
+                  type: 'credit_card' as const,
+                  balance: 6000,
+                  interestRate: 0.18,
+                  minimumPayment: 150,
+                  creditLimit: 8000,
+                },
+              ],
+              extraPayment: 400,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 5000,
+              monthlyExpenses: 3500,
+              emergencyFund: 3000,
+              includeConsolidationAnalysis: true,
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            expect(result.consolidationAnalysis).toBeDefined();
+            expect(result.consolidationAnalysis!.eligibleDebts).toContain(
+              'cc1'
+            );
+            expect(result.consolidationAnalysis!.eligibleDebts).toContain(
+              'cc2'
+            );
+            expect(
+              result.consolidationAnalysis!.consolidationOptions
+            ).toBeDefined();
+            expect(
+              result.consolidationAnalysis!.consolidationOptions.length
+            ).toBeGreaterThan(0);
+            expect(
+              result.consolidationAnalysis!.recommendedOption
+            ).toBeDefined();
+
+            // Verify consolidation options
+            const personalLoanOption =
+              result.consolidationAnalysis!.consolidationOptions.find(
+                option => option.optionName === 'Personal Loan Consolidation'
+              );
+            expect(personalLoanOption).toBeDefined();
+            expect(personalLoanOption!.newInterestRate).toBeLessThan(0.2);
+            expect(personalLoanOption!.pros.length).toBeGreaterThan(0);
+            expect(personalLoanOption!.cons.length).toBeGreaterThan(0);
+          });
+
+          test('should include credit score projections when requested', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'cc1',
+                  name: 'High Utilization Card',
+                  type: 'credit_card' as const,
+                  balance: 7000,
+                  interestRate: 0.19,
+                  minimumPayment: 175,
+                  creditLimit: 8000, // 87.5% utilization
+                  reportedToCredit: true,
+                },
+              ],
+              extraPayment: 300,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 4500,
+              monthlyExpenses: 3200,
+              emergencyFund: 2000,
+              includeCreditScoreProjections: true,
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            expect(result.creditScoreProjections).toBeDefined();
+            expect(result.creditScoreProjections!.currentScore).toBeDefined();
+            expect(
+              result.creditScoreProjections!.projectedScores
+            ).toBeDefined();
+            expect(
+              result.creditScoreProjections!.projectedScores.length
+            ).toBeGreaterThan(0);
+            expect(
+              result.creditScoreProjections!.scoreImprovementTips
+            ).toBeDefined();
+            expect(
+              result.creditScoreProjections!.scoreImprovementTips.length
+            ).toBeGreaterThan(0);
+
+            // Verify score improvement over time
+            const projectedScores =
+              result.creditScoreProjections!.projectedScores;
+            expect(projectedScores[0].month).toBe(0);
+            expect(
+              projectedScores[projectedScores.length - 1].score
+            ).toBeGreaterThan(projectedScores[0].score);
+
+            // Verify factors are included
+            projectedScores.forEach(projection => {
+              expect(projection.factors).toBeDefined();
+              expect(projection.factors.length).toBeGreaterThan(0);
+              expect(
+                projection.factors.some(f => f.factor === 'Payment History')
+              ).toBe(true);
+              expect(
+                projection.factors.some(f => f.factor === 'Credit Utilization')
+              ).toBe(true);
+            });
+          });
+
+          test('should include emergency fund analysis when requested', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'cc1',
+                  name: 'Credit Card',
+                  type: 'credit_card' as const,
+                  balance: 4000,
+                  interestRate: 0.16,
+                  minimumPayment: 120,
+                },
+              ],
+              extraPayment: 200,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 4000,
+              monthlyExpenses: 2800,
+              emergencyFund: 1000, // Less than 1 month
+              includeEmergencyFundAnalysis: true,
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            expect(result.emergencyFundAnalysis).toBeDefined();
+            expect(result.emergencyFundAnalysis!.currentEmergencyFund).toBe(
+              1000
+            );
+            expect(result.emergencyFundAnalysis!.recommendedEmergencyFund).toBe(
+              2800 * 6
+            ); // 6 months
+            expect(result.emergencyFundAnalysis!.scenarios).toBeDefined();
+            expect(result.emergencyFundAnalysis!.scenarios.length).toBe(3);
+            expect(
+              result.emergencyFundAnalysis!.recommendedScenario
+            ).toBeDefined();
+            expect(result.emergencyFundAnalysis!.reasoning).toBeDefined();
+
+            // Verify scenarios
+            const scenarios = result.emergencyFundAnalysis!.scenarios;
+            const emergencyFirstScenario = scenarios.find(
+              s => s.scenarioName === 'Emergency Fund First'
+            );
+            const debtFirstScenario = scenarios.find(
+              s => s.scenarioName === 'Debt First'
+            );
+            const balancedScenario = scenarios.find(
+              s => s.scenarioName === 'Balanced Approach'
+            );
+
+            expect(emergencyFirstScenario).toBeDefined();
+            expect(debtFirstScenario).toBeDefined();
+            expect(balancedScenario).toBeDefined();
+
+            expect(emergencyFirstScenario!.riskScore).toBeLessThan(
+              debtFirstScenario!.riskScore
+            );
+            expect(balancedScenario!.riskScore).toBeGreaterThan(
+              emergencyFirstScenario!.riskScore
+            );
+            expect(balancedScenario!.riskScore).toBeLessThan(
+              debtFirstScenario!.riskScore
+            );
+          });
+
+          test('should include FIRE integration when requested', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'loan1',
+                  name: 'Student Loan',
+                  type: 'student_loan' as const,
+                  balance: 25000,
+                  interestRate: 0.06,
+                  minimumPayment: 280,
+                },
+              ],
+              extraPayment: 300,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 5500,
+              monthlyExpenses: 3800,
+              emergencyFund: 10000,
+              fireGoal: {
+                targetAmount: 1000000,
+                currentAge: 28,
+                targetAge: 55,
+                expectedReturn: 0.07,
+              },
+              includeFireIntegration: true,
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            expect(result.fireIntegration).toBeDefined();
+            expect(result.fireIntegration!.debtFreeAge).toBeGreaterThan(28);
+            expect(result.fireIntegration!.fireTimelineWithDebt).toBeDefined();
+            expect(result.fireIntegration!.fireTimelineDebtFree).toBeDefined();
+            expect(
+              result.fireIntegration!.investmentVsDebtAnalysis
+            ).toBeDefined();
+
+            const analysis = result.fireIntegration!.investmentVsDebtAnalysis;
+            expect(analysis.debtPayoffROI).toBe(0.06); // Student loan rate
+            expect(analysis.expectedInvestmentROI).toBe(0.07);
+            expect(analysis.recommendation).toBeDefined();
+            expect([
+              'pay_debt_first',
+              'invest_first',
+              'balanced_approach',
+            ]).toContain(analysis.recommendation);
+            expect(analysis.reasoning).toBeDefined();
+
+            // Since investment return (7%) > debt rate (6%), should recommend investing
+            expect(analysis.recommendation).toBe('invest_first');
+          });
+
+          test('should generate appropriate recommendations', () => {
+            const params = {
+              debts: [
+                {
+                  id: 'cc1',
+                  name: 'High Interest Card',
+                  type: 'credit_card' as const,
+                  balance: 6000,
+                  interestRate: 0.24,
+                  minimumPayment: 180,
+                  creditLimit: 7000, // High utilization
+                  reportedToCredit: true,
+                },
+                {
+                  id: 'cc2',
+                  name: 'Store Card',
+                  type: 'credit_card' as const,
+                  balance: 2000,
+                  interestRate: 0.26,
+                  minimumPayment: 60,
+                  creditLimit: 3000,
+                  reportedToCredit: true,
+                },
+                {
+                  id: 'loan1',
+                  name: 'Personal Loan',
+                  type: 'personal_loan' as const,
+                  balance: 8000,
+                  interestRate: 0.14,
+                  minimumPayment: 250,
+                },
+              ],
+              extraPayment: 400,
+              strategy: 'avalanche' as const,
+              monthlyIncome: 5000,
+              monthlyExpenses: 3500,
+              emergencyFund: 1000, // Low emergency fund
+            };
+
+            const result = engine.calculateDebtPayoff(params);
+
+            expect(result.recommendations).toBeDefined();
+            expect(result.recommendations.length).toBeGreaterThan(0);
+
+            // Should have strategy recommendation
+            const strategyRec = result.recommendations.find(
+              r => r.category === 'strategy'
+            );
+            expect(strategyRec).toBeDefined();
+            expect(strategyRec!.priority).toBe('high');
+
+            // Should have emergency fund recommendation (low emergency fund)
+            const emergencyRec = result.recommendations.find(
+              r => r.category === 'emergency_fund'
+            );
+            expect(emergencyRec).toBeDefined();
+            expect(emergencyRec!.priority).toBe('high'); // Less than 1 month
+
+            // Should have credit improvement recommendation (high utilization)
+            const creditRec = result.recommendations.find(
+              r => r.category === 'credit_improvement'
+            );
+            expect(creditRec).toBeDefined();
+            expect(creditRec!.priority).toBe('high');
+
+            // Should have consolidation recommendation (multiple debts)
+            const consolidationRec = result.recommendations.find(
+              r => r.category === 'consolidation'
+            );
+            expect(consolidationRec).toBeDefined();
+
+            // Verify recommendation structure
+            result.recommendations.forEach(rec => {
+              expect(rec.recommendation).toBeDefined();
+              expect(rec.impact).toBeDefined();
+              expect(rec.priority).toBeDefined();
+              expect(['high', 'medium', 'low']).toContain(rec.priority);
+              expect(rec.implementationSteps).toBeDefined();
+              expect(rec.implementationSteps.length).toBeGreaterThan(0);
+              expect(rec.timeframe).toBeDefined();
+            });
+          });
+
+          test('should validate input parameters', () => {
+            expect(() => {
+              engine.calculateDebtPayoff({
+                debts: [], // Empty debts array
+                extraPayment: 100,
+                strategy: 'avalanche',
+                monthlyIncome: 5000,
+                monthlyExpenses: 3000,
+                emergencyFund: 2000,
+              });
+            }).toThrow();
+
+            expect(() => {
+              engine.calculateDebtPayoff({
+                debts: [
+                  {
+                    id: 'cc1',
+                    name: 'Credit Card',
+                    type: 'credit_card',
+                    balance: -1000, // Negative balance
+                    interestRate: 0.18,
+                    minimumPayment: 50,
+                  },
+                ],
+                extraPayment: 100,
+                strategy: 'avalanche',
+                monthlyIncome: 5000,
+                monthlyExpenses: 3000,
+                emergencyFund: 2000,
+              });
+            }).toThrow();
+          });
+
+          test('should handle different debt strategies correctly', () => {
+            const debts = [
+              {
+                id: 'small',
+                name: 'Small Balance',
+                type: 'credit_card' as const,
+                balance: 1000,
+                interestRate: 0.15,
+                minimumPayment: 30,
+              },
+              {
+                id: 'high_rate',
+                name: 'High Rate',
+                type: 'credit_card' as const,
+                balance: 5000,
+                interestRate: 0.25,
+                minimumPayment: 150,
+              },
+              {
+                id: 'large',
+                name: 'Large Balance',
+                type: 'personal_loan' as const,
+                balance: 10000,
+                interestRate: 0.12,
+                minimumPayment: 300,
+              },
+            ];
+
+            const baseParams = {
+              debts,
+              extraPayment: 200,
+              monthlyIncome: 6000,
+              monthlyExpenses: 4000,
+              emergencyFund: 5000,
+            };
+
+            // Test snowball strategy
+            const snowballResult = engine.calculateDebtPayoff({
+              ...baseParams,
+              strategy: 'snowball' as const,
+            });
+
+            // Test avalanche strategy
+            const avalancheResult = engine.calculateDebtPayoff({
+              ...baseParams,
+              strategy: 'avalanche' as const,
+            });
+
+            // Avalanche should save more interest than snowball
+            const snowballStrategy = snowballResult.strategies.find(
+              s => s.strategyType === 'snowball'
+            );
+            const avalancheStrategy = avalancheResult.strategies.find(
+              s => s.strategyType === 'avalanche'
+            );
+
+            expect(avalancheStrategy!.totalInterestPaid).toBeLessThanOrEqual(
+              snowballStrategy!.totalInterestPaid
+            );
+          });
+        });
+      });
+
       // Performance Tests for Coast FIRE calculations
       describe('Coast FIRE Performance Tests', () => {
         test('Coast FIRE calculation should complete within 100ms', () => {
@@ -2075,6 +2560,120 @@ describe('FinancialCalculationEngine', () => {
 
           const executionTime = performance.now() - startTime;
           expect(executionTime).toBeLessThan(500);
+        });
+
+        test('Enhanced debt payoff calculation should complete within 150ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateDebtPayoff({
+            debts: [
+              {
+                id: 'cc1',
+                name: 'Credit Card 1',
+                type: 'credit_card',
+                balance: 5000,
+                interestRate: 0.18,
+                minimumPayment: 150,
+                creditLimit: 8000,
+              },
+              {
+                id: 'loan1',
+                name: 'Personal Loan',
+                type: 'personal_loan',
+                balance: 10000,
+                interestRate: 0.12,
+                minimumPayment: 300,
+              },
+              {
+                id: 'cc2',
+                name: 'Credit Card 2',
+                type: 'credit_card',
+                balance: 3000,
+                interestRate: 0.22,
+                minimumPayment: 90,
+                creditLimit: 5000,
+              },
+            ],
+            extraPayment: 500,
+            strategy: 'avalanche',
+            monthlyIncome: 6000,
+            monthlyExpenses: 4000,
+            emergencyFund: 5000,
+            includeConsolidationAnalysis: true,
+            includeCreditScoreProjections: true,
+            includeFireIntegration: true,
+            includeEmergencyFundAnalysis: true,
+            fireGoal: {
+              targetAmount: 1000000,
+              currentAge: 30,
+              targetAge: 60,
+              expectedReturn: 0.07,
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(150);
+        });
+
+        test('Debt consolidation analysis should complete within 50ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateDebtPayoff({
+            debts: [
+              {
+                id: 'cc1',
+                name: 'Credit Card 1',
+                type: 'credit_card',
+                balance: 8000,
+                interestRate: 0.2,
+                minimumPayment: 200,
+                creditLimit: 10000,
+              },
+              {
+                id: 'cc2',
+                name: 'Credit Card 2',
+                type: 'credit_card',
+                balance: 6000,
+                interestRate: 0.18,
+                minimumPayment: 150,
+                creditLimit: 8000,
+              },
+            ],
+            extraPayment: 400,
+            strategy: 'avalanche',
+            monthlyIncome: 5000,
+            monthlyExpenses: 3500,
+            emergencyFund: 3000,
+            includeConsolidationAnalysis: true,
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(50);
+        });
+
+        test('Multiple debt strategies comparison should complete within 100ms', () => {
+          const startTime = performance.now();
+
+          const debts = Array.from({ length: 5 }, (_, i) => ({
+            id: `debt${i + 1}`,
+            name: `Debt ${i + 1}`,
+            type: 'credit_card' as const,
+            balance: 1000 + i * 2000,
+            interestRate: 0.15 + i * 0.02,
+            minimumPayment: 50 + i * 25,
+          }));
+
+          engine.calculateDebtPayoff({
+            debts,
+            extraPayment: 300,
+            strategy: 'avalanche',
+            monthlyIncome: 7000,
+            monthlyExpenses: 4500,
+            emergencyFund: 8000,
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(100);
         });
       });
     });

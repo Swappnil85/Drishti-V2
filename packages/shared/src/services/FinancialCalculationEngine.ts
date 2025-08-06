@@ -35,6 +35,13 @@ import {
   MarketStressTestResult,
   HistoricalMarketData,
   RebalancingStrategy,
+  DebtAccount,
+  DebtType,
+  DebtPayoffStrategy,
+  DebtConsolidationOption,
+  ConsolidationType,
+  CreditScoreFactor,
+  EmergencyFundScenario,
   CalculationCache,
   CalculationPerformanceMetrics,
 } from '../types/financial';
@@ -767,9 +774,26 @@ export class FinancialCalculationEngine {
   }
 
   /**
-   * Calculate debt payoff strategies
+   * Enhanced debt payoff strategies calculator
+   * Epic 7, Story 6: Debt Payoff Strategy Calculator
    */
   public calculateDebtPayoff(params: DebtPayoffParams): DebtPayoffResult {
+    // Input validation
+    if (!params.debts || params.debts.length === 0) {
+      throw new Error('At least one debt must be provided');
+    }
+
+    for (const debt of params.debts) {
+      if (debt.balance < 0) {
+        throw new Error('Debt balance cannot be negative');
+      }
+      if (debt.interestRate < 0 || debt.interestRate > 1) {
+        throw new Error('Interest rate must be between 0 and 100%');
+      }
+      if (debt.minimumPayment < 0) {
+        throw new Error('Minimum payment cannot be negative');
+      }
+    }
     const startTime = performance.now();
     const cacheKey = this.generateCacheKey('debt_payoff', params);
 
@@ -882,13 +906,41 @@ export class FinancialCalculationEngine {
           .reduce((sum, p) => sum + p.interestPayment, 0);
       });
 
+      // Enhanced result with Story 6 features
+      const strategies = this.calculateAllDebtStrategies(params);
+      const consolidationAnalysis = params.includeConsolidationAnalysis
+        ? this.calculateConsolidationAnalysis(params)
+        : undefined;
+      const creditScoreProjections = params.includeCreditScoreProjections
+        ? this.calculateCreditScoreProjections(params)
+        : undefined;
+      const emergencyFundAnalysis = params.includeEmergencyFundAnalysis
+        ? this.calculateEmergencyFundAnalysis(params)
+        : undefined;
+      const fireIntegration = params.includeFireIntegration
+        ? this.calculateFireIntegration(params)
+        : undefined;
+      const recommendations = this.generateDebtPayoffRecommendations(
+        params,
+        strategies
+      );
+
       const result: DebtPayoffResult = {
+        // Legacy compatibility
         strategy,
         totalInterest,
         totalTime: currentMonth,
         monthlySavings: extraPayment,
         payoffSchedule,
         debtOrder,
+
+        // Enhanced features (Story 6)
+        strategies,
+        consolidationAnalysis,
+        creditScoreProjections,
+        emergencyFundAnalysis,
+        fireIntegration,
+        recommendations,
       };
 
       this.setCache(
@@ -918,6 +970,710 @@ export class FinancialCalculationEngine {
         `Debt payoff calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
+  }
+
+  /**
+   * Calculate all debt payoff strategies for comparison
+   * Epic 7, Story 6: Strategy Comparison Engine
+   */
+  private calculateAllDebtStrategies(params: DebtPayoffParams): Array<{
+    strategyType: DebtPayoffStrategy;
+    strategyName: string;
+    description: string;
+    totalMonths: number;
+    totalInterestPaid: number;
+    totalAmountPaid: number;
+    monthlyPayment: number;
+    interestSavings: number;
+    timeSavings: number;
+  }> {
+    const strategies: DebtPayoffStrategy[] = [
+      'snowball',
+      'avalanche',
+      'highest_payment',
+      'minimum_only',
+    ];
+    const results = [];
+
+    // Calculate baseline (minimum payments only)
+    const baselineParams = {
+      ...params,
+      strategy: 'minimum_only' as DebtPayoffStrategy,
+      extraPayment: 0,
+    };
+    const baseline = this.calculateSingleDebtStrategy(baselineParams);
+
+    for (const strategy of strategies) {
+      const strategyParams = { ...params, strategy };
+      const result = this.calculateSingleDebtStrategy(strategyParams);
+
+      const strategyInfo = this.getStrategyInfo(strategy);
+
+      results.push({
+        strategyType: strategy,
+        strategyName: strategyInfo.name,
+        description: strategyInfo.description,
+        totalMonths: result.totalTime,
+        totalInterestPaid: result.totalInterest,
+        totalAmountPaid:
+          result.totalInterest +
+          params.debts.reduce((sum, d) => sum + d.balance, 0),
+        monthlyPayment:
+          params.debts.reduce((sum, d) => sum + d.minimumPayment, 0) +
+          params.extraPayment,
+        interestSavings: baseline.totalInterest - result.totalInterest,
+        timeSavings: baseline.totalTime - result.totalTime,
+      });
+    }
+
+    return results;
+  }
+
+  /**
+   * Get strategy information
+   */
+  private getStrategyInfo(strategy: DebtPayoffStrategy): {
+    name: string;
+    description: string;
+  } {
+    const strategyMap = {
+      snowball: {
+        name: 'Debt Snowball',
+        description:
+          'Pay off smallest balances first for psychological wins and momentum',
+      },
+      avalanche: {
+        name: 'Debt Avalanche',
+        description:
+          'Pay off highest interest rates first for maximum interest savings',
+      },
+      highest_payment: {
+        name: 'Highest Payment First',
+        description: 'Target debts with highest minimum payments first',
+      },
+      minimum_only: {
+        name: 'Minimum Payments Only',
+        description: 'Pay only minimum required payments on all debts',
+      },
+      custom: {
+        name: 'Custom Order',
+        description: 'User-defined payoff order based on personal preferences',
+      },
+      debt_to_income: {
+        name: 'Debt-to-Income Priority',
+        description: 'Prioritize debts with highest debt-to-income impact',
+      },
+      credit_impact: {
+        name: 'Credit Score Impact',
+        description: 'Focus on debts with highest positive credit score impact',
+      },
+    };
+
+    return (
+      strategyMap[strategy] || {
+        name: 'Unknown Strategy',
+        description: 'Unknown strategy type',
+      }
+    );
+  }
+
+  /**
+   * Calculate single debt strategy
+   */
+  private calculateSingleDebtStrategy(params: DebtPayoffParams): {
+    totalTime: number;
+    totalInterest: number;
+  } {
+    // Simplified calculation for strategy comparison
+    const debts = [...params.debts];
+    let totalInterest = 0;
+    let currentMonth = 0;
+    const maxMonths = 600; // 50 years maximum
+
+    // Sort debts based on strategy
+    this.sortDebtsByStrategy(debts, params.strategy);
+
+    while (debts.some(d => d.balance > 0) && currentMonth < maxMonths) {
+      currentMonth++;
+      let remainingExtra = params.extraPayment;
+
+      // Apply minimum payments and interest
+      for (const debt of debts) {
+        if (debt.balance > 0) {
+          const monthlyInterest = (debt.balance * debt.interestRate) / 12;
+          totalInterest += monthlyInterest;
+
+          const principalPayment = Math.min(
+            debt.minimumPayment - monthlyInterest,
+            debt.balance
+          );
+          debt.balance = Math.max(0, debt.balance - principalPayment);
+        }
+      }
+
+      // Apply extra payments based on strategy
+      for (const debt of debts) {
+        if (debt.balance > 0 && remainingExtra > 0) {
+          const extraPayment = Math.min(remainingExtra, debt.balance);
+          debt.balance -= extraPayment;
+          remainingExtra -= extraPayment;
+
+          if (params.strategy !== 'minimum_only') {
+            break; // Focus extra payment on first debt in strategy order
+          }
+        }
+      }
+    }
+
+    return { totalTime: currentMonth, totalInterest };
+  }
+
+  /**
+   * Sort debts by strategy
+   */
+  private sortDebtsByStrategy(
+    debts: DebtAccount[],
+    strategy: DebtPayoffStrategy
+  ): void {
+    switch (strategy) {
+      case 'snowball':
+        debts.sort((a, b) => a.balance - b.balance);
+        break;
+      case 'avalanche':
+        debts.sort((a, b) => b.interestRate - a.interestRate);
+        break;
+      case 'highest_payment':
+        debts.sort((a, b) => b.minimumPayment - a.minimumPayment);
+        break;
+      case 'debt_to_income':
+        // Assuming monthly income is available in params
+        debts.sort(
+          (a, b) => b.balance / b.minimumPayment - a.balance / a.minimumPayment
+        );
+        break;
+      case 'credit_impact':
+        // Prioritize credit cards and high utilization debts
+        debts.sort((a, b) => {
+          const aScore = this.getCreditImpactScore(a);
+          const bScore = this.getCreditImpactScore(b);
+          return bScore - aScore;
+        });
+        break;
+      default:
+        // Keep original order for minimum_only and custom
+        break;
+    }
+  }
+
+  /**
+   * Get credit impact score for debt prioritization
+   */
+  private getCreditImpactScore(debt: DebtAccount): number {
+    let score = 0;
+
+    // Credit cards have higher impact
+    if (debt.type === 'credit_card') {
+      score += 50;
+
+      // High utilization has higher impact
+      if (debt.creditLimit) {
+        const utilization = debt.balance / debt.creditLimit;
+        if (utilization > 0.3) score += 30;
+        if (utilization > 0.7) score += 20;
+      }
+    }
+
+    // Higher interest rates have more impact
+    score += debt.interestRate * 2;
+
+    // Accounts reported to credit have higher impact
+    if (debt.reportedToCredit) {
+      score += 20;
+    }
+
+    return score;
+  }
+
+  /**
+   * Calculate debt consolidation analysis
+   * Epic 7, Story 6: Consolidation Analysis
+   */
+  private calculateConsolidationAnalysis(params: DebtPayoffParams): any {
+    const eligibleDebts = params.debts
+      .filter(
+        debt => debt.type === 'credit_card' || debt.type === 'personal_loan'
+      )
+      .map(debt => debt.id);
+
+    const totalDebt = params.debts.reduce((sum, debt) => sum + debt.balance, 0);
+    const weightedInterestRate =
+      totalDebt > 0
+        ? params.debts.reduce(
+            (sum, debt) => sum + debt.balance * debt.interestRate,
+            0
+          ) / totalDebt
+        : 0.15; // Default 15% if no debt
+
+    const consolidationOptions = [
+      {
+        optionName: 'Personal Loan Consolidation',
+        newInterestRate: Math.max(0.06, weightedInterestRate - 0.03), // 3% lower than weighted average
+        newMonthlyPayment: totalDebt * 0.02, // 2% of total debt
+        totalMonths: 60, // 5 years
+        totalInterestPaid: 0,
+        savingsVsOriginal: 0,
+        requirements: [
+          'Credit score 650+',
+          'Debt-to-income ratio <40%',
+          'Stable income',
+        ],
+        pros: [
+          'Single monthly payment',
+          'Fixed interest rate',
+          'Predictable payoff timeline',
+        ],
+        cons: [
+          'May require collateral',
+          'Origination fees',
+          'Temptation to accumulate new debt',
+        ],
+      },
+      {
+        optionName: 'Balance Transfer Credit Card',
+        newInterestRate: 0.0, // 0% promotional rate
+        newMonthlyPayment: totalDebt * 0.025, // 2.5% of total debt
+        totalMonths: 18, // 18 months promotional period
+        totalInterestPaid: 0,
+        savingsVsOriginal: 0,
+        requirements: [
+          'Excellent credit score 720+',
+          'Low credit utilization',
+          'Good payment history',
+        ],
+        pros: [
+          '0% promotional rate',
+          'No origination fees',
+          'Rewards potential',
+        ],
+        cons: [
+          'Promotional rate expires',
+          'Balance transfer fees',
+          'High rate after promotion',
+        ],
+      },
+    ];
+
+    // Calculate savings for each option
+    const originalResult = this.calculateSingleDebtStrategy(params);
+
+    consolidationOptions.forEach(option => {
+      option.totalInterestPaid =
+        (option.newInterestRate * totalDebt * option.totalMonths) / 12;
+      option.savingsVsOriginal =
+        originalResult.totalInterest - option.totalInterestPaid;
+    });
+
+    const recommendedOption = consolidationOptions.reduce((best, current) =>
+      current.savingsVsOriginal > best.savingsVsOriginal ? current : best
+    ).optionName;
+
+    return {
+      eligibleDebts,
+      consolidationOptions,
+      recommendedOption,
+    };
+  }
+
+  /**
+   * Calculate credit score projections
+   * Epic 7, Story 6: Credit Score Analysis
+   */
+  private calculateCreditScoreProjections(params: DebtPayoffParams): any {
+    const currentScore = 650; // Default starting score
+    const projectedScores = [];
+
+    // Calculate credit utilization impact
+    const totalCreditLimit = params.debts
+      .filter(debt => debt.creditLimit)
+      .reduce((sum, debt) => sum + (debt.creditLimit || 0), 0);
+
+    const totalCreditCardDebt = params.debts
+      .filter(debt => debt.type === 'credit_card')
+      .reduce((sum, debt) => sum + debt.balance, 0);
+
+    const currentUtilization =
+      totalCreditLimit > 0 ? totalCreditCardDebt / totalCreditLimit : 0;
+
+    // Project score improvements over time
+    for (let month = 0; month <= 24; month += 6) {
+      const utilizationImprovement = Math.max(
+        0,
+        currentUtilization - month * 0.05
+      );
+      const paymentHistoryImprovement = month * 2; // 2 points per 6 months of good payments
+      const creditAgeImprovement = month * 0.5; // 0.5 points per 6 months
+
+      const projectedScore = Math.min(
+        850,
+        currentScore +
+          paymentHistoryImprovement +
+          (currentUtilization > 0.3
+            ? (currentUtilization - utilizationImprovement) * 100
+            : 0) +
+          creditAgeImprovement
+      );
+
+      projectedScores.push({
+        month,
+        score: Math.round(projectedScore),
+        factors: [
+          {
+            factor: 'Payment History',
+            impact: paymentHistoryImprovement,
+            description: 'Consistent on-time payments improve score',
+          },
+          {
+            factor: 'Credit Utilization',
+            impact: utilizationImprovement * 100,
+            description: 'Lower credit card balances improve utilization ratio',
+          },
+          {
+            factor: 'Credit Age',
+            impact: creditAgeImprovement,
+            description: 'Older accounts improve average account age',
+          },
+        ],
+      });
+    }
+
+    const scoreImprovementTips = [
+      'Pay all bills on time to build positive payment history',
+      'Keep credit card balances below 30% of credit limits',
+      'Pay down high-interest debt first to improve utilization',
+      'Avoid closing old credit cards to maintain credit history length',
+      "Consider becoming an authorized user on a family member's account",
+      'Monitor credit reports regularly for errors and disputes',
+    ];
+
+    return {
+      currentScore,
+      projectedScores,
+      scoreImprovementTips,
+    };
+  }
+
+  /**
+   * Calculate emergency fund vs debt analysis
+   * Epic 7, Story 6: Emergency Fund Analysis
+   */
+  private calculateEmergencyFundAnalysis(params: DebtPayoffParams): any {
+    const monthlyExpenses = params.monthlyExpenses;
+    const recommendedEmergencyFund = monthlyExpenses * 6; // 6 months of expenses
+
+    const scenarios = [
+      {
+        scenarioName: 'Emergency Fund First',
+        emergencyFundAmount: recommendedEmergencyFund,
+        debtPayoffAmount: 0,
+        description: 'Build full emergency fund before aggressive debt payoff',
+        totalInterestPaid: 0,
+        payoffTimeMonths: 0,
+        riskScore: 20, // Low risk
+        advantages: [
+          'Financial security for unexpected expenses',
+          'Prevents need to use credit cards for emergencies',
+          'Peace of mind and reduced financial stress',
+        ],
+        disadvantages: [
+          'Higher total interest paid on debt',
+          'Longer time to become debt-free',
+          'Opportunity cost of low emergency fund returns',
+        ],
+      },
+      {
+        scenarioName: 'Debt First',
+        emergencyFundAmount: monthlyExpenses * 1, // 1 month only
+        debtPayoffAmount: params.extraPayment,
+        description: 'Minimal emergency fund, focus on debt elimination',
+        totalInterestPaid: 0,
+        payoffTimeMonths: 0,
+        riskScore: 80, // High risk
+        advantages: [
+          'Faster debt elimination',
+          'Lower total interest paid',
+          'Improved cash flow sooner',
+        ],
+        disadvantages: [
+          'Vulnerable to financial emergencies',
+          'May need to use credit for unexpected expenses',
+          'Higher financial stress and risk',
+        ],
+      },
+      {
+        scenarioName: 'Balanced Approach',
+        emergencyFundAmount: monthlyExpenses * 3, // 3 months
+        debtPayoffAmount: params.extraPayment * 0.7, // 70% to debt
+        description: 'Build moderate emergency fund while paying down debt',
+        totalInterestPaid: 0,
+        payoffTimeMonths: 0,
+        riskScore: 40, // Medium risk
+        advantages: [
+          'Balanced risk and reward',
+          'Some emergency protection',
+          'Reasonable debt payoff timeline',
+        ],
+        disadvantages: [
+          'Compromise on both goals',
+          'Moderate interest costs',
+          'Longer timeline than debt-first approach',
+        ],
+      },
+    ];
+
+    // Calculate outcomes for each scenario
+    scenarios.forEach(scenario => {
+      const scenarioParams = {
+        ...params,
+        extraPayment: scenario.debtPayoffAmount,
+      };
+      const result = this.calculateSingleDebtStrategy(scenarioParams);
+      scenario.totalInterestPaid = result.totalInterest;
+      scenario.payoffTimeMonths = result.totalTime;
+    });
+
+    const recommendedScenario = 'Balanced Approach';
+    const reasoning =
+      'Provides reasonable emergency protection while making meaningful progress on debt elimination';
+
+    return {
+      currentEmergencyFund: params.emergencyFund,
+      recommendedEmergencyFund,
+      scenarios,
+      recommendedScenario,
+      reasoning,
+    };
+  }
+
+  /**
+   * Calculate FIRE integration analysis
+   * Epic 7, Story 6: FIRE Timeline Integration
+   */
+  private calculateFireIntegration(params: DebtPayoffParams): any {
+    if (!params.fireGoal) {
+      return undefined;
+    }
+
+    const { targetAmount, currentAge, targetAge, expectedReturn } =
+      params.fireGoal;
+
+    // Calculate debt-free age
+    const debtPayoffResult = this.calculateSingleDebtStrategy(params);
+    const debtFreeAge = Math.max(
+      currentAge + 0.1,
+      currentAge + debtPayoffResult.totalTime / 12
+    );
+
+    // Calculate FIRE timeline with debt
+    const monthsToFire = (targetAge - currentAge) * 12;
+    const availableForInvestment =
+      params.monthlyIncome -
+      params.monthlyExpenses -
+      params.debts.reduce((sum, d) => sum + d.minimumPayment, 0) -
+      params.extraPayment;
+
+    const fireTimelineWithDebt = {
+      ageAtFire: targetAge,
+      totalSavingsNeeded: targetAmount,
+      monthlySavingsRequired: availableForInvestment,
+    };
+
+    // Calculate FIRE timeline debt-free
+    const monthsAfterDebtFree = Math.max(
+      0,
+      monthsToFire - debtPayoffResult.totalTime
+    );
+    const availableAfterDebtFree =
+      params.monthlyIncome - params.monthlyExpenses;
+
+    const fireTimelineDebtFree = {
+      ageAtFire: Math.max(debtFreeAge, targetAge),
+      totalSavingsNeeded: targetAmount,
+      monthlySavingsRequired: availableAfterDebtFree,
+    };
+
+    // Investment vs debt analysis
+    const totalDebtBalance = params.debts.reduce(
+      (sum, debt) => sum + debt.balance,
+      0
+    );
+    const averageDebtInterestRate =
+      totalDebtBalance > 0
+        ? params.debts.reduce(
+            (sum, debt) => sum + debt.balance * debt.interestRate,
+            0
+          ) / totalDebtBalance
+        : 0.06; // Default 6% if no debt
+
+    const debtPayoffROI = averageDebtInterestRate; // Guaranteed return
+    const expectedInvestmentROI = expectedReturn;
+
+    let recommendation: 'pay_debt_first' | 'invest_first' | 'balanced_approach';
+    let reasoning: string;
+
+    if (debtPayoffROI > expectedInvestmentROI + 0.02) {
+      // 2% buffer for guaranteed return
+      recommendation = 'pay_debt_first';
+      reasoning = `Debt interest rates (${(debtPayoffROI * 100).toFixed(1)}%) exceed expected investment returns (${(expectedInvestmentROI * 100).toFixed(1)}%) by significant margin`;
+    } else if (expectedInvestmentROI > debtPayoffROI + 0.03) {
+      // 3% buffer for market risk
+      recommendation = 'invest_first';
+      reasoning = `Expected investment returns (${(expectedInvestmentROI * 100).toFixed(1)}%) significantly exceed debt interest rates (${(debtPayoffROI * 100).toFixed(1)}%)`;
+    } else {
+      recommendation = 'balanced_approach';
+      reasoning = `Debt rates and investment returns are similar - balanced approach recommended`;
+    }
+
+    const balancedApproach =
+      recommendation === 'balanced_approach'
+        ? {
+            debtPaymentPercentage: 60,
+            investmentPercentage: 40,
+            projectedOutcome:
+              'Moderate debt payoff timeline with investment growth',
+          }
+        : undefined;
+
+    return {
+      debtFreeAge,
+      fireTimelineWithDebt,
+      fireTimelineDebtFree,
+      investmentVsDebtAnalysis: {
+        debtPayoffROI,
+        expectedInvestmentROI,
+        recommendation,
+        reasoning,
+        balancedApproach,
+      },
+    };
+  }
+
+  /**
+   * Generate debt payoff recommendations
+   * Epic 7, Story 6: Recommendation Engine
+   */
+  private generateDebtPayoffRecommendations(
+    params: DebtPayoffParams,
+    strategies: any[]
+  ): any[] {
+    const recommendations = [];
+
+    // Strategy recommendation
+    const bestStrategy = strategies.reduce((best, current) =>
+      current.interestSavings > best.interestSavings ? current : best
+    );
+
+    recommendations.push({
+      category: 'strategy',
+      recommendation: `Use ${bestStrategy.strategyName} for optimal debt payoff`,
+      impact: `Save $${bestStrategy.interestSavings.toLocaleString()} in interest and ${bestStrategy.timeSavings} months`,
+      priority: 'high',
+      implementationSteps: [
+        'List all debts with balances and interest rates',
+        `Sort debts according to ${bestStrategy.strategyName} method`,
+        'Make minimum payments on all debts',
+        'Apply extra payments to priority debt',
+        'Repeat until all debts are paid off',
+      ],
+      timeframe: `${bestStrategy.totalMonths} months`,
+    });
+
+    // Emergency fund recommendation
+    const emergencyFundRatio = params.emergencyFund / params.monthlyExpenses;
+    if (emergencyFundRatio < 3) {
+      recommendations.push({
+        category: 'emergency_fund',
+        recommendation:
+          'Build emergency fund to 3-6 months of expenses before aggressive debt payoff',
+        impact: 'Prevents need to use credit cards for unexpected expenses',
+        priority: emergencyFundRatio < 1 ? 'high' : 'medium',
+        implementationSteps: [
+          'Calculate 3-6 months of essential expenses',
+          'Open high-yield savings account for emergency fund',
+          'Automate monthly transfers to emergency fund',
+          'Reduce debt payments temporarily if needed',
+        ],
+        timeframe: '6-12 months',
+      });
+    }
+
+    // Credit improvement recommendation
+    const creditCardDebts = params.debts.filter(d => d.type === 'credit_card');
+    if (creditCardDebts.length > 0) {
+      const totalCreditUsed = creditCardDebts.reduce(
+        (sum, d) => sum + d.balance,
+        0
+      );
+      const totalCreditLimit = creditCardDebts.reduce(
+        (sum, d) => sum + (d.creditLimit || 0),
+        0
+      );
+      const utilization =
+        totalCreditLimit > 0 ? totalCreditUsed / totalCreditLimit : 0;
+
+      if (utilization > 0.3) {
+        recommendations.push({
+          category: 'credit_improvement',
+          recommendation:
+            'Prioritize credit card debt to improve credit utilization ratio',
+          impact: 'Improve credit score by 20-50 points within 6 months',
+          priority: 'high',
+          implementationSteps: [
+            'Focus extra payments on credit cards first',
+            'Keep credit card balances below 30% of limits',
+            'Consider balance transfer to lower interest rate',
+            'Avoid closing paid-off credit cards',
+          ],
+          timeframe: '3-6 months',
+        });
+      }
+    }
+
+    // FIRE planning recommendation
+    if (params.fireGoal) {
+      recommendations.push({
+        category: 'fire_planning',
+        recommendation: 'Integrate debt payoff with FIRE timeline planning',
+        impact: 'Optimize path to financial independence',
+        priority: 'medium',
+        implementationSteps: [
+          'Calculate debt-free date',
+          'Project investment capacity after debt payoff',
+          'Consider balanced approach if investment returns exceed debt rates',
+          'Automate investments once debt-free',
+        ],
+        timeframe: 'Ongoing',
+      });
+    }
+
+    // Consolidation recommendation
+    if (params.debts.length > 3) {
+      recommendations.push({
+        category: 'consolidation',
+        recommendation:
+          'Consider debt consolidation to simplify payments and potentially reduce interest',
+        impact: 'Simplify debt management and potentially save on interest',
+        priority: 'low',
+        implementationSteps: [
+          'Research personal loan options',
+          'Compare balance transfer credit cards',
+          'Calculate total cost including fees',
+          'Ensure you qualify for better rates',
+        ],
+        timeframe: '1-2 months',
+      });
+    }
+
+    return recommendations;
   }
 
   /**

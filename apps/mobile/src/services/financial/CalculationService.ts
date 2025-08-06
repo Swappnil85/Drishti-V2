@@ -576,6 +576,12 @@ export class CalculationService {
                 calculation.params
               );
               break;
+            case 'debt_payoff':
+            case 'debt_payoff_enhanced':
+              result = financialCalculationEngine.calculateDebtPayoff(
+                calculation.params
+              );
+              break;
             default:
               throw new Error(
                 `Unsupported calculation type: ${calculation.type}`
@@ -1349,6 +1355,213 @@ export class CalculationService {
       return result;
     } catch (error) {
       console.error('Market stress test calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate enhanced debt payoff strategies with offline support
+   * Epic 7, Story 6: Debt Payoff Strategy Calculator
+   */
+  async calculateEnhancedDebtPayoff(
+    params: DebtPayoffParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<DebtPayoffResult> {
+    const { priority = 'normal', useCache = true, timeout = 30000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `debt_payoff_enhanced_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<DebtPayoffResult>(
+        (resolve, reject) => {
+          const queueItem = {
+            id: `debt_payoff_enhanced_${Date.now()}_${Math.random()}`,
+            type: 'debt_payoff_enhanced',
+            params,
+            priority,
+            resolve,
+            reject,
+          };
+
+          // Insert based on priority
+          if (priority === 'high') {
+            this.calculationQueue.unshift(queueItem);
+          } else {
+            this.calculationQueue.push(queueItem);
+          }
+
+          // Process queue
+          this.processQueue();
+        }
+      );
+
+      // Apply timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Enhanced debt payoff calculation timeout')),
+          timeout
+        )
+      );
+
+      const result = await Promise.race([calculationPromise, timeoutPromise]);
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `debt_payoff_enhanced_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('debt_payoff_enhanced', result);
+
+      return result;
+    } catch (error) {
+      console.error('Enhanced debt payoff calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate debt consolidation analysis with offline support
+   * Epic 7, Story 6: Debt Consolidation Analysis
+   */
+  async calculateDebtConsolidation(
+    params: DebtPayoffParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any> {
+    const { priority = 'normal', useCache = true, timeout = 20000 } = options;
+
+    try {
+      // Ensure consolidation analysis is enabled
+      const consolidationParams = {
+        ...params,
+        includeConsolidationAnalysis: true,
+      };
+
+      const result = await this.calculateEnhancedDebtPayoff(
+        consolidationParams,
+        {
+          priority,
+          useCache,
+          timeout,
+        }
+      );
+
+      return result.consolidationAnalysis;
+    } catch (error) {
+      console.error('Debt consolidation analysis failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate credit score projections with offline support
+   * Epic 7, Story 6: Credit Score Projections
+   */
+  async calculateCreditScoreProjections(
+    params: DebtPayoffParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any> {
+    const { priority = 'normal', useCache = true, timeout = 15000 } = options;
+
+    try {
+      // Ensure credit score projections are enabled
+      const creditParams = {
+        ...params,
+        includeCreditScoreProjections: true,
+      };
+
+      const result = await this.calculateEnhancedDebtPayoff(creditParams, {
+        priority,
+        useCache,
+        timeout,
+      });
+
+      return result.creditScoreProjections;
+    } catch (error) {
+      console.error('Credit score projections calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate debt vs investment analysis with offline support
+   * Epic 7, Story 6: FIRE Integration Analysis
+   */
+  async calculateDebtVsInvestmentAnalysis(
+    params: DebtPayoffParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any> {
+    const { priority = 'normal', useCache = true, timeout = 25000 } = options;
+
+    try {
+      // Ensure FIRE integration is enabled
+      const fireParams = {
+        ...params,
+        includeFireIntegration: true,
+      };
+
+      const result = await this.calculateEnhancedDebtPayoff(fireParams, {
+        priority,
+        useCache,
+        timeout,
+      });
+
+      return result.fireIntegration?.investmentVsDebtAnalysis;
+    } catch (error) {
+      console.error('Debt vs investment analysis failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get debt payoff recommendations with offline support
+   * Epic 7, Story 6: Recommendation Engine
+   */
+  async getDebtPayoffRecommendations(
+    params: DebtPayoffParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<any[]> {
+    const { priority = 'normal', useCache = true, timeout = 15000 } = options;
+
+    try {
+      const result = await this.calculateEnhancedDebtPayoff(params, {
+        priority,
+        useCache,
+        timeout,
+      });
+
+      return result.recommendations || [];
+    } catch (error) {
+      console.error('Debt payoff recommendations failed:', error);
       throw error;
     }
   }

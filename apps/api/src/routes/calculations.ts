@@ -28,6 +28,9 @@ import {
   MarketScenarioResult,
   MarketStressTestParams,
   MarketStressTestResult,
+  DebtAccount,
+  DebtType,
+  DebtPayoffStrategy,
   CalculationRequest,
   BatchCalculationRequest,
   CalculationResponse,
@@ -1853,6 +1856,190 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
             calculationType: 'market_stress_test',
             scenariosAnalyzed: result.stressTestResults.length,
             portfolioResilienceScore: result.portfolioResilience.overallScore,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Enhanced Debt Payoff Strategy Calculator Endpoint (Story 6)
+  fastify.post<{
+    Body: DebtPayoffParams;
+    Reply: CalculationResponse;
+  }>(
+    '/debt-payoff-enhanced',
+    {
+      schema: {
+        description:
+          'Enhanced debt payoff strategy calculator with consolidation analysis, credit score projections, and FIRE integration',
+        tags: [
+          'calculations',
+          'debt',
+          'payoff',
+          'strategy',
+          'consolidation',
+          'credit',
+        ],
+        body: {
+          type: 'object',
+          required: [
+            'debts',
+            'extraPayment',
+            'strategy',
+            'monthlyIncome',
+            'monthlyExpenses',
+            'emergencyFund',
+          ],
+          properties: {
+            debts: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: [
+                  'id',
+                  'name',
+                  'type',
+                  'balance',
+                  'interestRate',
+                  'minimumPayment',
+                ],
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  type: {
+                    type: 'string',
+                    enum: [
+                      'credit_card',
+                      'personal_loan',
+                      'auto_loan',
+                      'student_loan',
+                      'mortgage',
+                      'home_equity_loan',
+                      'medical_debt',
+                      'other',
+                    ],
+                  },
+                  balance: { type: 'number', minimum: 0 },
+                  interestRate: { type: 'number', minimum: 0, maximum: 1 },
+                  minimumPayment: { type: 'number', minimum: 0 },
+                  creditLimit: { type: 'number', minimum: 0 },
+                  paymentDueDate: { type: 'number', minimum: 1, maximum: 31 },
+                  promotionalRate: {
+                    type: 'object',
+                    properties: {
+                      rate: { type: 'number', minimum: 0, maximum: 1 },
+                      expirationDate: { type: 'string', format: 'date' },
+                    },
+                  },
+                  reportedToCredit: { type: 'boolean' },
+                  accountAge: { type: 'number', minimum: 0 },
+                },
+              },
+            },
+            extraPayment: { type: 'number', minimum: 0 },
+            strategy: {
+              type: 'string',
+              enum: [
+                'snowball',
+                'avalanche',
+                'custom',
+                'minimum_only',
+                'highest_payment',
+                'debt_to_income',
+                'credit_impact',
+              ],
+            },
+            customOrder: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+            monthlyIncome: { type: 'number', minimum: 0 },
+            monthlyExpenses: { type: 'number', minimum: 0 },
+            emergencyFund: { type: 'number', minimum: 0 },
+            fireGoal: {
+              type: 'object',
+              properties: {
+                targetAmount: { type: 'number', minimum: 0 },
+                currentAge: { type: 'number', minimum: 18, maximum: 100 },
+                targetAge: { type: 'number', minimum: 18, maximum: 100 },
+                expectedReturn: { type: 'number', minimum: 0, maximum: 1 },
+              },
+            },
+            includeConsolidationAnalysis: { type: 'boolean' },
+            includeCreditScoreProjections: { type: 'boolean' },
+            includeFireIntegration: { type: 'boolean' },
+            includeEmergencyFundAnalysis: { type: 'boolean' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  // Legacy compatibility
+                  strategy: { type: 'string' },
+                  totalInterest: { type: 'number' },
+                  totalTime: { type: 'number' },
+                  monthlySavings: { type: 'number' },
+                  payoffSchedule: { type: 'array' },
+                  debtOrder: { type: 'array' },
+                  comparison: { type: 'object' },
+
+                  // Enhanced features
+                  strategies: { type: 'array' },
+                  consolidationAnalysis: { type: 'object' },
+                  creditScoreProjections: { type: 'object' },
+                  emergencyFundAnalysis: { type: 'object' },
+                  fireIntegration: { type: 'object' },
+                  recommendations: { type: 'array' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: DebtPayoffParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        const result = financialCalculationEngine.calculateDebtPayoff(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'debt_payoff_enhanced',
+            debtsAnalyzed: result.strategies.length,
+            strategiesCompared: result.strategies.length,
+            hasConsolidationAnalysis: !!result.consolidationAnalysis,
+            hasCreditProjections: !!result.creditScoreProjections,
+            hasFireIntegration: !!result.fireIntegration,
+            hasEmergencyFundAnalysis: !!result.emergencyFundAnalysis,
+            recommendationsCount: result.recommendations.length,
             timestamp: new Date().toISOString(),
           },
         });

@@ -794,22 +794,36 @@ export interface BudgetAdjustmentResult {
   }>;
 }
 
-// Debt Payoff Calculation Parameters
+// Enhanced Debt Payoff Calculation Parameters (Story 6)
 export interface DebtPayoffParams {
-  debts: Array<{
-    id: string;
-    name: string;
-    balance: number;
-    interestRate: number;
-    minimumPayment: number;
-  }>;
+  debts: DebtAccount[];
   extraPayment: number;
-  strategy: 'snowball' | 'avalanche' | 'custom';
+  strategy: DebtPayoffStrategy;
   customOrder?: string[]; // debt IDs in custom order
+
+  // Enhanced financial context (Story 6)
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  emergencyFund: number;
+
+  // FIRE integration
+  fireGoal?: {
+    targetAmount: number;
+    currentAge: number;
+    targetAge: number;
+    expectedReturn: number;
+  };
+
+  // Analysis options
+  includeConsolidationAnalysis?: boolean;
+  includeCreditScoreProjections?: boolean;
+  includeFireIntegration?: boolean;
+  includeEmergencyFundAnalysis?: boolean;
 }
 
-// Debt Payoff Result
+// Enhanced Debt Payoff Result (Story 6)
 export interface DebtPayoffResult {
+  // Legacy compatibility
   strategy: string;
   totalInterest: number;
   totalTime: number; // months
@@ -836,6 +850,119 @@ export interface DebtPayoffResult {
     avalanche: { totalInterest: number; totalTime: number };
     savings: { interest: number; time: number };
   };
+
+  // Enhanced features (Story 6)
+  strategies: Array<{
+    strategyType: DebtPayoffStrategy;
+    strategyName: string;
+    description: string;
+
+    // Timeline and costs
+    totalMonths: number;
+    totalInterestPaid: number;
+    totalAmountPaid: number;
+    monthlyPayment: number;
+
+    // Savings vs other strategies
+    interestSavings: number;
+    timeSavings: number; // Months saved vs minimum payments
+  }>;
+
+  // Consolidation analysis
+  consolidationAnalysis?: {
+    eligibleDebts: string[];
+    consolidationOptions: Array<{
+      optionName: string;
+      newInterestRate: number;
+      newMonthlyPayment: number;
+      totalMonths: number;
+      totalInterestPaid: number;
+      savingsVsOriginal: number;
+      requirements: string[];
+      pros: string[];
+      cons: string[];
+    }>;
+    recommendedOption?: string;
+  };
+
+  // Credit score projections
+  creditScoreProjections?: {
+    currentScore: number;
+    projectedScores: Array<{
+      month: number;
+      score: number;
+      factors: Array<{
+        factor: string;
+        impact: number;
+        description: string;
+      }>;
+    }>;
+    scoreImprovementTips: string[];
+  };
+
+  // Emergency fund vs debt analysis
+  emergencyFundAnalysis?: {
+    currentEmergencyFund: number;
+    recommendedEmergencyFund: number;
+
+    scenarios: Array<{
+      scenarioName: string;
+      emergencyFundAmount: number;
+      debtPayoffAmount: number;
+      description: string;
+      totalInterestPaid: number;
+      payoffTimeMonths: number;
+      riskScore: number;
+      advantages: string[];
+      disadvantages: string[];
+    }>;
+
+    recommendedScenario: string;
+    reasoning: string;
+  };
+
+  // FIRE timeline integration
+  fireIntegration?: {
+    debtFreeAge: number;
+    fireTimelineWithDebt: {
+      ageAtFire: number;
+      totalSavingsNeeded: number;
+      monthlySavingsRequired: number;
+    };
+    fireTimelineDebtFree: {
+      ageAtFire: number;
+      totalSavingsNeeded: number;
+      monthlySavingsRequired: number;
+    };
+
+    investmentVsDebtAnalysis: {
+      debtPayoffROI: number;
+      expectedInvestmentROI: number;
+      recommendation: 'pay_debt_first' | 'invest_first' | 'balanced_approach';
+      reasoning: string;
+
+      balancedApproach?: {
+        debtPaymentPercentage: number;
+        investmentPercentage: number;
+        projectedOutcome: string;
+      };
+    };
+  };
+
+  // Recommendations
+  recommendations: Array<{
+    category:
+      | 'strategy'
+      | 'consolidation'
+      | 'emergency_fund'
+      | 'fire_planning'
+      | 'credit_improvement';
+    recommendation: string;
+    impact: string;
+    priority: 'high' | 'medium' | 'low';
+    implementationSteps: string[];
+    timeframe: string;
+  }>;
 }
 
 // Goal Progress Projection Parameters
@@ -1406,6 +1533,145 @@ export interface MarketStressTestResult {
     recommendedActions: string[];
     emergencyFundRecommendation: number;
   };
+}
+
+// Debt Payoff Strategy Calculator (Story 6)
+export interface DebtPayoffParams {
+  // Debt information
+  debts: DebtAccount[];
+
+  // Payment strategy
+  strategy: DebtPayoffStrategy;
+  extraPayment: number; // Additional monthly payment beyond minimums
+
+  // Financial context
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  emergencyFund: number;
+
+  // FIRE integration
+  fireGoal?: {
+    targetAmount: number;
+    currentAge: number;
+    targetAge: number;
+    expectedReturn: number;
+  };
+
+  // Analysis options
+  includeConsolidationAnalysis?: boolean;
+  includeCreditScoreProjections?: boolean;
+  includeFireIntegration?: boolean;
+  includeEmergencyFundAnalysis?: boolean;
+}
+
+// Debt account information
+// Debt account information
+export interface DebtAccount {
+  id: string;
+  name: string;
+  type: DebtType;
+  balance: number;
+  interestRate: number; // Annual percentage rate
+  minimumPayment: number;
+
+  // Optional details
+  creditLimit?: number; // For credit cards
+  paymentDueDate?: number; // Day of month (1-31)
+  promotionalRate?: {
+    rate: number;
+    expirationDate: string;
+  };
+
+  // Credit impact
+  reportedToCredit?: boolean;
+  accountAge?: number; // Months since account opened
+}
+
+// Debt types
+export type DebtType =
+  | 'credit_card'
+  | 'personal_loan'
+  | 'auto_loan'
+  | 'student_loan'
+  | 'mortgage'
+  | 'home_equity_loan'
+  | 'medical_debt'
+  | 'other';
+
+// Debt payoff strategies
+export type DebtPayoffStrategy =
+  | 'snowball' // Smallest balance first
+  | 'avalanche' // Highest interest rate first
+  | 'custom' // User-defined order
+  | 'minimum_only' // Minimum payments only
+  | 'highest_payment' // Highest minimum payment first
+  | 'debt_to_income' // Highest debt-to-income ratio first
+  | 'credit_impact'; // Prioritize debts with highest credit score impact
+
+// Debt consolidation options
+export interface DebtConsolidationOption {
+  type: ConsolidationType;
+  name: string;
+  interestRate: number;
+  term: number; // Months
+  monthlyPayment: number;
+  totalCost: number;
+
+  // Eligibility requirements
+  minimumCreditScore?: number;
+  maximumDebtToIncome?: number;
+  minimumIncome?: number;
+  collateralRequired?: boolean;
+
+  // Features
+  features: string[];
+  fees: Array<{
+    type: string;
+    amount: number;
+    description: string;
+  }>;
+}
+
+export type ConsolidationType =
+  | 'personal_loan'
+  | 'balance_transfer'
+  | 'home_equity_loan'
+  | 'debt_management_plan'
+  | 'debt_settlement';
+
+// Credit score factors and projections
+export interface CreditScoreFactor {
+  factor:
+    | 'payment_history'
+    | 'credit_utilization'
+    | 'credit_age'
+    | 'credit_mix'
+    | 'new_credit';
+  currentImpact: number; // 0-100 percentage of score
+  weight: number; // Importance weight (payment history = 35%, etc.)
+  currentStatus: 'excellent' | 'good' | 'fair' | 'poor';
+  improvementPotential: number; // Points that could be gained
+}
+
+// Emergency fund analysis scenarios
+export interface EmergencyFundScenario {
+  name: string;
+  emergencyFundMonths: number; // Months of expenses
+  description: string;
+  riskLevel: 'low' | 'medium' | 'high';
+
+  // Financial allocation
+  monthlyToEmergencyFund: number;
+  monthlyToDebtPayoff: number;
+
+  // Outcomes
+  emergencyFundCompleteMonths: number;
+  debtFreeMonths: number;
+  totalInterestPaid: number;
+
+  // Risk assessment
+  riskFactors: string[];
+  mitigationStrategies: string[];
 }
 
 // Batch Calculation Request
