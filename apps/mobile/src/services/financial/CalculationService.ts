@@ -26,6 +26,10 @@ import {
   DebtPayoffResult,
   GoalProjectionParams,
   GoalProjectionResult,
+  CoastFIRECalculationParams,
+  CoastFIRECalculationResult,
+  BaristaFIRECalculationParams,
+  BaristaFIRECalculationResult,
   CalculationResponse,
   BatchCalculationRequest,
   BatchCalculationResponse,
@@ -547,6 +551,16 @@ export class CalculationService {
                 calculation.params
               );
               break;
+            case 'coast_fire':
+              result = financialCalculationEngine.calculateCoastFIREAnalysis(
+                calculation.params
+              );
+              break;
+            case 'barista_fire':
+              result = financialCalculationEngine.calculateBaristaFIREAnalysis(
+                calculation.params
+              );
+              break;
             default:
               throw new Error(
                 `Unsupported calculation type: ${calculation.type}`
@@ -1025,6 +1039,154 @@ export class CalculationService {
         queueSize: this.calculationQueue.length,
         subscriberCount: this.subscribers.size,
       };
+    }
+  }
+
+  /**
+   * Calculate Coast FIRE analysis with offline support
+   * Epic 7, Story 4: Coast FIRE Calculations
+   */
+  async calculateCoastFIRE(
+    params: CoastFIRECalculationParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<CoastFIRECalculationResult> {
+    const { priority = 'normal', useCache = true, timeout = 30000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `coast_fire_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<CoastFIRECalculationResult>(
+        (resolve, reject) => {
+          const queueItem = {
+            id: `coast_fire_${Date.now()}_${Math.random()}`,
+            type: 'coast_fire',
+            params,
+            priority,
+            resolve,
+            reject,
+          };
+
+          // Insert based on priority
+          if (priority === 'high') {
+            this.calculationQueue.unshift(queueItem);
+          } else {
+            this.calculationQueue.push(queueItem);
+          }
+
+          // Process queue
+          this.processQueue();
+        }
+      );
+
+      // Apply timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Coast FIRE calculation timeout')),
+          timeout
+        )
+      );
+
+      const result = await Promise.race([calculationPromise, timeoutPromise]);
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `coast_fire_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('coast_fire', result);
+
+      return result;
+    } catch (error) {
+      console.error('Coast FIRE calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate Barista FIRE analysis with offline support
+   * Epic 7, Story 4: Barista FIRE Calculations
+   */
+  async calculateBaristaFIRE(
+    params: BaristaFIRECalculationParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<BaristaFIRECalculationResult> {
+    const { priority = 'normal', useCache = true, timeout = 30000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `barista_fire_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<BaristaFIRECalculationResult>(
+        (resolve, reject) => {
+          const queueItem = {
+            id: `barista_fire_${Date.now()}_${Math.random()}`,
+            type: 'barista_fire',
+            params,
+            priority,
+            resolve,
+            reject,
+          };
+
+          // Insert based on priority
+          if (priority === 'high') {
+            this.calculationQueue.unshift(queueItem);
+          } else {
+            this.calculationQueue.push(queueItem);
+          }
+
+          // Process queue
+          this.processQueue();
+        }
+      );
+
+      // Apply timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Barista FIRE calculation timeout')),
+          timeout
+        )
+      );
+
+      const result = await Promise.race([calculationPromise, timeoutPromise]);
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `barista_fire_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('barista_fire', result);
+
+      return result;
+    } catch (error) {
+      console.error('Barista FIRE calculation failed:', error);
+      throw error;
     }
   }
 }

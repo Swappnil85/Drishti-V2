@@ -1017,6 +1017,188 @@ export interface CalculationResponse<T = any> {
   };
 }
 
+// Coast FIRE Calculation Parameters (Story 4)
+export interface CoastFIRECalculationParams {
+  // Basic information
+  currentAge: number;
+  currentSavings: number;
+  targetFireNumber: number;
+  expectedReturn: number;
+
+  // Coast points to calculate
+  coastAges?: number[]; // Default: [30, 35, 40, 45, 50]
+  traditionalRetirementAge?: number; // Default: 65
+
+  // Optional parameters
+  inflationRate?: number;
+  currentMonthlyContributions?: number;
+
+  // Geographic arbitrage
+  geographicArbitrage?: {
+    currentLocation: string;
+    targetLocation: string;
+    costOfLivingReduction: number; // Percentage reduction (0.0 to 1.0)
+    movingCosts: number;
+    timeToMove: number; // Years from now
+  };
+
+  // Healthcare considerations
+  healthcareGapAnalysis?: {
+    currentEmployerCoverage: boolean;
+    estimatedMonthlyCost: number;
+    ageForMedicare: number; // Usually 65
+    bridgeInsuranceYears: number;
+  };
+}
+
+// Coast FIRE Calculation Result
+export interface CoastFIRECalculationResult {
+  // Coast point analysis
+  coastPoints: Array<{
+    age: number;
+    requiredAmount: number;
+    currentShortfall: number;
+    monthlyContributionsNeeded: number;
+    yearsToReachCoastPoint: number;
+    feasible: boolean;
+    confidenceLevel: 'high' | 'medium' | 'low';
+  }>;
+
+  // Timeline visualization data
+  timeline: {
+    contributionPhase: {
+      startAge: number;
+      endAge: number;
+      totalContributions: number;
+      projectedValue: number;
+    };
+    coastPhase: {
+      startAge: number;
+      endAge: number;
+      startingAmount: number;
+      finalAmount: number;
+      compoundGrowth: number;
+    };
+  };
+
+  // Recommendations
+  recommendations: Array<{
+    category: 'contribution' | 'timeline' | 'strategy' | 'risk';
+    suggestion: string;
+    impact: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+
+  // Geographic arbitrage analysis
+  geographicArbitrage?: {
+    currentLocationCost: number;
+    targetLocationCost: number;
+    fireNumberReduction: number;
+    coastPointImprovement: number;
+    netBenefit: number;
+    paybackPeriod: number; // Years to recover moving costs
+  };
+
+  // Healthcare gap analysis
+  healthcareGapAnalysis?: {
+    gapYears: number;
+    totalGapCost: number;
+    monthlyBudgetImpact: number;
+    mitigationStrategies: string[];
+    additionalFireNeeded: number;
+  };
+
+  // Stress testing
+  stressTestResults: Array<{
+    scenario: string;
+    adjustedCoastPoints: Array<{
+      age: number;
+      requiredAmount: number;
+      impactPercentage: number;
+    }>;
+    riskLevel: 'low' | 'medium' | 'high';
+    mitigationSuggestions: string[];
+  }>;
+}
+
+// Barista FIRE Calculation Parameters
+export interface BaristaFIRECalculationParams {
+  // Basic FIRE information
+  currentAge: number;
+  currentSavings: number;
+  fullFireNumber: number;
+  expectedReturn: number;
+
+  // Part-time work scenarios
+  partTimeScenarios: Array<{
+    name: string;
+    annualIncome: number;
+    benefitsValue: number; // Healthcare, etc.
+    workYears: number; // How many years of part-time work
+    startAge: number;
+  }>;
+
+  // Expenses during Barista phase
+  baristaPhaseExpenses: {
+    annualExpenses: number;
+    healthcareCosts: number;
+    inflationRate: number;
+  };
+
+  // Optional parameters
+  socialSecurityAge?: number;
+  bridgeYears?: number; // Years between stopping full-time and Social Security
+}
+
+// Barista FIRE Calculation Result
+export interface BaristaFIRECalculationResult {
+  // Barista scenarios analysis
+  scenarios: Array<{
+    name: string;
+    requiredSavings: number;
+    savingsReduction: number; // Compared to full FIRE
+    partTimeIncome: number;
+    benefitsValue: number;
+    totalYearsToFire: number;
+    baristaPhaseYears: number;
+    feasibilityScore: number; // 0-100
+
+    // Financial projections
+    projections: {
+      savingsAtBaristaStart: number;
+      incomeFromSavings: number;
+      incomeFromWork: number;
+      totalAnnualIncome: number;
+      expenseCoverage: number; // Percentage of expenses covered
+    };
+
+    // Risk analysis
+    risks: Array<{
+      type: 'income' | 'health' | 'market' | 'inflation';
+      description: string;
+      impact: 'low' | 'medium' | 'high';
+      mitigation: string;
+    }>;
+  }>;
+
+  // Optimal scenario recommendation
+  recommendedScenario: {
+    scenarioName: string;
+    reasonsForRecommendation: string[];
+    keyBenefits: string[];
+    potentialDrawbacks: string[];
+  };
+
+  // Comparison with full FIRE
+  fullFireComparison: {
+    fullFireAmount: number;
+    baristaFireAmount: number;
+    savingsReduction: number;
+    timeToFireReduction: number; // Years saved
+    flexibilityScore: number; // 0-100
+  };
+}
+
 // Batch Calculation Request
 export interface BatchCalculationRequest {
   calculations: CalculationRequest[];

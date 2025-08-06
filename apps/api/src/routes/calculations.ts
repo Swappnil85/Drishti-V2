@@ -20,6 +20,10 @@ import {
   BudgetAdjustmentResult,
   DebtPayoffParams,
   GoalProjectionParams,
+  CoastFIRECalculationParams,
+  CoastFIRECalculationResult,
+  BaristaFIRECalculationParams,
+  BaristaFIRECalculationResult,
   CalculationRequest,
   BatchCalculationRequest,
   CalculationResponse,
@@ -1331,6 +1335,239 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
             calculationType: 'budget_adjustment',
             expenseCategoriesAnalyzed:
               request.body.currentBudget.expenses.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Coast FIRE Calculation Endpoint (Story 4)
+  fastify.post<{
+    Body: CoastFIRECalculationParams;
+    Reply: CalculationResponse;
+  }>(
+    '/coast-fire',
+    {
+      schema: {
+        description:
+          'Calculate comprehensive Coast FIRE analysis with multiple coast points',
+        tags: ['calculations', 'fire', 'coast'],
+        body: {
+          type: 'object',
+          required: [
+            'currentAge',
+            'currentSavings',
+            'targetFireNumber',
+            'expectedReturn',
+          ],
+          properties: {
+            currentAge: { type: 'number', minimum: 18, maximum: 100 },
+            currentSavings: { type: 'number', minimum: 0 },
+            targetFireNumber: { type: 'number', minimum: 0 },
+            expectedReturn: { type: 'number', minimum: 0, maximum: 0.5 },
+            coastAges: {
+              type: 'array',
+              items: { type: 'number', minimum: 18, maximum: 100 },
+            },
+            traditionalRetirementAge: {
+              type: 'number',
+              minimum: 50,
+              maximum: 100,
+            },
+            inflationRate: { type: 'number', minimum: 0, maximum: 0.2 },
+            currentMonthlyContributions: { type: 'number', minimum: 0 },
+            geographicArbitrage: {
+              type: 'object',
+              properties: {
+                currentLocation: { type: 'string' },
+                targetLocation: { type: 'string' },
+                costOfLivingReduction: {
+                  type: 'number',
+                  minimum: 0,
+                  maximum: 1,
+                },
+                movingCosts: { type: 'number', minimum: 0 },
+                timeToMove: { type: 'number', minimum: 0 },
+              },
+            },
+            healthcareGapAnalysis: {
+              type: 'object',
+              properties: {
+                currentEmployerCoverage: { type: 'boolean' },
+                estimatedMonthlyCost: { type: 'number', minimum: 0 },
+                ageForMedicare: { type: 'number', minimum: 60, maximum: 70 },
+                bridgeInsuranceYears: { type: 'number', minimum: 0 },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  coastPoints: { type: 'array' },
+                  timeline: { type: 'object' },
+                  recommendations: { type: 'array' },
+                  geographicArbitrage: { type: 'object' },
+                  healthcareGapAnalysis: { type: 'object' },
+                  stressTestResults: { type: 'array' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: CoastFIRECalculationParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        const result = financialCalculationEngine.calculateCoastFIREAnalysis(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'coast_fire',
+            coastPointsAnalyzed: result.coastPoints.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Barista FIRE Calculation Endpoint (Story 4)
+  fastify.post<{
+    Body: BaristaFIRECalculationParams;
+    Reply: CalculationResponse;
+  }>(
+    '/barista-fire',
+    {
+      schema: {
+        description:
+          'Calculate comprehensive Barista FIRE analysis with part-time work scenarios',
+        tags: ['calculations', 'fire', 'barista'],
+        body: {
+          type: 'object',
+          required: [
+            'currentAge',
+            'currentSavings',
+            'fullFireNumber',
+            'expectedReturn',
+            'partTimeScenarios',
+            'baristaPhaseExpenses',
+          ],
+          properties: {
+            currentAge: { type: 'number', minimum: 18, maximum: 100 },
+            currentSavings: { type: 'number', minimum: 0 },
+            fullFireNumber: { type: 'number', minimum: 0 },
+            expectedReturn: { type: 'number', minimum: 0, maximum: 0.5 },
+            partTimeScenarios: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: [
+                  'name',
+                  'annualIncome',
+                  'benefitsValue',
+                  'workYears',
+                  'startAge',
+                ],
+                properties: {
+                  name: { type: 'string' },
+                  annualIncome: { type: 'number', minimum: 0 },
+                  benefitsValue: { type: 'number', minimum: 0 },
+                  workYears: { type: 'number', minimum: 1 },
+                  startAge: { type: 'number', minimum: 18, maximum: 100 },
+                },
+              },
+            },
+            baristaPhaseExpenses: {
+              type: 'object',
+              required: ['annualExpenses', 'healthcareCosts', 'inflationRate'],
+              properties: {
+                annualExpenses: { type: 'number', minimum: 0 },
+                healthcareCosts: { type: 'number', minimum: 0 },
+                inflationRate: { type: 'number', minimum: 0, maximum: 0.2 },
+              },
+            },
+            socialSecurityAge: { type: 'number', minimum: 62, maximum: 70 },
+            bridgeYears: { type: 'number', minimum: 0 },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  scenarios: { type: 'array' },
+                  recommendedScenario: { type: 'object' },
+                  fullFireComparison: { type: 'object' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: BaristaFIRECalculationParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        const result = financialCalculationEngine.calculateBaristaFIREAnalysis(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'barista_fire',
+            scenariosAnalyzed: result.scenarios.length,
             timestamp: new Date().toISOString(),
           },
         });

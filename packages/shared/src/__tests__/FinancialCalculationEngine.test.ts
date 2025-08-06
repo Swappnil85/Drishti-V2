@@ -1174,6 +1174,461 @@ describe('FinancialCalculationEngine', () => {
         expect(executionTime).toBeLessThan(20);
       });
     });
+
+    // Coast FIRE Calculation Tests (Story 4)
+    describe('Coast FIRE Calculations', () => {
+      describe('calculateCoastFIREAnalysis', () => {
+        test('should calculate basic Coast FIRE analysis', () => {
+          const params = {
+            currentAge: 30,
+            currentSavings: 50000,
+            targetFireNumber: 1000000,
+            expectedReturn: 0.07,
+            coastAges: [35, 40, 45],
+            traditionalRetirementAge: 65,
+            currentMonthlyContributions: 2000,
+          };
+
+          const result = engine.calculateCoastFIREAnalysis(params);
+
+          expect(result.coastPoints).toHaveLength(3);
+          expect(result.coastPoints[0].age).toBe(35);
+          expect(result.coastPoints[0].requiredAmount).toBeGreaterThan(0);
+          expect(result.coastPoints[0].feasible).toBeDefined();
+          expect(result.timeline).toBeDefined();
+          expect(result.timeline.contributionPhase).toBeDefined();
+          expect(result.timeline.coastPhase).toBeDefined();
+          expect(result.recommendations.length).toBeGreaterThanOrEqual(5);
+          expect(result.stressTestResults).toHaveLength(4);
+        });
+
+        test('should handle geographic arbitrage analysis', () => {
+          const params = {
+            currentAge: 28,
+            currentSavings: 75000,
+            targetFireNumber: 1200000,
+            expectedReturn: 0.07,
+            geographicArbitrage: {
+              currentLocation: 'San Francisco',
+              targetLocation: 'Austin',
+              costOfLivingReduction: 0.3,
+              movingCosts: 15000,
+              timeToMove: 2,
+            },
+          };
+
+          const result = engine.calculateCoastFIREAnalysis(params);
+
+          expect(result.geographicArbitrage).toBeDefined();
+          expect(result.geographicArbitrage!.currentLocationCost).toBe(1200000);
+          expect(result.geographicArbitrage!.targetLocationCost).toBe(840000); // 30% reduction
+          expect(result.geographicArbitrage!.fireNumberReduction).toBe(360000);
+          expect(result.geographicArbitrage!.netBenefit).toBeGreaterThan(0);
+          expect(result.geographicArbitrage!.paybackPeriod).toBeGreaterThan(0);
+        });
+
+        test('should analyze healthcare coverage gap', () => {
+          const params = {
+            currentAge: 32,
+            currentSavings: 100000,
+            targetFireNumber: 1500000,
+            expectedReturn: 0.07,
+            coastAges: [40],
+            healthcareGapAnalysis: {
+              currentEmployerCoverage: true,
+              estimatedMonthlyCost: 800,
+              ageForMedicare: 65,
+              bridgeInsuranceYears: 25,
+            },
+          };
+
+          const result = engine.calculateCoastFIREAnalysis(params);
+
+          expect(result.healthcareGapAnalysis).toBeDefined();
+          expect(result.healthcareGapAnalysis!.gapYears).toBe(25); // 65 - 40
+          expect(result.healthcareGapAnalysis!.totalGapCost).toBe(240000); // 25 * 800 * 12
+          expect(result.healthcareGapAnalysis!.monthlyBudgetImpact).toBe(800);
+          expect(
+            result.healthcareGapAnalysis!.mitigationStrategies
+          ).toHaveLength(6);
+          expect(result.healthcareGapAnalysis!.additionalFireNeeded).toBe(
+            6000000
+          ); // 240000 / 0.04
+        });
+
+        test('should perform stress testing scenarios', () => {
+          const params = {
+            currentAge: 35,
+            currentSavings: 200000,
+            targetFireNumber: 2000000,
+            expectedReturn: 0.07,
+            coastAges: [45, 50],
+          };
+
+          const result = engine.calculateCoastFIREAnalysis(params);
+
+          expect(result.stressTestResults).toHaveLength(4);
+
+          const marketCrashScenario = result.stressTestResults.find(s =>
+            s.scenario.includes('Market Crash')
+          );
+          expect(marketCrashScenario).toBeDefined();
+          expect(marketCrashScenario!.riskLevel).toBe('high');
+          expect(marketCrashScenario!.adjustedCoastPoints).toHaveLength(2);
+          expect(marketCrashScenario!.mitigationSuggestions).toHaveLength(5);
+
+          // Verify that stress test increases required amounts
+          expect(
+            marketCrashScenario!.adjustedCoastPoints[0].requiredAmount
+          ).toBeGreaterThan(result.coastPoints[0].requiredAmount);
+        });
+
+        test('should handle edge case with current age already past coast ages', () => {
+          const params = {
+            currentAge: 50,
+            currentSavings: 300000,
+            targetFireNumber: 1000000,
+            expectedReturn: 0.07,
+            coastAges: [35, 40, 45], // All in the past
+          };
+
+          const result = engine.calculateCoastFIREAnalysis(params);
+
+          expect(result.coastPoints).toHaveLength(0); // No future coast points
+          expect(result.recommendations.length).toBeGreaterThanOrEqual(4); // Still provides recommendations
+        });
+
+        test('should throw error for invalid parameters', () => {
+          expect(() => {
+            engine.calculateCoastFIREAnalysis({
+              currentAge: 15, // Too young
+              currentSavings: 50000,
+              targetFireNumber: 1000000,
+              expectedReturn: 0.07,
+            });
+          }).toThrow('Current age must be between 18 and 100');
+
+          expect(() => {
+            engine.calculateCoastFIREAnalysis({
+              currentAge: 30,
+              currentSavings: -10000, // Negative savings
+              targetFireNumber: 1000000,
+              expectedReturn: 0.07,
+            });
+          }).toThrow('Current savings cannot be negative');
+
+          expect(() => {
+            engine.calculateCoastFIREAnalysis({
+              currentAge: 30,
+              currentSavings: 50000,
+              targetFireNumber: 0, // Zero FIRE number
+              expectedReturn: 0.07,
+            });
+          }).toThrow('Target FIRE number must be positive');
+
+          expect(() => {
+            engine.calculateCoastFIREAnalysis({
+              currentAge: 30,
+              currentSavings: 50000,
+              targetFireNumber: 1000000,
+              expectedReturn: 0.6, // Too high return
+            });
+          }).toThrow('Expected return must be between 0% and 50%');
+        });
+      });
+
+      describe('calculateBaristaFIREAnalysis', () => {
+        test('should calculate basic Barista FIRE analysis', () => {
+          const params = {
+            currentAge: 30,
+            currentSavings: 100000,
+            fullFireNumber: 1500000,
+            expectedReturn: 0.07,
+            partTimeScenarios: [
+              {
+                name: 'Coffee Shop Barista',
+                annualIncome: 25000,
+                benefitsValue: 8000,
+                workYears: 10,
+                startAge: 45,
+              },
+              {
+                name: 'Freelance Consulting',
+                annualIncome: 40000,
+                benefitsValue: 0,
+                workYears: 15,
+                startAge: 50,
+              },
+            ],
+            baristaPhaseExpenses: {
+              annualExpenses: 50000,
+              healthcareCosts: 12000,
+              inflationRate: 0.03,
+            },
+          };
+
+          const result = engine.calculateBaristaFIREAnalysis(params);
+
+          expect(result.scenarios).toHaveLength(2);
+          expect(result.scenarios[0].name).toBe('Coffee Shop Barista');
+          expect(result.scenarios[0].requiredSavings).toBeGreaterThan(0);
+          expect(result.scenarios[0].savingsReduction).toBeGreaterThan(0);
+          expect(result.scenarios[0].feasibilityScore).toBeGreaterThanOrEqual(
+            0
+          );
+          expect(result.scenarios[0].feasibilityScore).toBeLessThanOrEqual(100);
+          expect(result.scenarios[0].risks).toHaveLength(4);
+
+          expect(result.recommendedScenario).toBeDefined();
+          expect(result.recommendedScenario.scenarioName).toBeDefined();
+          expect(
+            result.recommendedScenario.reasonsForRecommendation
+          ).toHaveLength(3);
+          expect(result.recommendedScenario.keyBenefits).toHaveLength(4);
+          expect(result.recommendedScenario.potentialDrawbacks).toHaveLength(4);
+
+          expect(result.fullFireComparison).toBeDefined();
+          expect(result.fullFireComparison.fullFireAmount).toBe(1500000);
+          expect(result.fullFireComparison.savingsReduction).toBeGreaterThan(0);
+        });
+
+        test('should handle scenario with full expense coverage', () => {
+          const params = {
+            currentAge: 35,
+            currentSavings: 200000,
+            fullFireNumber: 1000000,
+            expectedReturn: 0.07,
+            partTimeScenarios: [
+              {
+                name: 'High-Income Part-Time',
+                annualIncome: 60000,
+                benefitsValue: 15000,
+                workYears: 20,
+                startAge: 45,
+              },
+            ],
+            baristaPhaseExpenses: {
+              annualExpenses: 60000,
+              healthcareCosts: 10000,
+              inflationRate: 0.03,
+            },
+          };
+
+          const result = engine.calculateBaristaFIREAnalysis(params);
+
+          expect(result.scenarios).toHaveLength(1);
+          const scenario = result.scenarios[0];
+
+          // With 60k income + 15k benefits = 75k total, covering 60k expenses
+          expect(scenario.projections.expenseCoverage).toBeGreaterThan(100);
+          expect(scenario.feasibilityScore).toBeGreaterThanOrEqual(80); // Should be highly feasible
+        });
+
+        test('should throw error for invalid Barista FIRE parameters', () => {
+          expect(() => {
+            engine.calculateBaristaFIREAnalysis({
+              currentAge: 105, // Too old
+              currentSavings: 50000,
+              fullFireNumber: 1000000,
+              expectedReturn: 0.07,
+              partTimeScenarios: [],
+              baristaPhaseExpenses: {
+                annualExpenses: 40000,
+                healthcareCosts: 8000,
+                inflationRate: 0.03,
+              },
+            });
+          }).toThrow('Current age must be between 18 and 100');
+
+          expect(() => {
+            engine.calculateBaristaFIREAnalysis({
+              currentAge: 30,
+              currentSavings: 50000,
+              fullFireNumber: -100000, // Negative FIRE number
+              expectedReturn: 0.07,
+              partTimeScenarios: [
+                {
+                  name: 'Test',
+                  annualIncome: 30000,
+                  benefitsValue: 5000,
+                  workYears: 10,
+                  startAge: 45,
+                },
+              ],
+              baristaPhaseExpenses: {
+                annualExpenses: 40000,
+                healthcareCosts: 8000,
+                inflationRate: 0.03,
+              },
+            });
+          }).toThrow('Full FIRE number must be positive');
+        });
+      });
+
+      describe('generateCoastFIRETimelineData', () => {
+        test('should generate timeline visualization data', () => {
+          const params = {
+            currentAge: 30,
+            currentSavings: 100000,
+            targetFireNumber: 1000000,
+            expectedReturn: 0.07,
+            traditionalRetirementAge: 65,
+            currentMonthlyContributions: 3000,
+          };
+
+          const coastPoint = { age: 40, requiredAmount: 300000 };
+          const result = engine.generateCoastFIRETimelineData(
+            params,
+            coastPoint
+          );
+
+          expect(result.timelineData).toBeDefined();
+          expect(result.timelineData.length).toBe(36); // 30 to 65 = 36 years
+
+          // Check contribution phase data
+          const contributionPhaseData = result.timelineData.filter(
+            d => d.phase === 'contribution'
+          );
+          expect(contributionPhaseData).toHaveLength(11); // 30 to 40 = 11 years
+          expect(contributionPhaseData[0].age).toBe(30);
+          expect(contributionPhaseData[0].contributions).toBe(36000); // 3000 * 12
+
+          // Check coast phase data
+          const coastPhaseData = result.timelineData.filter(
+            d => d.phase === 'coast'
+          );
+          expect(coastPhaseData).toHaveLength(25); // 41 to 65 = 25 years
+          expect(coastPhaseData[0].contributions).toBe(0);
+          expect(coastPhaseData[0].growth).toBeGreaterThan(0);
+
+          // Check phase breakdown
+          expect(result.phaseBreakdown.contributionPhase.duration).toBe(10);
+          expect(
+            result.phaseBreakdown.contributionPhase.totalContributions
+          ).toBeGreaterThan(0);
+          expect(result.phaseBreakdown.coastPhase.duration).toBe(25);
+          expect(result.phaseBreakdown.coastPhase.totalGrowth).toBeGreaterThan(
+            0
+          );
+        });
+
+        test('should include milestones in timeline data', () => {
+          const params = {
+            currentAge: 25,
+            currentSavings: 50000,
+            targetFireNumber: 800000,
+            expectedReturn: 0.07,
+            traditionalRetirementAge: 65,
+            currentMonthlyContributions: 2000,
+          };
+
+          const coastPoint = { age: 35, requiredAmount: 200000 };
+          const result = engine.generateCoastFIRETimelineData(
+            params,
+            coastPoint
+          );
+
+          // Find milestone entries
+          const fiveYearMark = result.timelineData.find(d =>
+            d.milestones.includes('5-Year Mark')
+          );
+          const tenYearMark = result.timelineData.find(d =>
+            d.milestones.includes('10-Year Mark')
+          );
+          const coastFireAchieved = result.timelineData.find(d =>
+            d.milestones.includes('Coast FIRE Achieved')
+          );
+          const traditionalRetirement = result.timelineData.find(d =>
+            d.milestones.includes('Traditional Retirement Age')
+          );
+
+          expect(fiveYearMark).toBeDefined();
+          expect(fiveYearMark!.age).toBe(30);
+          expect(tenYearMark).toBeDefined();
+          expect(tenYearMark!.age).toBe(35);
+          expect(coastFireAchieved).toBeDefined();
+          expect(coastFireAchieved!.age).toBe(35);
+          expect(traditionalRetirement).toBeDefined();
+          expect(traditionalRetirement!.age).toBe(65);
+        });
+      });
+
+      // Performance Tests for Coast FIRE calculations
+      describe('Coast FIRE Performance Tests', () => {
+        test('Coast FIRE calculation should complete within 100ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateCoastFIREAnalysis({
+            currentAge: 30,
+            currentSavings: 100000,
+            targetFireNumber: 1500000,
+            expectedReturn: 0.07,
+            coastAges: [35, 40, 45, 50, 55],
+            geographicArbitrage: {
+              currentLocation: 'NYC',
+              targetLocation: 'Austin',
+              costOfLivingReduction: 0.25,
+              movingCosts: 20000,
+              timeToMove: 3,
+            },
+            healthcareGapAnalysis: {
+              currentEmployerCoverage: true,
+              estimatedMonthlyCost: 1000,
+              ageForMedicare: 65,
+              bridgeInsuranceYears: 20,
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(100);
+        });
+
+        test('Barista FIRE calculation should complete within 50ms', () => {
+          const startTime = performance.now();
+
+          engine.calculateBaristaFIREAnalysis({
+            currentAge: 30,
+            currentSavings: 150000,
+            fullFireNumber: 2000000,
+            expectedReturn: 0.07,
+            partTimeScenarios: Array.from({ length: 5 }, (_, i) => ({
+              name: `Scenario ${i + 1}`,
+              annualIncome: 30000 + i * 10000,
+              benefitsValue: 5000 + i * 2000,
+              workYears: 10 + i * 2,
+              startAge: 45 + i * 2,
+            })),
+            baristaPhaseExpenses: {
+              annualExpenses: 60000,
+              healthcareCosts: 12000,
+              inflationRate: 0.03,
+            },
+          });
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(50);
+        });
+
+        test('Timeline generation should complete within 30ms', () => {
+          const startTime = performance.now();
+
+          engine.generateCoastFIRETimelineData(
+            {
+              currentAge: 25,
+              currentSavings: 75000,
+              targetFireNumber: 1200000,
+              expectedReturn: 0.07,
+              traditionalRetirementAge: 65,
+              currentMonthlyContributions: 2500,
+            },
+            { age: 40, requiredAmount: 350000 }
+          );
+
+          const executionTime = performance.now() - startTime;
+          expect(executionTime).toBeLessThan(30);
+        });
+      });
+    });
   });
 });
 

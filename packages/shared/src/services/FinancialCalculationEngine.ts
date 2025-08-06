@@ -24,6 +24,10 @@ import {
   DebtPayoffResult,
   GoalProjectionParams,
   GoalProjectionResult,
+  CoastFIRECalculationParams,
+  CoastFIRECalculationResult,
+  BaristaFIRECalculationParams,
+  BaristaFIRECalculationResult,
   CalculationCache,
   CalculationPerformanceMetrics,
 } from '../types/financial';
@@ -2663,6 +2667,666 @@ export class FinancialCalculationEngine {
     }
 
     return recommendations;
+  }
+
+  /**
+   * Calculate comprehensive Coast FIRE analysis with multiple coast points
+   * Epic 7, Story 4: Coast FIRE Calculations
+   */
+  public calculateCoastFIREAnalysis(
+    params: CoastFIRECalculationParams
+  ): CoastFIRECalculationResult {
+    const startTime = performance.now();
+
+    try {
+      // Input validation
+      if (params.currentAge < 18 || params.currentAge > 100) {
+        throw new Error('Current age must be between 18 and 100');
+      }
+      if (params.currentSavings < 0) {
+        throw new Error('Current savings cannot be negative');
+      }
+      if (params.targetFireNumber <= 0) {
+        throw new Error('Target FIRE number must be positive');
+      }
+      if (params.expectedReturn <= 0 || params.expectedReturn > 0.5) {
+        throw new Error('Expected return must be between 0% and 50%');
+      }
+
+      // Default parameters
+      const coastAges = params.coastAges || [30, 35, 40, 45, 50];
+      const traditionalRetirementAge = params.traditionalRetirementAge || 65;
+      const inflationRate = params.inflationRate || 0.03;
+      const currentMonthlyContributions =
+        params.currentMonthlyContributions || 0;
+
+      // Calculate coast points
+      const coastPoints = coastAges
+        .filter(age => age > params.currentAge)
+        .map(coastAge => {
+          const yearsToCoast = coastAge - params.currentAge;
+          const yearsFromCoastToRetirement =
+            traditionalRetirementAge - coastAge;
+
+          // Amount needed at coast age to reach FIRE number by retirement
+          const requiredAmountAtCoast =
+            params.targetFireNumber /
+            Math.pow(1 + params.expectedReturn, yearsFromCoastToRetirement);
+
+          // Current trajectory with contributions
+          const futureValueWithContributions =
+            params.currentSavings *
+              Math.pow(1 + params.expectedReturn, yearsToCoast) +
+            currentMonthlyContributions *
+              12 *
+              ((Math.pow(1 + params.expectedReturn, yearsToCoast) - 1) /
+                params.expectedReturn);
+
+          const currentShortfall = Math.max(
+            0,
+            requiredAmountAtCoast - futureValueWithContributions
+          );
+
+          // Monthly contributions needed to reach coast point
+          const monthlyContributionsNeeded =
+            currentShortfall > 0
+              ? (currentShortfall * params.expectedReturn) /
+                (12 * (Math.pow(1 + params.expectedReturn, yearsToCoast) - 1))
+              : 0;
+
+          // Years to reach coast point with current contributions
+          const yearsToReachCoastPoint =
+            currentShortfall > 0 && currentMonthlyContributions > 0
+              ? Math.log(
+                  1 +
+                    (currentShortfall * params.expectedReturn) /
+                      (currentMonthlyContributions * 12)
+                ) / Math.log(1 + params.expectedReturn)
+              : yearsToCoast;
+
+          // Feasibility assessment
+          const feasible =
+            currentShortfall === 0 ||
+            monthlyContributionsNeeded < currentMonthlyContributions * 2;
+          const confidenceLevel: 'high' | 'medium' | 'low' =
+            currentShortfall === 0
+              ? 'high'
+              : monthlyContributionsNeeded < currentMonthlyContributions * 1.5
+                ? 'medium'
+                : 'low';
+
+          return {
+            age: coastAge,
+            requiredAmount: requiredAmountAtCoast,
+            currentShortfall,
+            monthlyContributionsNeeded,
+            yearsToReachCoastPoint,
+            feasible,
+            confidenceLevel,
+          };
+        });
+
+      // Find optimal coast point (first feasible one or lowest shortfall)
+      const optimalCoastPoint =
+        coastPoints.length > 0
+          ? coastPoints.find(cp => cp.feasible) ||
+            coastPoints.reduce((min, cp) =>
+              cp.currentShortfall < min.currentShortfall ? cp : min
+            )
+          : undefined;
+
+      // Timeline visualization data
+      const timeline = {
+        contributionPhase: {
+          startAge: params.currentAge,
+          endAge: optimalCoastPoint?.age || coastAges[0],
+          totalContributions:
+            (optimalCoastPoint?.yearsToReachCoastPoint || 0) *
+            currentMonthlyContributions *
+            12,
+          projectedValue: optimalCoastPoint?.requiredAmount || 0,
+        },
+        coastPhase: {
+          startAge: optimalCoastPoint?.age || coastAges[0],
+          endAge: traditionalRetirementAge,
+          startingAmount: optimalCoastPoint?.requiredAmount || 0,
+          finalAmount: params.targetFireNumber,
+          compoundGrowth:
+            params.targetFireNumber - (optimalCoastPoint?.requiredAmount || 0),
+        },
+      };
+
+      // Generate recommendations
+      const recommendations = this.generateCoastFIRERecommendations(
+        params,
+        coastPoints,
+        optimalCoastPoint
+      );
+
+      // Geographic arbitrage analysis
+      let geographicArbitrage;
+      if (params.geographicArbitrage) {
+        const ga = params.geographicArbitrage;
+        const currentLocationCost = params.targetFireNumber;
+        const targetLocationCost =
+          params.targetFireNumber * (1 - ga.costOfLivingReduction);
+        const fireNumberReduction = currentLocationCost - targetLocationCost;
+        const coastPointImprovement = fireNumberReduction * 0.6; // Assuming 60% coast ratio
+        const netBenefit = fireNumberReduction - ga.movingCosts;
+        const paybackPeriod = ga.movingCosts / (fireNumberReduction * 0.04); // Assuming 4% withdrawal rate
+
+        geographicArbitrage = {
+          currentLocationCost,
+          targetLocationCost,
+          fireNumberReduction,
+          coastPointImprovement,
+          netBenefit,
+          paybackPeriod,
+        };
+      }
+
+      // Healthcare gap analysis
+      let healthcareGapAnalysis;
+      if (params.healthcareGapAnalysis) {
+        const hga = params.healthcareGapAnalysis;
+        const gapYears =
+          hga.ageForMedicare - (optimalCoastPoint?.age || params.currentAge);
+        const totalGapCost = gapYears * hga.estimatedMonthlyCost * 12;
+        const monthlyBudgetImpact = hga.estimatedMonthlyCost;
+        const additionalFireNeeded = totalGapCost / 0.04; // 4% rule
+
+        healthcareGapAnalysis = {
+          gapYears,
+          totalGapCost,
+          monthlyBudgetImpact,
+          mitigationStrategies: [
+            'COBRA continuation coverage (18-36 months)',
+            'ACA marketplace plans with subsidies',
+            'Healthcare sharing ministries',
+            'Part-time work for benefits (Barista FIRE)',
+            "Spouse's employer coverage",
+            'Health Savings Account (HSA) for tax-free withdrawals',
+          ],
+          additionalFireNeeded,
+        };
+      }
+
+      // Stress testing scenarios
+      const stressTestResults = this.generateCoastFIREStressTests(
+        params,
+        coastPoints
+      );
+
+      const result: CoastFIRECalculationResult = {
+        coastPoints,
+        timeline,
+        recommendations,
+        geographicArbitrage,
+        healthcareGapAnalysis,
+        stressTestResults,
+      };
+
+      // Cache the result
+      const cacheKey = `coast_fire_${JSON.stringify(params)}`;
+      this.setCache(cacheKey, result);
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Coast FIRE calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Generate Coast FIRE recommendations based on analysis
+   */
+  private generateCoastFIRERecommendations(
+    params: CoastFIRECalculationParams,
+    coastPoints: CoastFIRECalculationResult['coastPoints'],
+    optimalCoastPoint: CoastFIRECalculationResult['coastPoints'][0] | undefined
+  ): CoastFIRECalculationResult['recommendations'] {
+    const recommendations: CoastFIRECalculationResult['recommendations'] = [];
+
+    // Contribution recommendations
+    if (optimalCoastPoint && optimalCoastPoint.currentShortfall > 0) {
+      recommendations.push({
+        category: 'contribution',
+        suggestion: `Increase monthly contributions by $${Math.round(optimalCoastPoint.monthlyContributionsNeeded)} to reach Coast FIRE by age ${optimalCoastPoint.age}`,
+        impact: `Reduces required savings by ${Math.round((1 - 0.6) * 100)}% compared to traditional FIRE`,
+        priority: 'high',
+      });
+    }
+
+    // Timeline recommendations
+    const feasibleCoastPoints = coastPoints.filter(cp => cp.feasible);
+    if (feasibleCoastPoints.length > 0) {
+      const earliestFeasible = feasibleCoastPoints[0];
+      recommendations.push({
+        category: 'timeline',
+        suggestion: `Target Coast FIRE by age ${earliestFeasible.age} for maximum flexibility`,
+        impact: `${65 - earliestFeasible.age} years of financial freedom without required contributions`,
+        priority: 'medium',
+      });
+    }
+
+    // Strategy recommendations
+    recommendations.push({
+      category: 'strategy',
+      suggestion:
+        'Consider geographic arbitrage to reduce required Coast FIRE amount',
+      impact: 'Can reduce FIRE number by 20-40% depending on location',
+      priority: 'medium',
+    });
+
+    recommendations.push({
+      category: 'strategy',
+      suggestion:
+        'Plan for healthcare coverage gap between employer insurance and Medicare',
+      impact: 'Healthcare costs can add $500-2000/month to expenses',
+      priority: 'high',
+    });
+
+    // Risk recommendations
+    recommendations.push({
+      category: 'risk',
+      suggestion: 'Maintain emergency fund even during coast phase',
+      impact: 'Protects against sequence of returns risk',
+      priority: 'high',
+    });
+
+    recommendations.push({
+      category: 'risk',
+      suggestion:
+        'Consider part-time work flexibility (Barista FIRE) as backup plan',
+      impact: 'Provides income buffer and potential benefits coverage',
+      priority: 'medium',
+    });
+
+    return recommendations;
+  }
+
+  /**
+   * Generate stress test scenarios for Coast FIRE
+   */
+  private generateCoastFIREStressTests(
+    params: CoastFIRECalculationParams,
+    coastPoints: CoastFIRECalculationResult['coastPoints']
+  ): CoastFIRECalculationResult['stressTestResults'] {
+    const scenarios = [
+      {
+        name: 'Market Crash (-30%)',
+        returnAdjustment: -0.03,
+        riskLevel: 'high' as const,
+      },
+      {
+        name: 'Low Returns (2% real)',
+        returnAdjustment: -0.02,
+        riskLevel: 'medium' as const,
+      },
+      {
+        name: 'High Inflation (+2%)',
+        returnAdjustment: -0.02,
+        riskLevel: 'medium' as const,
+      },
+      {
+        name: 'Extended Bear Market',
+        returnAdjustment: -0.025,
+        riskLevel: 'high' as const,
+      },
+    ];
+
+    return scenarios.map(scenario => {
+      const adjustedReturn = params.expectedReturn + scenario.returnAdjustment;
+      const traditionalRetirementAge = params.traditionalRetirementAge || 65;
+
+      const adjustedCoastPoints = coastPoints.map(cp => {
+        const yearsFromCoastToRetirement = traditionalRetirementAge - cp.age;
+        const adjustedRequiredAmount =
+          params.targetFireNumber /
+          Math.pow(1 + adjustedReturn, yearsFromCoastToRetirement);
+        const impactPercentage =
+          ((adjustedRequiredAmount - cp.requiredAmount) / cp.requiredAmount) *
+          100;
+
+        return {
+          age: cp.age,
+          requiredAmount: adjustedRequiredAmount,
+          impactPercentage,
+        };
+      });
+
+      const mitigationSuggestions = [
+        'Increase safety margin in Coast FIRE calculations',
+        'Consider more conservative return assumptions',
+        'Maintain flexibility to return to work if needed',
+        'Diversify income sources during coast phase',
+        'Build larger emergency fund before coasting',
+      ];
+
+      return {
+        scenario: scenario.name,
+        adjustedCoastPoints,
+        riskLevel: scenario.riskLevel,
+        mitigationSuggestions,
+      };
+    });
+  }
+
+  /**
+   * Calculate comprehensive Barista FIRE analysis with part-time work scenarios
+   * Epic 7, Story 4: Barista FIRE Calculations
+   */
+  public calculateBaristaFIREAnalysis(
+    params: BaristaFIRECalculationParams
+  ): BaristaFIRECalculationResult {
+    const startTime = performance.now();
+
+    try {
+      // Input validation
+      if (params.currentAge < 18 || params.currentAge > 100) {
+        throw new Error('Current age must be between 18 and 100');
+      }
+      if (params.currentSavings < 0) {
+        throw new Error('Current savings cannot be negative');
+      }
+      if (params.fullFireNumber <= 0) {
+        throw new Error('Full FIRE number must be positive');
+      }
+      if (params.expectedReturn <= 0 || params.expectedReturn > 0.5) {
+        throw new Error('Expected return must be between 0% and 50%');
+      }
+
+      // Default parameters
+      const socialSecurityAge = params.socialSecurityAge || 67;
+      const bridgeYears =
+        params.bridgeYears || socialSecurityAge - params.currentAge;
+
+      // Analyze each Barista FIRE scenario
+      const scenarios = params.partTimeScenarios.map(scenario => {
+        // Calculate required savings for Barista FIRE
+        const annualExpensesDuringBarista =
+          params.baristaPhaseExpenses.annualExpenses;
+        const annualIncomeFromWork =
+          scenario.annualIncome + scenario.benefitsValue;
+        const annualIncomeNeededFromSavings = Math.max(
+          0,
+          annualExpensesDuringBarista - annualIncomeFromWork
+        );
+
+        // Required savings using 4% rule for the gap
+        const requiredSavings = annualIncomeNeededFromSavings / 0.04;
+        const savingsReduction = params.fullFireNumber - requiredSavings;
+
+        // Calculate time to reach Barista FIRE
+        const monthlyContributionsNeeded =
+          requiredSavings > params.currentSavings
+            ? ((requiredSavings - params.currentSavings) *
+                params.expectedReturn) /
+              (12 *
+                (Math.pow(
+                  1 + params.expectedReturn,
+                  scenario.startAge - params.currentAge
+                ) -
+                  1))
+            : 0;
+
+        const totalYearsToFire = scenario.startAge - params.currentAge;
+        const baristaPhaseYears = scenario.workYears;
+
+        // Feasibility score (0-100)
+        const feasibilityScore = Math.min(
+          100,
+          Math.max(
+            0,
+            100 -
+              (monthlyContributionsNeeded / 1000) * 10 -
+              (scenario.workYears / 20) * 20
+          )
+        );
+
+        // Financial projections
+        const savingsAtBaristaStart = requiredSavings;
+        const incomeFromSavings = savingsAtBaristaStart * 0.04; // 4% withdrawal
+        const incomeFromWork = scenario.annualIncome;
+        const totalAnnualIncome =
+          incomeFromSavings + incomeFromWork + scenario.benefitsValue;
+        const expenseCoverage =
+          (totalAnnualIncome / annualExpensesDuringBarista) * 100;
+
+        // Risk analysis
+        const risks = [
+          {
+            type: 'income' as const,
+            description: 'Part-time work may not be available or sustainable',
+            impact: 'high' as const,
+            mitigation: 'Develop multiple income streams and marketable skills',
+          },
+          {
+            type: 'health' as const,
+            description:
+              'Healthcare costs may be higher without employer benefits',
+            impact: 'medium' as const,
+            mitigation:
+              'Budget for ACA marketplace premiums and higher deductibles',
+          },
+          {
+            type: 'market' as const,
+            description: 'Market downturns could reduce withdrawal capacity',
+            impact: 'medium' as const,
+            mitigation:
+              'Maintain larger emergency fund and flexible work arrangements',
+          },
+          {
+            type: 'inflation' as const,
+            description: 'Rising costs could outpace part-time income growth',
+            impact: 'medium' as const,
+            mitigation: 'Choose work with inflation-adjusted income potential',
+          },
+        ];
+
+        return {
+          name: scenario.name,
+          requiredSavings,
+          savingsReduction,
+          partTimeIncome: scenario.annualIncome,
+          benefitsValue: scenario.benefitsValue,
+          totalYearsToFire,
+          baristaPhaseYears,
+          feasibilityScore,
+          projections: {
+            savingsAtBaristaStart,
+            incomeFromSavings,
+            incomeFromWork,
+            totalAnnualIncome,
+            expenseCoverage,
+          },
+          risks,
+        };
+      });
+
+      // Find recommended scenario (highest feasibility score)
+      const recommendedScenario = scenarios.reduce((best, current) =>
+        current.feasibilityScore > best.feasibilityScore ? current : best
+      );
+
+      const recommendedScenarioResult = {
+        scenarioName: recommendedScenario.name,
+        reasonsForRecommendation: [
+          `Highest feasibility score: ${recommendedScenario.feasibilityScore}/100`,
+          `Reduces required savings by $${Math.round(recommendedScenario.savingsReduction).toLocaleString()}`,
+          `Provides ${recommendedScenario.baristaPhaseYears} years of flexible work transition`,
+        ],
+        keyBenefits: [
+          'Reduced savings requirement compared to full FIRE',
+          'Maintained income and benefits during transition',
+          'Flexibility to adjust work hours and lifestyle',
+          'Social engagement and purpose through continued work',
+        ],
+        potentialDrawbacks: [
+          'Dependence on continued ability to work',
+          'Potential healthcare coverage gaps',
+          'Market risk on smaller savings base',
+          'Less complete financial independence',
+        ],
+      };
+
+      // Comparison with full FIRE
+      const fullFireComparison = {
+        fullFireAmount: params.fullFireNumber,
+        baristaFireAmount: recommendedScenario.requiredSavings,
+        savingsReduction: recommendedScenario.savingsReduction,
+        timeToFireReduction:
+          Math.max(
+            0,
+            (params.fullFireNumber - params.currentSavings) /
+              (recommendedScenario.requiredSavings - params.currentSavings) -
+              1
+          ) * recommendedScenario.totalYearsToFire,
+        flexibilityScore: Math.min(
+          100,
+          recommendedScenario.feasibilityScore + 20
+        ), // Bonus for flexibility
+      };
+
+      const result: BaristaFIRECalculationResult = {
+        scenarios,
+        recommendedScenario: recommendedScenarioResult,
+        fullFireComparison,
+      };
+
+      // Cache the result
+      const cacheKey = `barista_fire_${JSON.stringify(params)}`;
+      this.setCache(cacheKey, result);
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Barista FIRE calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Generate Coast FIRE timeline visualization data
+   * Epic 7, Story 4: Timeline Visualization
+   */
+  public generateCoastFIRETimelineData(
+    params: CoastFIRECalculationParams,
+    coastPoint: { age: number; requiredAmount: number }
+  ): {
+    timelineData: Array<{
+      age: number;
+      year: number;
+      phase: 'contribution' | 'coast';
+      accountValue: number;
+      contributions: number;
+      growth: number;
+      withdrawals: number;
+      milestones: string[];
+    }>;
+    phaseBreakdown: {
+      contributionPhase: {
+        duration: number;
+        totalContributions: number;
+        totalGrowth: number;
+        endValue: number;
+      };
+      coastPhase: {
+        duration: number;
+        totalGrowth: number;
+        startValue: number;
+        endValue: number;
+      };
+    };
+  } {
+    const currentYear = new Date().getFullYear();
+    const traditionalRetirementAge = params.traditionalRetirementAge || 65;
+    const currentMonthlyContributions = params.currentMonthlyContributions || 0;
+    const annualContributions = currentMonthlyContributions * 12;
+
+    const timelineData = [];
+    let accountValue = params.currentSavings;
+    let totalContributions = 0;
+    let contributionPhaseGrowth = 0;
+    let coastPhaseGrowth = 0;
+
+    // Contribution phase
+    for (let age = params.currentAge; age <= coastPoint.age; age++) {
+      const year = currentYear + (age - params.currentAge);
+      const growth = accountValue * params.expectedReturn;
+      accountValue += growth + annualContributions;
+      totalContributions += annualContributions;
+      contributionPhaseGrowth += growth;
+
+      const milestones = [];
+      if (age === coastPoint.age) {
+        milestones.push('Coast FIRE Achieved');
+      }
+      if (age === params.currentAge + 5) {
+        milestones.push('5-Year Mark');
+      }
+      if (age === params.currentAge + 10) {
+        milestones.push('10-Year Mark');
+      }
+
+      timelineData.push({
+        age,
+        year,
+        phase: 'contribution' as const,
+        accountValue,
+        contributions: annualContributions,
+        growth,
+        withdrawals: 0,
+        milestones,
+      });
+    }
+
+    const coastStartValue = accountValue;
+
+    // Coast phase
+    for (let age = coastPoint.age + 1; age <= traditionalRetirementAge; age++) {
+      const year = currentYear + (age - params.currentAge);
+      const growth = accountValue * params.expectedReturn;
+      accountValue += growth;
+      coastPhaseGrowth += growth;
+
+      const milestones = [];
+      if (age === traditionalRetirementAge) {
+        milestones.push('Traditional Retirement Age');
+      }
+      if (age === 65 && traditionalRetirementAge !== 65) {
+        milestones.push('Medicare Eligibility');
+      }
+
+      timelineData.push({
+        age,
+        year,
+        phase: 'coast' as const,
+        accountValue,
+        contributions: 0,
+        growth,
+        withdrawals: 0,
+        milestones,
+      });
+    }
+
+    const phaseBreakdown = {
+      contributionPhase: {
+        duration: coastPoint.age - params.currentAge,
+        totalContributions,
+        totalGrowth: contributionPhaseGrowth,
+        endValue: coastStartValue,
+      },
+      coastPhase: {
+        duration: traditionalRetirementAge - coastPoint.age,
+        totalGrowth: coastPhaseGrowth,
+        startValue: coastStartValue,
+        endValue: accountValue,
+      },
+    };
+
+    return { timelineData, phaseBreakdown };
   }
 }
 
