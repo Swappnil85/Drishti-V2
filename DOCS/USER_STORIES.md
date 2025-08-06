@@ -324,18 +324,18 @@
 **User Story**: As a user, I want accurate future value projections for my accounts.
 
 - **Enhanced Acceptance Criteria**:
-  - Calculation engine uses compound interest formulas with monthly compounding accuracy
-  - Users can set individual expected annual return rates for each account type
-  - Projections account for inflation adjustment with customizable inflation rates
-  - **NEW**: Monte Carlo simulation support for probabilistic projections (1000+ iterations)
-  - **NEW**: Sequence of returns risk modeling for retirement withdrawal scenarios
-  - **NEW**: Market volatility impact analysis with confidence intervals
-  - **NEW**: Tax-adjusted projections considering account types and withdrawal strategies
-  - **NEW**: Tax categorization affects withdrawal strategy calculations and FIRE projections _(moved from Epic 6.3)_
-  - **NEW**: Real-time calculation updates with <200ms performance requirement
-  - **NEW**: Updated balances trigger automatic recalculation of net worth and goal progress _(moved from Epic 6.2)_
-  - **NEW**: Account deletion includes impact analysis showing effect on goals and projections _(moved from Epic 6.4)_
-  - **NEW**: Net worth projections based on current savings rate and market assumptions _(moved from Epic 6.5)_
+  - ✅Calculation engine uses compound interest formulas with monthly compounding accuracy
+  - ✅ Users can set individual expected annual return rates for each account type
+  - ✅ Projections account for inflation adjustment with customizable inflation rates
+  - ✅ **NEW**: Monte Carlo simulation support for probabilistic projections (1000+ iterations)
+  - ✅ **NEW**: Sequence of returns risk modeling for retirement withdrawal scenarios
+  - ✅ **NEW**: Market volatility impact analysis with confidence intervals
+  - ✅ **NEW**: Tax-adjusted projections considering account types and withdrawal strategies
+  - ✅ **NEW**: Tax categorization affects withdrawal strategy calculations and FIRE projections _(moved from Epic 6.3)_
+  - ✅ **NEW**: Real-time calculation updates with <200ms performance requirement
+  - ✅ **NEW**: Updated balances trigger automatic recalculation of net worth and goal progress _(moved from Epic 6.2)_
+  - ✅ **NEW**: Account deletion includes impact analysis showing effect on goals and projections _(moved from Epic 6.4)_
+  - ✅ **NEW**: Net worth projections based on current savings rate and market assumptions _(moved from Epic 6.5)_
 
 **User Story**: As a user, I want to calculate my FIRE number based on expenses.
 

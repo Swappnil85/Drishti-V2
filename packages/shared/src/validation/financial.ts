@@ -360,6 +360,252 @@ export const dashboardQuerySchema = z.object({
   include_projections: z.coerce.boolean().default(true),
 });
 
+// Financial Calculation Validation Schemas
+
+// Compound Interest Parameters Schema
+export const compoundInterestParamsSchema = z.object({
+  principal: positiveNumberSchema,
+  annualRate: z.number().min(0).max(1, 'Annual rate must be between 0 and 1'),
+  compoundingFrequency: z
+    .number()
+    .int()
+    .min(1)
+    .max(365, 'Compounding frequency must be between 1 and 365'),
+  timeInYears: positiveNumberSchema.max(100, 'Time cannot exceed 100 years'),
+  additionalContributions: nonNegativeNumberSchema.optional(),
+  contributionFrequency: z.number().int().min(1).max(365).optional(),
+  contributionTiming: z.enum(['beginning', 'end']).default('end'),
+});
+
+// Account Projection Parameters Schema
+export const accountProjectionParamsSchema = z.object({
+  accountId: uuidSchema,
+  currentBalance: z.number().finite(),
+  interestRate: z
+    .number()
+    .min(-0.1)
+    .max(1, 'Interest rate must be between -10% and 100%'),
+  monthlyContribution: z.number().finite(),
+  projectionYears: z
+    .number()
+    .int()
+    .min(1)
+    .max(50, 'Projection years must be between 1 and 50'),
+  inflationRate: z
+    .number()
+    .min(0)
+    .max(0.2, 'Inflation rate must be between 0% and 20%')
+    .optional(),
+  taxRate: z
+    .number()
+    .min(0)
+    .max(0.6, 'Tax rate must be between 0% and 60%')
+    .optional(),
+  fees: z
+    .object({
+      annualFee: nonNegativeNumberSchema.optional(),
+      managementFeeRate: z
+        .number()
+        .min(0)
+        .max(0.1, 'Management fee rate must be between 0% and 10%')
+        .optional(),
+      transactionFee: nonNegativeNumberSchema.optional(),
+    })
+    .optional(),
+});
+
+// Monte Carlo Parameters Schema
+export const monteCarloParamsSchema = z.object({
+  initialValue: nonNegativeNumberSchema,
+  monthlyContribution: z.number().finite(),
+  yearsToProject: z.number().int().min(1).max(50),
+  expectedReturn: z
+    .number()
+    .min(-0.5)
+    .max(1, 'Expected return must be between -50% and 100%'),
+  volatility: z
+    .number()
+    .min(0)
+    .max(2, 'Volatility must be between 0% and 200%'),
+  iterations: z
+    .number()
+    .int()
+    .min(100)
+    .max(10000, 'Iterations must be between 100 and 10,000')
+    .default(1000),
+  inflationRate: z.number().min(0).max(0.2).optional(),
+  correlationMatrix: z.array(z.array(z.number().min(-1).max(1))).optional(),
+});
+
+// FIRE Calculation Parameters Schema
+export const fireCalculationParamsSchema = z.object({
+  currentAge: z
+    .number()
+    .int()
+    .min(18)
+    .max(100, 'Age must be between 18 and 100'),
+  currentSavings: nonNegativeNumberSchema,
+  monthlyIncome: positiveNumberSchema,
+  monthlyExpenses: positiveNumberSchema,
+  expectedReturn: z
+    .number()
+    .min(0)
+    .max(0.2, 'Expected return must be between 0% and 20%'),
+  inflationRate: z
+    .number()
+    .min(0)
+    .max(0.1, 'Inflation rate must be between 0% and 10%'),
+  withdrawalRate: z
+    .number()
+    .min(0.01)
+    .max(0.1, 'Withdrawal rate must be between 1% and 10%')
+    .default(0.04),
+  targetAge: z.number().int().min(30).max(100).optional(),
+  socialSecurityBenefit: nonNegativeNumberSchema.optional(),
+  pensionBenefit: nonNegativeNumberSchema.optional(),
+  healthcareCosts: nonNegativeNumberSchema.optional(),
+});
+
+// Debt Payoff Parameters Schema
+export const debtPayoffParamsSchema = z
+  .object({
+    debts: z
+      .array(
+        z.object({
+          id: uuidSchema,
+          name: z.string().min(1).max(255),
+          balance: positiveNumberSchema,
+          interestRate: z.number().min(0).max(1),
+          minimumPayment: positiveNumberSchema,
+        })
+      )
+      .min(1, 'At least one debt is required'),
+    extraPayment: nonNegativeNumberSchema,
+    strategy: z.enum(['snowball', 'avalanche', 'custom']),
+    customOrder: z.array(uuidSchema).optional(),
+  })
+  .refine(
+    data =>
+      data.strategy !== 'custom' ||
+      (data.customOrder && data.customOrder.length === data.debts.length),
+    {
+      message:
+        'Custom order must include all debt IDs when using custom strategy',
+      path: ['customOrder'],
+    }
+  );
+
+// Goal Projection Parameters Schema
+export const goalProjectionParamsSchema = z.object({
+  goalId: uuidSchema,
+  targetAmount: positiveNumberSchema,
+  currentAmount: nonNegativeNumberSchema,
+  monthlyContribution: nonNegativeNumberSchema,
+  targetDate: dateStringSchema.optional(),
+  interestRate: z.number().min(0).max(0.2),
+  riskLevel: z.enum(['conservative', 'moderate', 'aggressive']),
+  inflationAdjusted: z.boolean().default(true),
+});
+
+// Portfolio Optimization Parameters Schema
+export const portfolioOptimizationParamsSchema = z
+  .object({
+    assets: z
+      .array(
+        z.object({
+          id: uuidSchema,
+          name: z.string().min(1).max(255),
+          expectedReturn: z.number().min(-0.5).max(1),
+          volatility: z.number().min(0).max(2),
+          currentAllocation: z.number().min(0).max(100),
+        })
+      )
+      .min(2, 'At least two assets are required'),
+    correlationMatrix: z.array(z.array(z.number().min(-1).max(1))),
+    riskTolerance: z.enum(['conservative', 'moderate', 'aggressive']),
+    timeHorizon: z.number().int().min(1).max(50),
+    constraints: z
+      .object({
+        minAllocation: z.record(z.number().min(0).max(100)).optional(),
+        maxAllocation: z.record(z.number().min(0).max(100)).optional(),
+        excludeAssets: z.array(uuidSchema).optional(),
+      })
+      .optional(),
+  })
+  .refine(
+    data => {
+      const totalAllocation = data.assets.reduce(
+        (sum, asset) => sum + asset.currentAllocation,
+        0
+      );
+      return Math.abs(totalAllocation - 100) < 0.01; // Allow for small rounding errors
+    },
+    {
+      message: 'Total current allocation must equal 100%',
+      path: ['assets'],
+    }
+  );
+
+// Tax Optimization Parameters Schema
+export const taxOptimizationParamsSchema = z
+  .object({
+    accounts: z
+      .array(
+        z.object({
+          id: uuidSchema,
+          type: z.enum([
+            'taxable',
+            'traditional_ira',
+            'roth_ira',
+            '401k',
+            'hsa',
+          ]),
+          balance: nonNegativeNumberSchema,
+          contributionLimit: nonNegativeNumberSchema,
+          currentContribution: nonNegativeNumberSchema,
+        })
+      )
+      .min(1),
+    income: positiveNumberSchema,
+    taxBracket: z.number().min(0).max(0.6),
+    state: z.string().length(2).optional(), // US state code
+    retirementAge: z.number().int().min(50).max(75),
+    currentAge: z.number().int().min(18).max(100),
+  })
+  .refine(data => data.currentAge < data.retirementAge, {
+    message: 'Current age must be less than retirement age',
+    path: ['currentAge'],
+  });
+
+// Calculation Request Schema
+export const calculationRequestSchema = z.object({
+  type: z.enum([
+    'future_value',
+    'monte_carlo',
+    'fire',
+    'debt_payoff',
+    'goal_projection',
+    'portfolio_optimization',
+    'tax_optimization',
+  ]),
+  params: z.any(), // Will be validated based on type
+  userId: uuidSchema,
+  priority: z.enum(['low', 'normal', 'high', 'realtime']).default('normal'),
+  cacheKey: z.string().optional(),
+  timeout: z.number().int().min(1000).max(60000).optional(), // 1 second to 1 minute
+});
+
+// Batch Calculation Request Schema
+export const batchCalculationRequestSchema = z.object({
+  calculations: z
+    .array(calculationRequestSchema)
+    .min(1)
+    .max(10, 'Maximum 10 calculations per batch'),
+  parallel: z.boolean().default(true),
+  maxConcurrency: z.number().int().min(1).max(5).default(3),
+  failFast: z.boolean().default(false),
+});
+
 // Export all schemas for easy access
 export const financialValidationSchemas = {
   // Create schemas
@@ -388,6 +634,18 @@ export const financialValidationSchemas = {
 
   // Sync schemas
   syncRequest: syncRequestSchema,
+
+  // Financial calculation schemas
+  compoundInterestParams: compoundInterestParamsSchema,
+  accountProjectionParams: accountProjectionParamsSchema,
+  monteCarloParams: monteCarloParamsSchema,
+  fireCalculationParams: fireCalculationParamsSchema,
+  debtPayoffParams: debtPayoffParamsSchema,
+  goalProjectionParams: goalProjectionParamsSchema,
+  portfolioOptimizationParams: portfolioOptimizationParamsSchema,
+  taxOptimizationParams: taxOptimizationParamsSchema,
+  calculationRequest: calculationRequestSchema,
+  batchCalculationRequest: batchCalculationRequestSchema,
 
   // Utility schemas
   pagination: paginationSchema,
