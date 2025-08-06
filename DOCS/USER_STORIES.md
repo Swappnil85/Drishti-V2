@@ -340,14 +340,14 @@
 **User Story**: As a user, I want to calculate my FIRE number based on expenses.
 
 - **Enhanced Acceptance Criteria**:
-  - App calculates FIRE number using 4% rule (25x annual expenses) as default
-  - Users can adjust withdrawal rate from 3-5% based on their risk tolerance
-  - Calculation includes geographic cost-of-living adjustments
-  - **NEW**: Multiple FIRE variants calculation (Lean FIRE, Fat FIRE, Coast FIRE, Barista FIRE)
-  - **NEW**: Healthcare cost projections for early retirement scenarios
-  - **NEW**: Social Security benefits integration for retirement planning
-  - **NEW**: Expense inflation modeling with category-specific inflation rates
-  - **NEW**: FIRE number stress testing under various economic scenarios
+  - ✅ App calculates FIRE number using 4% rule (25x annual expenses) as default
+  - ✅ Users can adjust withdrawal rate from 3-5% based on their risk tolerance
+  - ✅ Calculation includes geographic cost-of-living adjustments
+  - ✅ **NEW**: Multiple FIRE variants calculation (Lean FIRE, Fat FIRE, Coast FIRE, Barista FIRE)
+  - ✅ **NEW**: Healthcare cost projections for early retirement scenarios
+  - ✅ **NEW**: Social Security benefits integration for retirement planning
+  - ✅ **NEW**: Expense inflation modeling with category-specific inflation rates
+  - ✅ **NEW**: FIRE number stress testing under various economic scenarios
 
 **User Story**: As a user, I want to know my required savings rate to reach goals.
 
