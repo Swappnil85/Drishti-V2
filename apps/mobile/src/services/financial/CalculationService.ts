@@ -16,6 +16,12 @@ import {
   FIRECalculationResult,
   FIRENumberCalculationParams,
   FIRENumberCalculationResult,
+  SavingsRateCalculationParams,
+  SavingsRateCalculationResult,
+  GoalBasedPlanningParams,
+  GoalBasedPlanningResult,
+  BudgetAdjustmentParams,
+  BudgetAdjustmentResult,
   DebtPayoffParams,
   DebtPayoffResult,
   GoalProjectionParams,
@@ -526,6 +532,21 @@ export class CalculationService {
                   calculation.params
                 );
               break;
+            case 'savings_rate':
+              result = financialCalculationEngine.calculateRequiredSavingsRate(
+                calculation.params
+              );
+              break;
+            case 'goal_planning':
+              result = financialCalculationEngine.calculateGoalBasedPlanning(
+                calculation.params
+              );
+              break;
+            case 'budget_adjustment':
+              result = financialCalculationEngine.calculateBudgetAdjustments(
+                calculation.params
+              );
+              break;
             default:
               throw new Error(
                 `Unsupported calculation type: ${calculation.type}`
@@ -772,6 +793,210 @@ export class CalculationService {
       return result;
     } catch (error) {
       console.error('Healthcare cost projection failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate required savings rate to reach financial goals (Story 3)
+   */
+  async calculateRequiredSavingsRate(
+    params: SavingsRateCalculationParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<SavingsRateCalculationResult> {
+    const { priority = 'normal', useCache = true, timeout = 30000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `savings_rate_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          this.notifySubscribers('savings_rate', cachedResult);
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<SavingsRateCalculationResult>(
+        (resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Savings rate calculation timeout'));
+          }, timeout);
+
+          this.calculationQueue.push({
+            id: Date.now().toString(),
+            type: 'savings_rate',
+            params,
+            priority,
+            resolve: result => {
+              clearTimeout(timeoutId);
+              resolve(result);
+            },
+            reject: error => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
+          });
+
+          this.processQueue();
+        }
+      );
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `savings_rate_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('savings_rate', result);
+
+      return result;
+    } catch (error) {
+      console.error('Savings rate calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate goal-based financial planning
+   */
+  async calculateGoalBasedPlanning(
+    params: GoalBasedPlanningParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<GoalBasedPlanningResult> {
+    const { priority = 'normal', useCache = true, timeout = 20000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `goal_planning_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          this.notifySubscribers('goal_planning', cachedResult);
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<GoalBasedPlanningResult>(
+        (resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Goal planning calculation timeout'));
+          }, timeout);
+
+          this.calculationQueue.push({
+            id: Date.now().toString(),
+            type: 'goal_planning',
+            params,
+            priority,
+            resolve: result => {
+              clearTimeout(timeoutId);
+              resolve(result);
+            },
+            reject: error => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
+          });
+
+          this.processQueue();
+        }
+      );
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `goal_planning_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('goal_planning', result);
+
+      return result;
+    } catch (error) {
+      console.error('Goal planning calculation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate budget adjustments and recommendations
+   */
+  async calculateBudgetAdjustments(
+    params: BudgetAdjustmentParams,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      useCache?: boolean;
+      timeout?: number;
+    } = {}
+  ): Promise<BudgetAdjustmentResult> {
+    const { priority = 'normal', useCache = true, timeout = 15000 } = options;
+
+    try {
+      // Check cache first
+      if (useCache) {
+        const cacheKey = `budget_adjustment_${JSON.stringify(params)}`;
+        const cachedResult = await this.getCachedResult(cacheKey);
+        if (cachedResult) {
+          this.notifySubscribers('budget_adjustment', cachedResult);
+          return cachedResult;
+        }
+      }
+
+      // Add to queue for processing
+      const calculationPromise = new Promise<BudgetAdjustmentResult>(
+        (resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Budget adjustment calculation timeout'));
+          }, timeout);
+
+          this.calculationQueue.push({
+            id: Date.now().toString(),
+            type: 'budget_adjustment',
+            params,
+            priority,
+            resolve: result => {
+              clearTimeout(timeoutId);
+              resolve(result);
+            },
+            reject: error => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
+          });
+
+          this.processQueue();
+        }
+      );
+
+      const result = await calculationPromise;
+
+      // Cache the result
+      if (useCache) {
+        const cacheKey = `budget_adjustment_${JSON.stringify(params)}`;
+        await this.setCachedResult(cacheKey, result);
+      }
+
+      // Notify subscribers
+      this.notifySubscribers('budget_adjustment', result);
+
+      return result;
+    } catch (error) {
+      console.error('Budget adjustment calculation failed:', error);
       throw error;
     }
   }

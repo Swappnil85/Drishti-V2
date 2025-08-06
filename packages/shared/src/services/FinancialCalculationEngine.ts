@@ -14,6 +14,12 @@ import {
   FIRECalculationResult,
   FIRENumberCalculationParams,
   FIRENumberCalculationResult,
+  SavingsRateCalculationParams,
+  SavingsRateCalculationResult,
+  GoalBasedPlanningParams,
+  GoalBasedPlanningResult,
+  BudgetAdjustmentParams,
+  BudgetAdjustmentResult,
   DebtPayoffParams,
   DebtPayoffResult,
   GoalProjectionParams,
@@ -348,6 +354,401 @@ export class FinancialCalculationEngine {
       );
       throw new Error(`Monte Carlo simulation failed: ${error.message}`);
     }
+  }
+
+  /**
+   * Calculate required savings rate to reach financial goals (Story 3)
+   * Determines optimal savings rate and provides budget adjustment recommendations
+   */
+  calculateRequiredSavingsRate(
+    params: SavingsRateCalculationParams
+  ): SavingsRateCalculationResult {
+    const startTime = performance.now();
+
+    // Generate cache key
+    const cacheKey = this.generateCacheKey('savings_rate', params);
+
+    // Check cache first
+    const cachedResult = this.getFromCache(cacheKey);
+    if (cachedResult) {
+      this.recordPerformance(
+        'calculateRequiredSavingsRate',
+        performance.now() - startTime,
+        true,
+        params.goals.length
+      );
+      return cachedResult;
+    }
+
+    // Validate input parameters
+    this.validateSavingsRateParams(params);
+
+    // Calculate required savings for each goal
+    const goalCalculations = this.calculateGoalRequirements(params);
+
+    // Optimize savings allocation across goals
+    const optimizedAllocation = this.optimizeSavingsAllocation(
+      params,
+      goalCalculations
+    );
+
+    // Generate budget adjustment recommendations
+    const budgetAdjustments = this.generateBudgetAdjustments(
+      params,
+      optimizedAllocation
+    );
+
+    // Generate income optimization suggestions
+    const incomeOptimization = this.generateIncomeOptimization(params);
+
+    // Perform timeline analysis
+    const timelineAnalysis = this.analyzeTimelines(params, optimizedAllocation);
+
+    // Generate scenario analysis
+    const scenarioAnalysis = this.generateScenarioAnalysis(
+      params,
+      optimizedAllocation
+    );
+
+    // Create progress milestones
+    const milestones = this.createProgressMilestones(
+      params,
+      optimizedAllocation
+    );
+
+    const result: SavingsRateCalculationResult = {
+      recommendedSavingsRate: optimizedAllocation.totalSavingsRate,
+      requiredMonthlySavings: optimizedAllocation.totalMonthlySavings,
+      currentSavingsGap:
+        optimizedAllocation.totalMonthlySavings -
+        (params.currentIncome - params.monthlyExpenses),
+      goalBreakdown: optimizedAllocation.goalBreakdown,
+      budgetAdjustments,
+      incomeOptimization,
+      timelineAnalysis,
+      scenarioAnalysis,
+      milestones,
+    };
+
+    // Cache the result
+    this.setCache(cacheKey, result, ['savings_rate', 'goals']);
+
+    // Record performance
+    const executionTime = performance.now() - startTime;
+    this.recordPerformance(
+      'calculateRequiredSavingsRate',
+      executionTime,
+      false,
+      params.goals.length
+    );
+
+    return result;
+  }
+
+  /**
+   * Perform goal-based financial planning
+   * Optimizes savings allocation across multiple financial goals
+   */
+  calculateGoalBasedPlanning(
+    params: GoalBasedPlanningParams
+  ): GoalBasedPlanningResult {
+    const startTime = performance.now();
+
+    // Generate cache key
+    const cacheKey = this.generateCacheKey('goal_planning', params);
+
+    // Check cache first
+    const cachedResult = this.getFromCache(cacheKey);
+    if (cachedResult) {
+      this.recordPerformance(
+        'calculateGoalBasedPlanning',
+        performance.now() - startTime,
+        true,
+        params.goals.length
+      );
+      return cachedResult;
+    }
+
+    // Validate parameters
+    this.validateGoalPlanningParams(params);
+
+    // Calculate required savings for each goal
+    const goalRequirements = params.goals.map(goal => {
+      const monthsToGoal = this.calculateMonthsToDate(goal.targetDate);
+      const remainingAmount = goal.targetAmount - goal.currentAmount;
+      const adjustedAmount = goal.inflationAdjusted
+        ? remainingAmount *
+          Math.pow(1 + params.inflationRate, monthsToGoal / 12)
+        : remainingAmount;
+
+      const requiredMonthlySavings = this.calculateRequiredMonthlySavings(
+        adjustedAmount,
+        monthsToGoal,
+        params.expectedReturn
+      );
+
+      return {
+        goalId: goal.id,
+        requiredMonthlySavings,
+        adjustedTargetAmount: adjustedAmount,
+        monthsToGoal,
+        priority: goal.priority,
+      };
+    });
+
+    // Sort goals by priority
+    const prioritizedGoals = goalRequirements.sort(
+      (a, b) => b.priority - a.priority
+    );
+
+    // Calculate total required savings
+    const totalRequiredSavings = goalRequirements.reduce(
+      (sum, goal) => sum + goal.requiredMonthlySavings,
+      0
+    );
+    const recommendedSavingsRate = totalRequiredSavings / params.currentIncome;
+
+    // Determine plan feasibility
+    const maxSavingsRate = params.constraints?.maxSavingsRate || 0.5;
+    let planFeasibility: 'achievable' | 'challenging' | 'unrealistic';
+    let confidenceScore: number;
+
+    if (recommendedSavingsRate <= maxSavingsRate * 0.7) {
+      planFeasibility = 'achievable';
+      confidenceScore = 0.9;
+    } else if (recommendedSavingsRate <= maxSavingsRate) {
+      planFeasibility = 'challenging';
+      confidenceScore = 0.6;
+    } else {
+      planFeasibility = 'unrealistic';
+      confidenceScore = 0.3;
+    }
+
+    // Create goal prioritization
+    const goalPrioritization = prioritizedGoals.map((goal, index) => ({
+      goalId: goal.goalId,
+      rank: index + 1,
+      allocatedSavings: Math.min(
+        goal.requiredMonthlySavings,
+        params.availableForSavings * (goal.priority / 10)
+      ),
+      projectedCompletion: new Date(
+        Date.now() + goal.monthsToGoal * 30 * 24 * 60 * 60 * 1000
+      ),
+      successProbability: confidenceScore * (goal.priority / 10),
+    }));
+
+    // Generate savings allocation timeline
+    const savingsAllocation = this.generateSavingsAllocation(
+      params,
+      goalRequirements
+    );
+
+    // Generate recommendations
+    const recommendations = this.generatePlanningRecommendations(
+      params,
+      goalRequirements,
+      planFeasibility
+    );
+
+    const result: GoalBasedPlanningResult = {
+      overallPlan: {
+        totalRequiredSavings,
+        recommendedSavingsRate,
+        planFeasibility,
+        confidenceScore,
+      },
+      goalPrioritization,
+      savingsAllocation,
+      recommendations,
+    };
+
+    // Cache the result
+    this.setCache(cacheKey, result, ['goal_planning']);
+
+    // Record performance
+    const executionTime = performance.now() - startTime;
+    this.recordPerformance(
+      'calculateGoalBasedPlanning',
+      executionTime,
+      false,
+      params.goals.length
+    );
+
+    return result;
+  }
+
+  /**
+   * Analyze budget and provide adjustment recommendations
+   */
+  calculateBudgetAdjustments(
+    params: BudgetAdjustmentParams
+  ): BudgetAdjustmentResult {
+    const startTime = performance.now();
+
+    // Generate cache key
+    const cacheKey = this.generateCacheKey('budget_adjustment', params);
+
+    // Check cache first
+    const cachedResult = this.getFromCache(cacheKey);
+    if (cachedResult) {
+      this.recordPerformance(
+        'calculateBudgetAdjustments',
+        performance.now() - startTime,
+        true,
+        params.currentBudget.expenses.length
+      );
+      return cachedResult;
+    }
+
+    // Validate parameters
+    this.validateBudgetAdjustmentParams(params);
+
+    // Calculate current savings gap
+    const currentSavings =
+      params.currentBudget.income -
+      params.currentBudget.expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const savingsGap = params.savingsGoal - currentSavings;
+
+    if (savingsGap <= 0) {
+      // Already meeting savings goal
+      return {
+        adjustmentPlan: [],
+        totalSavingsIncrease: 0,
+        newSavingsRate: currentSavings / params.currentBudget.income,
+        implementationStrategy: [],
+        alternativeStrategies: [],
+      };
+    }
+
+    // Analyze each expense category for reduction potential
+    const adjustmentPlan = params.currentBudget.expenses
+      .filter(
+        expense =>
+          !params.preferences?.protectedCategories?.includes(expense.category)
+      )
+      .map(expense => {
+        const maxReduction = expense.amount * expense.flexibility;
+        const recommendedReduction = Math.min(maxReduction, savingsGap * 0.3); // Don't cut any single category too drastically
+
+        let difficulty: 'easy' | 'medium' | 'hard';
+        let qualityOfLifeImpact: 'low' | 'medium' | 'high';
+
+        if (expense.essential) {
+          difficulty = 'hard';
+          qualityOfLifeImpact = 'high';
+        } else if (expense.flexibility > 0.5) {
+          difficulty = 'easy';
+          qualityOfLifeImpact = 'low';
+        } else {
+          difficulty = 'medium';
+          qualityOfLifeImpact = 'medium';
+        }
+
+        return {
+          category: expense.category,
+          currentAmount: expense.amount,
+          recommendedAmount: expense.amount - recommendedReduction,
+          reduction: recommendedReduction,
+          reductionPercentage: recommendedReduction / expense.amount,
+          difficulty,
+          qualityOfLifeImpact,
+        };
+      })
+      .filter(adjustment => adjustment.reduction > 0)
+      .sort((a, b) => {
+        // Prioritize easy reductions first
+        const difficultyScore = { easy: 1, medium: 2, hard: 3 };
+        return difficultyScore[a.difficulty] - difficultyScore[b.difficulty];
+      });
+
+    const totalSavingsIncrease = adjustmentPlan.reduce(
+      (sum, adj) => sum + adj.reduction,
+      0
+    );
+    const newSavingsRate =
+      (currentSavings + totalSavingsIncrease) / params.currentBudget.income;
+
+    // Create implementation strategy
+    const implementationStrategy = [
+      {
+        phase: 1,
+        duration: '1 month',
+        changes: adjustmentPlan
+          .filter(adj => adj.difficulty === 'easy')
+          .map(adj => `Reduce ${adj.category} by $${adj.reduction.toFixed(0)}`),
+        expectedSavings: adjustmentPlan
+          .filter(adj => adj.difficulty === 'easy')
+          .reduce((sum, adj) => sum + adj.reduction, 0),
+      },
+      {
+        phase: 2,
+        duration: '2-3 months',
+        changes: adjustmentPlan
+          .filter(adj => adj.difficulty === 'medium')
+          .map(adj => `Reduce ${adj.category} by $${adj.reduction.toFixed(0)}`),
+        expectedSavings: adjustmentPlan
+          .filter(adj => adj.difficulty === 'medium')
+          .reduce((sum, adj) => sum + adj.reduction, 0),
+      },
+      {
+        phase: 3,
+        duration: '3-6 months',
+        changes: adjustmentPlan
+          .filter(adj => adj.difficulty === 'hard')
+          .map(adj => `Reduce ${adj.category} by $${adj.reduction.toFixed(0)}`),
+        expectedSavings: adjustmentPlan
+          .filter(adj => adj.difficulty === 'hard')
+          .reduce((sum, adj) => sum + adj.reduction, 0),
+      },
+    ].filter(phase => phase.changes.length > 0);
+
+    // Generate alternative strategies
+    const alternativeStrategies = [
+      {
+        strategy: 'Increase Income',
+        description: 'Focus on earning more rather than spending less',
+        potentialSavings: savingsGap,
+        effort: 'medium' as const,
+        timeframe: '3-12 months',
+      },
+      {
+        strategy: 'Hybrid Approach',
+        description: 'Combine moderate expense reduction with income increase',
+        potentialSavings: savingsGap,
+        effort: 'medium' as const,
+        timeframe: '2-6 months',
+      },
+      {
+        strategy: 'Lifestyle Downsizing',
+        description: 'Make significant lifestyle changes for maximum savings',
+        potentialSavings: savingsGap * 1.5,
+        effort: 'high' as const,
+        timeframe: '1-3 months',
+      },
+    ];
+
+    const result: BudgetAdjustmentResult = {
+      adjustmentPlan,
+      totalSavingsIncrease,
+      newSavingsRate,
+      implementationStrategy,
+      alternativeStrategies,
+    };
+
+    // Cache the result
+    this.setCache(cacheKey, result, ['budget_adjustment']);
+
+    // Record performance
+    const executionTime = performance.now() - startTime;
+    this.recordPerformance(
+      'calculateBudgetAdjustments',
+      executionTime,
+      false,
+      params.currentBudget.expenses.length
+    );
+
+    return result;
   }
 
   /**
@@ -1572,6 +1973,663 @@ export class FinancialCalculationEngine {
       hitRate,
       averageComputationTime,
     };
+  }
+
+  // Helper methods for savings rate calculations (Story 3)
+
+  /**
+   * Validate savings rate calculation parameters
+   */
+  private validateSavingsRateParams(
+    params: SavingsRateCalculationParams
+  ): void {
+    if (params.currentAge < 18 || params.currentAge > 100) {
+      throw new Error('Current age must be between 18 and 100');
+    }
+    if (params.currentIncome <= 0) {
+      throw new Error('Current income must be positive');
+    }
+    if (params.currentSavings < 0) {
+      throw new Error('Current savings cannot be negative');
+    }
+    if (params.monthlyExpenses <= 0) {
+      throw new Error('Monthly expenses must be positive');
+    }
+    if (params.goals.length === 0) {
+      throw new Error('At least one financial goal is required');
+    }
+
+    // Validate each goal
+    params.goals.forEach((goal, index) => {
+      if (goal.targetAmount <= 0) {
+        throw new Error(`Goal ${index + 1}: Target amount must be positive`);
+      }
+      if (goal.targetDate <= new Date()) {
+        throw new Error(`Goal ${index + 1}: Target date must be in the future`);
+      }
+      if (goal.currentProgress < 0) {
+        throw new Error(
+          `Goal ${index + 1}: Current progress cannot be negative`
+        );
+      }
+    });
+  }
+
+  /**
+   * Validate goal-based planning parameters
+   */
+  private validateGoalPlanningParams(params: GoalBasedPlanningParams): void {
+    if (params.currentIncome <= 0) {
+      throw new Error('Current income must be positive');
+    }
+    if (params.currentExpenses < 0) {
+      throw new Error('Current expenses cannot be negative');
+    }
+    if (params.availableForSavings < 0) {
+      throw new Error('Available savings amount cannot be negative');
+    }
+    if (params.expectedReturn < -0.5 || params.expectedReturn > 1) {
+      throw new Error('Expected return must be between -50% and 100%');
+    }
+    if (params.inflationRate < 0 || params.inflationRate > 0.2) {
+      throw new Error('Inflation rate must be between 0% and 20%');
+    }
+  }
+
+  /**
+   * Validate budget adjustment parameters
+   */
+  private validateBudgetAdjustmentParams(params: BudgetAdjustmentParams): void {
+    if (params.currentBudget.income <= 0) {
+      throw new Error('Income must be positive');
+    }
+    if (params.savingsGoal < 0) {
+      throw new Error('Savings goal cannot be negative');
+    }
+    if (params.targetSavingsRate < 0 || params.targetSavingsRate > 1) {
+      throw new Error('Target savings rate must be between 0% and 100%');
+    }
+
+    params.currentBudget.expenses.forEach((expense, index) => {
+      if (expense.amount < 0) {
+        throw new Error(`Expense ${index + 1}: Amount cannot be negative`);
+      }
+      if (expense.flexibility < 0 || expense.flexibility > 1) {
+        throw new Error(
+          `Expense ${index + 1}: Flexibility must be between 0 and 1`
+        );
+      }
+    });
+  }
+
+  /**
+   * Calculate required savings for each goal
+   */
+  private calculateGoalRequirements(
+    params: SavingsRateCalculationParams
+  ): Array<{
+    goalId: string;
+    goalName: string;
+    requiredMonthlySavings: number;
+    monthsToGoal: number;
+    priority: 'high' | 'medium' | 'low';
+    achievabilityScore: number;
+  }> {
+    return params.goals.map(goal => {
+      const monthsToGoal = this.calculateMonthsToDate(goal.targetDate);
+      const remainingAmount = goal.targetAmount - goal.currentProgress;
+
+      // Apply income growth if specified
+      let adjustedIncome = params.currentIncome;
+      if (params.incomeGrowth) {
+        const yearsToGoal = monthsToGoal / 12;
+        adjustedIncome =
+          params.currentIncome *
+          Math.pow(1 + params.incomeGrowth.annualGrowthRate, yearsToGoal);
+      }
+
+      // Calculate required monthly savings using future value formula
+      const monthlyRate = 0.07 / 12; // Assume 7% annual return
+      const requiredMonthlySavings = this.calculateRequiredMonthlySavings(
+        remainingAmount,
+        monthsToGoal,
+        monthlyRate
+      );
+
+      // Calculate achievability score based on income and constraints
+      const maxPossibleSavings =
+        adjustedIncome * (params.budgetConstraints?.maxSavingsRate || 0.5);
+      const achievabilityScore = Math.min(
+        100,
+        (maxPossibleSavings / requiredMonthlySavings) * 100
+      );
+
+      return {
+        goalId: goal.id,
+        goalName: goal.name,
+        requiredMonthlySavings,
+        monthsToGoal,
+        priority: goal.priority,
+        achievabilityScore,
+      };
+    });
+  }
+
+  /**
+   * Calculate required monthly savings for a target amount
+   */
+  private calculateRequiredMonthlySavings(
+    targetAmount: number,
+    months: number,
+    monthlyReturn: number
+  ): number {
+    if (monthlyReturn === 0) {
+      return targetAmount / months;
+    }
+
+    // Future value of annuity formula: FV = PMT * [((1 + r)^n - 1) / r]
+    // Solving for PMT: PMT = FV / [((1 + r)^n - 1) / r]
+    const futureValueFactor =
+      (Math.pow(1 + monthlyReturn, months) - 1) / monthlyReturn;
+    return targetAmount / futureValueFactor;
+  }
+
+  /**
+   * Calculate months between now and target date
+   */
+  private calculateMonthsToDate(targetDate: Date): number {
+    const now = new Date();
+    const diffTime = targetDate.getTime() - now.getTime();
+    const diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30.44); // Average days per month
+    return Math.max(1, Math.round(diffMonths));
+  }
+
+  /**
+   * Optimize savings allocation across multiple goals
+   */
+  private optimizeSavingsAllocation(
+    params: SavingsRateCalculationParams,
+    goalCalculations: Array<{
+      goalId: string;
+      goalName: string;
+      requiredMonthlySavings: number;
+      monthsToGoal: number;
+      priority: 'high' | 'medium' | 'low';
+      achievabilityScore: number;
+    }>
+  ): {
+    totalSavingsRate: number;
+    totalMonthlySavings: number;
+    goalBreakdown: Array<{
+      goalId: string;
+      goalName: string;
+      requiredMonthlySavings: number;
+      timelineAdjustment?: {
+        originalDate: Date;
+        adjustedDate: Date;
+        reasonForAdjustment: string;
+      };
+      achievabilityScore: number;
+      priority: 'high' | 'medium' | 'low';
+    }>;
+  } {
+    const maxSavingsRate = params.budgetConstraints?.maxSavingsRate || 0.5;
+    const maxMonthlySavings = params.currentIncome * maxSavingsRate;
+
+    // Sort goals by priority and achievability
+    const priorityWeights = { high: 3, medium: 2, low: 1 };
+    const sortedGoals = [...goalCalculations].sort((a, b) => {
+      const aPriority = priorityWeights[a.priority];
+      const bPriority = priorityWeights[b.priority];
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority; // Higher priority first
+      }
+      return b.achievabilityScore - a.achievabilityScore; // Higher achievability first
+    });
+
+    let totalRequiredSavings = sortedGoals.reduce(
+      (sum, goal) => sum + goal.requiredMonthlySavings,
+      0
+    );
+
+    // If total required savings exceeds maximum, adjust timelines for flexible goals
+    const goalBreakdown = sortedGoals.map(goal => {
+      const originalGoal = params.goals.find(g => g.id === goal.goalId)!;
+      let adjustedGoal = { ...goal };
+
+      if (totalRequiredSavings > maxMonthlySavings && originalGoal.isFlexible) {
+        // Extend timeline to reduce required monthly savings
+        const extensionFactor = Math.min(
+          2,
+          totalRequiredSavings / maxMonthlySavings
+        );
+        const newMonths = Math.round(goal.monthsToGoal * extensionFactor);
+        const newRequiredSavings = this.calculateRequiredMonthlySavings(
+          originalGoal.targetAmount - originalGoal.currentProgress,
+          newMonths,
+          0.07 / 12
+        );
+
+        adjustedGoal.requiredMonthlySavings = newRequiredSavings;
+        adjustedGoal.timelineAdjustment = {
+          originalDate: originalGoal.targetDate,
+          adjustedDate: new Date(
+            Date.now() + newMonths * 30 * 24 * 60 * 60 * 1000
+          ),
+          reasonForAdjustment:
+            'Extended timeline to make savings goal achievable within budget constraints',
+        };
+      }
+
+      return adjustedGoal;
+    });
+
+    // Recalculate total after adjustments
+    totalRequiredSavings = goalBreakdown.reduce(
+      (sum, goal) => sum + goal.requiredMonthlySavings,
+      0
+    );
+    const totalSavingsRate = Math.min(
+      totalRequiredSavings / params.currentIncome,
+      maxSavingsRate
+    );
+
+    return {
+      totalSavingsRate,
+      totalMonthlySavings: totalRequiredSavings,
+      goalBreakdown,
+    };
+  }
+
+  /**
+   * Generate budget adjustment recommendations
+   */
+  private generateBudgetAdjustments(
+    params: SavingsRateCalculationParams,
+    optimizedAllocation: any
+  ): Array<{
+    category: string;
+    currentAmount: number;
+    recommendedAmount: number;
+    potentialSavings: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    impact: 'low' | 'medium' | 'high';
+  }> {
+    const savingsGap =
+      optimizedAllocation.totalMonthlySavings -
+      (params.currentIncome - params.monthlyExpenses);
+
+    if (savingsGap <= 0) {
+      return []; // No adjustments needed
+    }
+
+    // Generate generic budget adjustment recommendations
+    const recommendations = [
+      {
+        category: 'Dining Out',
+        currentAmount: params.monthlyExpenses * 0.15, // Assume 15% of expenses
+        recommendedAmount: params.monthlyExpenses * 0.1, // Reduce to 10%
+        potentialSavings: params.monthlyExpenses * 0.05,
+        difficulty: 'easy' as const,
+        impact: 'medium' as const,
+      },
+      {
+        category: 'Entertainment',
+        currentAmount: params.monthlyExpenses * 0.08, // Assume 8% of expenses
+        recommendedAmount: params.monthlyExpenses * 0.05, // Reduce to 5%
+        potentialSavings: params.monthlyExpenses * 0.03,
+        difficulty: 'easy' as const,
+        impact: 'low' as const,
+      },
+      {
+        category: 'Subscriptions',
+        currentAmount: params.monthlyExpenses * 0.05, // Assume 5% of expenses
+        recommendedAmount: params.monthlyExpenses * 0.02, // Reduce to 2%
+        potentialSavings: params.monthlyExpenses * 0.03,
+        difficulty: 'easy' as const,
+        impact: 'low' as const,
+      },
+      {
+        category: 'Transportation',
+        currentAmount: params.monthlyExpenses * 0.15, // Assume 15% of expenses
+        recommendedAmount: params.monthlyExpenses * 0.12, // Reduce to 12%
+        potentialSavings: params.monthlyExpenses * 0.03,
+        difficulty: 'medium' as const,
+        impact: 'medium' as const,
+      },
+    ];
+
+    // Filter and sort by potential savings
+    return recommendations
+      .filter(rec => rec.potentialSavings > 0)
+      .sort((a, b) => b.potentialSavings - a.potentialSavings)
+      .slice(0, 5); // Return top 5 recommendations
+  }
+
+  /**
+   * Generate income optimization suggestions
+   */
+  private generateIncomeOptimization(
+    params: SavingsRateCalculationParams
+  ): Array<{
+    strategy: string;
+    potentialIncomeIncrease: number;
+    timeframe: string;
+    effort: 'low' | 'medium' | 'high';
+    probability: number;
+  }> {
+    const currentIncome = params.currentIncome;
+
+    return [
+      {
+        strategy: 'Negotiate salary increase',
+        potentialIncomeIncrease: currentIncome * 0.05, // 5% increase
+        timeframe: '3-6 months',
+        effort: 'medium' as const,
+        probability: 0.6,
+      },
+      {
+        strategy: 'Develop new skills for promotion',
+        potentialIncomeIncrease: currentIncome * 0.15, // 15% increase
+        timeframe: '6-12 months',
+        effort: 'high' as const,
+        probability: 0.4,
+      },
+      {
+        strategy: 'Start freelance/side business',
+        potentialIncomeIncrease: currentIncome * 0.2, // 20% additional income
+        timeframe: '3-9 months',
+        effort: 'high' as const,
+        probability: 0.3,
+      },
+      {
+        strategy: 'Switch to higher-paying job',
+        potentialIncomeIncrease: currentIncome * 0.25, // 25% increase
+        timeframe: '2-6 months',
+        effort: 'medium' as const,
+        probability: 0.5,
+      },
+      {
+        strategy: 'Optimize tax withholdings',
+        potentialIncomeIncrease: currentIncome * 0.02, // 2% effective increase
+        timeframe: '1 month',
+        effort: 'low' as const,
+        probability: 0.9,
+      },
+    ];
+  }
+
+  /**
+   * Analyze timelines for all goals
+   */
+  private analyzeTimelines(
+    params: SavingsRateCalculationParams,
+    optimizedAllocation: any
+  ): {
+    earliestGoalCompletion: Date;
+    latestGoalCompletion: Date;
+    totalSavingsPeriod: number;
+    peakSavingsRate: number;
+    averageSavingsRate: number;
+  } {
+    const goalDates = params.goals.map(goal => goal.targetDate);
+    const earliestGoalCompletion = new Date(
+      Math.min(...goalDates.map(d => d.getTime()))
+    );
+    const latestGoalCompletion = new Date(
+      Math.max(...goalDates.map(d => d.getTime()))
+    );
+
+    const totalSavingsPeriod =
+      (latestGoalCompletion.getTime() - Date.now()) /
+      (1000 * 60 * 60 * 24 * 365.25);
+    const peakSavingsRate = optimizedAllocation.totalSavingsRate;
+    const averageSavingsRate = optimizedAllocation.totalSavingsRate * 0.8; // Assume some variation
+
+    return {
+      earliestGoalCompletion,
+      latestGoalCompletion,
+      totalSavingsPeriod,
+      peakSavingsRate,
+      averageSavingsRate,
+    };
+  }
+
+  /**
+   * Generate scenario analysis
+   */
+  private generateScenarioAnalysis(
+    params: SavingsRateCalculationParams,
+    optimizedAllocation: any
+  ): Array<{
+    scenario: string;
+    requiredSavingsRate: number;
+    goalAchievementRate: number;
+    tradeoffs: string[];
+  }> {
+    const baseRate = optimizedAllocation.totalSavingsRate;
+
+    return [
+      {
+        scenario: 'Conservative (All goals achieved)',
+        requiredSavingsRate: baseRate,
+        goalAchievementRate: 1.0,
+        tradeoffs: [
+          'Higher savings rate required',
+          'Less discretionary spending',
+        ],
+      },
+      {
+        scenario: 'Moderate (High priority goals only)',
+        requiredSavingsRate: baseRate * 0.7,
+        goalAchievementRate: 0.7,
+        tradeoffs: [
+          'Some lower priority goals delayed',
+          'More balanced lifestyle',
+        ],
+      },
+      {
+        scenario: 'Aggressive (Income growth assumed)',
+        requiredSavingsRate: baseRate * 0.8,
+        goalAchievementRate: 1.0,
+        tradeoffs: [
+          'Dependent on income increases',
+          'Career development required',
+        ],
+      },
+      {
+        scenario: 'Flexible (Timeline adjustments)',
+        requiredSavingsRate: baseRate * 0.6,
+        goalAchievementRate: 1.0,
+        tradeoffs: [
+          'Extended timelines for some goals',
+          'Lower immediate pressure',
+        ],
+      },
+    ];
+  }
+
+  /**
+   * Create progress milestones
+   */
+  private createProgressMilestones(
+    params: SavingsRateCalculationParams,
+    optimizedAllocation: any
+  ): Array<{
+    date: Date;
+    description: string;
+    targetSavings: number;
+    goalProgress: Record<string, number>;
+  }> {
+    const milestones = [];
+    const monthlyTarget = optimizedAllocation.totalMonthlySavings;
+
+    // Create quarterly milestones for the first 2 years
+    for (let quarter = 1; quarter <= 8; quarter++) {
+      const date = new Date();
+      date.setMonth(date.getMonth() + quarter * 3);
+
+      const targetSavings = monthlyTarget * quarter * 3;
+      const goalProgress: Record<string, number> = {};
+
+      // Calculate progress for each goal
+      optimizedAllocation.goalBreakdown.forEach((goal: any) => {
+        const goalMonthlySavings = goal.requiredMonthlySavings;
+        const goalTargetAmount =
+          params.goals.find(g => g.id === goal.goalId)?.targetAmount || 0;
+        const currentProgress =
+          params.goals.find(g => g.id === goal.goalId)?.currentProgress || 0;
+
+        const progressAmount = goalMonthlySavings * quarter * 3;
+        const totalProgress = currentProgress + progressAmount;
+        goalProgress[goal.goalId] = Math.min(
+          100,
+          (totalProgress / goalTargetAmount) * 100
+        );
+      });
+
+      milestones.push({
+        date,
+        description: `Quarter ${quarter} savings milestone`,
+        targetSavings,
+        goalProgress,
+      });
+    }
+
+    return milestones;
+  }
+
+  /**
+   * Generate savings allocation timeline
+   */
+  private generateSavingsAllocation(
+    params: GoalBasedPlanningParams,
+    goalRequirements: Array<{
+      goalId: string;
+      requiredMonthlySavings: number;
+      adjustedTargetAmount: number;
+      monthsToGoal: number;
+      priority: number;
+    }>
+  ): Array<{
+    month: number;
+    totalSavings: number;
+    goalAllocations: Record<string, number>;
+    cumulativeProgress: Record<string, number>;
+  }> {
+    const allocation = [];
+    const maxMonths = Math.max(...goalRequirements.map(g => g.monthsToGoal));
+    const cumulativeProgress: Record<string, number> = {};
+
+    // Initialize cumulative progress
+    goalRequirements.forEach(goal => {
+      cumulativeProgress[goal.goalId] = 0;
+    });
+
+    for (let month = 1; month <= Math.min(maxMonths, 60); month++) {
+      // Limit to 5 years
+      const goalAllocations: Record<string, number> = {};
+      let totalSavings = 0;
+
+      goalRequirements.forEach(goal => {
+        if (month <= goal.monthsToGoal) {
+          const allocation = Math.min(
+            goal.requiredMonthlySavings,
+            params.availableForSavings * (goal.priority / 10)
+          );
+          goalAllocations[goal.goalId] = allocation;
+          cumulativeProgress[goal.goalId] += allocation;
+          totalSavings += allocation;
+        }
+      });
+
+      allocation.push({
+        month,
+        totalSavings,
+        goalAllocations,
+        cumulativeProgress: { ...cumulativeProgress },
+      });
+    }
+
+    return allocation;
+  }
+
+  /**
+   * Generate planning recommendations
+   */
+  private generatePlanningRecommendations(
+    params: GoalBasedPlanningParams,
+    goalRequirements: Array<{
+      goalId: string;
+      requiredMonthlySavings: number;
+      adjustedTargetAmount: number;
+      monthsToGoal: number;
+      priority: number;
+    }>,
+    planFeasibility: 'achievable' | 'challenging' | 'unrealistic'
+  ): Array<{
+    type:
+      | 'goal_adjustment'
+      | 'timeline_change'
+      | 'savings_increase'
+      | 'income_boost';
+    description: string;
+    impact: number;
+    effort: 'low' | 'medium' | 'high';
+  }> {
+    const recommendations = [];
+
+    if (planFeasibility === 'unrealistic') {
+      recommendations.push({
+        type: 'goal_adjustment' as const,
+        description:
+          'Consider reducing target amounts for lower priority goals',
+        impact: 30,
+        effort: 'low' as const,
+      });
+
+      recommendations.push({
+        type: 'timeline_change' as const,
+        description:
+          'Extend timelines for flexible goals to reduce monthly savings pressure',
+        impact: 25,
+        effort: 'low' as const,
+      });
+
+      recommendations.push({
+        type: 'income_boost' as const,
+        description:
+          'Focus on increasing income through career development or side income',
+        impact: 40,
+        effort: 'high' as const,
+      });
+    } else if (planFeasibility === 'challenging') {
+      recommendations.push({
+        type: 'savings_increase' as const,
+        description:
+          'Look for additional areas to cut expenses and increase savings rate',
+        impact: 20,
+        effort: 'medium' as const,
+      });
+
+      recommendations.push({
+        type: 'income_boost' as const,
+        description:
+          'Consider salary negotiation or skill development for promotion',
+        impact: 25,
+        effort: 'medium' as const,
+      });
+    } else {
+      recommendations.push({
+        type: 'goal_adjustment' as const,
+        description:
+          'Consider adding additional goals or increasing target amounts',
+        impact: 15,
+        effort: 'low' as const,
+      });
+    }
+
+    return recommendations;
   }
 }
 

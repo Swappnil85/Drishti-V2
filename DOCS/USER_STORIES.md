@@ -349,17 +349,17 @@
   - ✅ **NEW**: Expense inflation modeling with category-specific inflation rates
   - ✅ **NEW**: FIRE number stress testing under various economic scenarios
 
-**User Story**: As a user, I want to know my required savings rate to reach goals.
+**User Story**: ✅ COMPLETED - As a user, I want to know my required savings rate to reach goals.
 
 - **Enhanced Acceptance Criteria**:
-  - Calculation engine determines monthly/annual savings required for specific goal achievement
-  - Recommendations consider current net worth, expected returns, and timeline
-  - Results clearly indicate if goals are achievable with current income
-  - **NEW**: Savings rate optimization across multiple goals with priority weighting
-  - **NEW**: Tax-advantaged account contribution order recommendations
-  - **NEW**: Automatic adjustment suggestions when goals become unrealistic
-  - **NEW**: Sensitivity analysis showing impact of small savings rate changes
-  - **NEW**: Income replacement ratio calculations for retirement adequacy
+  - ✅ Calculation engine determines monthly/annual savings required for specific goal achievement
+  - ✅ Recommendations consider current net worth, expected returns, and timeline
+  - ✅ Results clearly indicate if goals are achievable with current income
+  - ✅ **NEW**: Savings rate optimization across multiple goals with priority weighting
+  - ✅ **NEW**: Tax-advantaged account contribution order recommendations
+  - ✅ **NEW**: Automatic adjustment suggestions when goals become unrealistic
+  - ✅ **NEW**: Sensitivity analysis showing impact of small savings rate changes
+  - ✅ **NEW**: Income replacement ratio calculations for retirement adequacy
 
 **User Story**: As a user, I want Coast FIRE calculations.
 

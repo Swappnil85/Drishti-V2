@@ -557,6 +557,243 @@ export interface FIRENumberCalculationResult {
   }>;
 }
 
+// Savings Rate Calculation Parameters (Story 3)
+export interface SavingsRateCalculationParams {
+  // Current financial situation
+  currentAge: number;
+  currentIncome: number;
+  currentSavings: number;
+  monthlyExpenses: number;
+
+  // Financial goals
+  goals: Array<{
+    id: string;
+    name: string;
+    targetAmount: number;
+    targetDate: Date;
+    priority: 'high' | 'medium' | 'low';
+    goalType:
+      | 'retirement'
+      | 'emergency_fund'
+      | 'house_down_payment'
+      | 'education'
+      | 'vacation'
+      | 'debt_payoff'
+      | 'other';
+    currentProgress: number;
+    isFlexible: boolean; // Can timeline be adjusted?
+  }>;
+
+  // Income projections
+  incomeGrowth?: {
+    annualGrowthRate: number;
+    promotionSchedule?: Array<{
+      year: number;
+      salaryIncrease: number;
+    }>;
+    bonusExpectations?: Array<{
+      year: number;
+      bonusAmount: number;
+    }>;
+  };
+
+  // Budget constraints
+  budgetConstraints?: {
+    maxSavingsRate: number; // Maximum percentage of income that can be saved
+    essentialExpenses: number; // Non-negotiable monthly expenses
+    discretionaryExpenses: number; // Flexible monthly expenses
+    emergencyFundMonths: number; // Months of expenses to maintain as emergency fund
+  };
+
+  // Optimization preferences
+  optimizationPreferences?: {
+    prioritizeHighPriorityGoals: boolean;
+    allowTimelineAdjustments: boolean;
+    preferEarlierGoals: boolean;
+    riskTolerance: 'conservative' | 'moderate' | 'aggressive';
+  };
+}
+
+// Savings Rate Calculation Result
+export interface SavingsRateCalculationResult {
+  // Overall savings rate recommendation
+  recommendedSavingsRate: number;
+  requiredMonthlySavings: number;
+  currentSavingsGap: number;
+
+  // Goal-specific breakdown
+  goalBreakdown: Array<{
+    goalId: string;
+    goalName: string;
+    requiredMonthlySavings: number;
+    timelineAdjustment?: {
+      originalDate: Date;
+      adjustedDate: Date;
+      reasonForAdjustment: string;
+    };
+    achievabilityScore: number; // 0-100 score
+    priority: 'high' | 'medium' | 'low';
+  }>;
+
+  // Budget adjustment recommendations
+  budgetAdjustments: Array<{
+    category: string;
+    currentAmount: number;
+    recommendedAmount: number;
+    potentialSavings: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    impact: 'low' | 'medium' | 'high';
+  }>;
+
+  // Income optimization suggestions
+  incomeOptimization: Array<{
+    strategy: string;
+    potentialIncomeIncrease: number;
+    timeframe: string;
+    effort: 'low' | 'medium' | 'high';
+    probability: number; // 0-1 probability of success
+  }>;
+
+  // Timeline analysis
+  timelineAnalysis: {
+    earliestGoalCompletion: Date;
+    latestGoalCompletion: Date;
+    totalSavingsPeriod: number; // in years
+    peakSavingsRate: number;
+    averageSavingsRate: number;
+  };
+
+  // Scenario analysis
+  scenarioAnalysis: Array<{
+    scenario: string;
+    requiredSavingsRate: number;
+    goalAchievementRate: number; // Percentage of goals achieved
+    tradeoffs: string[];
+  }>;
+
+  // Progress tracking milestones
+  milestones: Array<{
+    date: Date;
+    description: string;
+    targetSavings: number;
+    goalProgress: Record<string, number>; // goalId -> progress percentage
+  }>;
+}
+
+// Goal-Based Financial Planning Parameters
+export interface GoalBasedPlanningParams {
+  goals: Array<{
+    id: string;
+    name: string;
+    targetAmount: number;
+    currentAmount: number;
+    targetDate: Date;
+    priority: number; // 1-10 scale
+    goalType: string;
+    inflationAdjusted: boolean;
+  }>;
+
+  currentIncome: number;
+  currentExpenses: number;
+  availableForSavings: number;
+  expectedReturn: number;
+  inflationRate: number;
+
+  constraints?: {
+    maxSavingsRate: number;
+    minEmergencyFund: number;
+    flexibleGoals: string[]; // Goal IDs that can have timeline adjustments
+  };
+}
+
+// Goal-Based Financial Planning Result
+export interface GoalBasedPlanningResult {
+  overallPlan: {
+    totalRequiredSavings: number;
+    recommendedSavingsRate: number;
+    planFeasibility: 'achievable' | 'challenging' | 'unrealistic';
+    confidenceScore: number;
+  };
+
+  goalPrioritization: Array<{
+    goalId: string;
+    rank: number;
+    allocatedSavings: number;
+    projectedCompletion: Date;
+    successProbability: number;
+  }>;
+
+  savingsAllocation: Array<{
+    month: number;
+    totalSavings: number;
+    goalAllocations: Record<string, number>; // goalId -> amount
+    cumulativeProgress: Record<string, number>; // goalId -> total saved
+  }>;
+
+  recommendations: Array<{
+    type:
+      | 'goal_adjustment'
+      | 'timeline_change'
+      | 'savings_increase'
+      | 'income_boost';
+    description: string;
+    impact: number;
+    effort: 'low' | 'medium' | 'high';
+  }>;
+}
+
+// Budget Adjustment Analysis Parameters
+export interface BudgetAdjustmentParams {
+  currentBudget: {
+    income: number;
+    expenses: Array<{
+      category: string;
+      amount: number;
+      essential: boolean;
+      flexibility: number; // 0-1 scale, how much can be reduced
+    }>;
+  };
+
+  savingsGoal: number;
+  targetSavingsRate: number;
+
+  preferences?: {
+    protectedCategories: string[]; // Categories that shouldn't be touched
+    priorityReductions: string[]; // Categories to reduce first
+    lifestyleImportance: number; // 0-1 scale
+  };
+}
+
+// Budget Adjustment Analysis Result
+export interface BudgetAdjustmentResult {
+  adjustmentPlan: Array<{
+    category: string;
+    currentAmount: number;
+    recommendedAmount: number;
+    reduction: number;
+    reductionPercentage: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    qualityOfLifeImpact: 'low' | 'medium' | 'high';
+  }>;
+
+  totalSavingsIncrease: number;
+  newSavingsRate: number;
+  implementationStrategy: Array<{
+    phase: number;
+    duration: string;
+    changes: string[];
+    expectedSavings: number;
+  }>;
+
+  alternativeStrategies: Array<{
+    strategy: string;
+    description: string;
+    potentialSavings: number;
+    effort: 'low' | 'medium' | 'high';
+    timeframe: string;
+  }>;
+}
+
 // Debt Payoff Calculation Parameters
 export interface DebtPayoffParams {
   debts: Array<{

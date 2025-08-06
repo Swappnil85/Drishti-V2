@@ -12,6 +12,12 @@ import {
   FIRECalculationParams,
   FIRENumberCalculationParams,
   FIRENumberCalculationResult,
+  SavingsRateCalculationParams,
+  SavingsRateCalculationResult,
+  GoalBasedPlanningParams,
+  GoalBasedPlanningResult,
+  BudgetAdjustmentParams,
+  BudgetAdjustmentResult,
   DebtPayoffParams,
   GoalProjectionParams,
   CalculationRequest,
@@ -934,6 +940,397 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
           metadata: {
             calculationType: 'expense_based_fire',
             categoriesAnalyzed: request.body.expenseCategories.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Savings Rate Calculation Endpoint (Story 3)
+  fastify.post<{
+    Body: SavingsRateCalculationParams;
+    Reply: CalculationResponse;
+  }>(
+    '/savings-rate',
+    {
+      schema: {
+        description: 'Calculate required savings rate to reach financial goals',
+        tags: ['calculations', 'savings', 'goals'],
+        body: {
+          type: 'object',
+          required: [
+            'currentAge',
+            'currentIncome',
+            'currentSavings',
+            'monthlyExpenses',
+            'goals',
+          ],
+          properties: {
+            currentAge: { type: 'number', minimum: 18, maximum: 100 },
+            currentIncome: { type: 'number', minimum: 0 },
+            currentSavings: { type: 'number', minimum: 0 },
+            monthlyExpenses: { type: 'number', minimum: 0 },
+            goals: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: [
+                  'id',
+                  'name',
+                  'targetAmount',
+                  'targetDate',
+                  'priority',
+                  'goalType',
+                  'currentProgress',
+                  'isFlexible',
+                ],
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  targetAmount: { type: 'number', minimum: 0 },
+                  targetDate: { type: 'string', format: 'date' },
+                  priority: { type: 'string', enum: ['high', 'medium', 'low'] },
+                  goalType: {
+                    type: 'string',
+                    enum: [
+                      'retirement',
+                      'emergency_fund',
+                      'house_down_payment',
+                      'education',
+                      'vacation',
+                      'debt_payoff',
+                      'other',
+                    ],
+                  },
+                  currentProgress: { type: 'number', minimum: 0 },
+                  isFlexible: { type: 'boolean' },
+                },
+              },
+            },
+            incomeGrowth: {
+              type: 'object',
+              properties: {
+                annualGrowthRate: { type: 'number', minimum: 0, maximum: 1 },
+                promotionSchedule: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      year: { type: 'number' },
+                      salaryIncrease: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
+            budgetConstraints: {
+              type: 'object',
+              properties: {
+                maxSavingsRate: { type: 'number', minimum: 0, maximum: 1 },
+                essentialExpenses: { type: 'number', minimum: 0 },
+                discretionaryExpenses: { type: 'number', minimum: 0 },
+                emergencyFundMonths: { type: 'number', minimum: 0 },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  recommendedSavingsRate: { type: 'number' },
+                  requiredMonthlySavings: { type: 'number' },
+                  currentSavingsGap: { type: 'number' },
+                  goalBreakdown: { type: 'array' },
+                  budgetAdjustments: { type: 'array' },
+                  incomeOptimization: { type: 'array' },
+                  timelineAnalysis: { type: 'object' },
+                  scenarioAnalysis: { type: 'array' },
+                  milestones: { type: 'array' },
+                },
+              },
+              executionTime: { type: 'number' },
+              cacheHit: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: SavingsRateCalculationParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        // Validate required parameters
+        if (!request.body.goals || request.body.goals.length === 0) {
+          return reply.code(400).send({
+            success: false,
+            error: 'At least one financial goal is required',
+            executionTime: performance.now() - startTime,
+            cacheHit: false,
+          });
+        }
+
+        // Convert string dates to Date objects
+        const processedParams = {
+          ...request.body,
+          goals: request.body.goals.map(goal => ({
+            ...goal,
+            targetDate: new Date(goal.targetDate),
+          })),
+        };
+
+        const result =
+          financialCalculationEngine.calculateRequiredSavingsRate(
+            processedParams
+          );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'savings_rate',
+            goalsAnalyzed: request.body.goals.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Goal-Based Financial Planning Endpoint (Story 3)
+  fastify.post<{
+    Body: GoalBasedPlanningParams;
+    Reply: CalculationResponse;
+  }>(
+    '/goal-planning',
+    {
+      schema: {
+        description:
+          'Optimize savings allocation across multiple financial goals',
+        tags: ['calculations', 'goals', 'planning'],
+        body: {
+          type: 'object',
+          required: [
+            'goals',
+            'currentIncome',
+            'currentExpenses',
+            'availableForSavings',
+            'expectedReturn',
+            'inflationRate',
+          ],
+          properties: {
+            goals: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: [
+                  'id',
+                  'name',
+                  'targetAmount',
+                  'currentAmount',
+                  'targetDate',
+                  'priority',
+                  'goalType',
+                  'inflationAdjusted',
+                ],
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  targetAmount: { type: 'number', minimum: 0 },
+                  currentAmount: { type: 'number', minimum: 0 },
+                  targetDate: { type: 'string', format: 'date' },
+                  priority: { type: 'number', minimum: 1, maximum: 10 },
+                  goalType: { type: 'string' },
+                  inflationAdjusted: { type: 'boolean' },
+                },
+              },
+            },
+            currentIncome: { type: 'number', minimum: 0 },
+            currentExpenses: { type: 'number', minimum: 0 },
+            availableForSavings: { type: 'number', minimum: 0 },
+            expectedReturn: { type: 'number', minimum: -0.5, maximum: 1 },
+            inflationRate: { type: 'number', minimum: 0, maximum: 0.2 },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: GoalBasedPlanningParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        // Validate required parameters
+        if (!request.body.goals || request.body.goals.length === 0) {
+          return reply.code(400).send({
+            success: false,
+            error: 'At least one financial goal is required',
+            executionTime: performance.now() - startTime,
+            cacheHit: false,
+          });
+        }
+
+        // Convert string dates to Date objects
+        const processedParams = {
+          ...request.body,
+          goals: request.body.goals.map(goal => ({
+            ...goal,
+            targetDate: new Date(goal.targetDate),
+          })),
+        };
+
+        const result =
+          financialCalculationEngine.calculateGoalBasedPlanning(
+            processedParams
+          );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'goal_planning',
+            goalsAnalyzed: request.body.goals.length,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      } catch (error: any) {
+        const executionTime = performance.now() - startTime;
+        reply.code(400).send({
+          success: false,
+          error: error.message,
+          executionTime,
+          cacheHit: false,
+        });
+      }
+    }
+  );
+
+  // Budget Adjustment Analysis Endpoint (Story 3)
+  fastify.post<{
+    Body: BudgetAdjustmentParams;
+    Reply: CalculationResponse;
+  }>(
+    '/budget-adjustment',
+    {
+      schema: {
+        description: 'Analyze budget and provide adjustment recommendations',
+        tags: ['calculations', 'budget', 'optimization'],
+        body: {
+          type: 'object',
+          required: ['currentBudget', 'savingsGoal', 'targetSavingsRate'],
+          properties: {
+            currentBudget: {
+              type: 'object',
+              required: ['income', 'expenses'],
+              properties: {
+                income: { type: 'number', minimum: 0 },
+                expenses: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    required: [
+                      'category',
+                      'amount',
+                      'essential',
+                      'flexibility',
+                    ],
+                    properties: {
+                      category: { type: 'string' },
+                      amount: { type: 'number', minimum: 0 },
+                      essential: { type: 'boolean' },
+                      flexibility: { type: 'number', minimum: 0, maximum: 1 },
+                    },
+                  },
+                },
+              },
+            },
+            savingsGoal: { type: 'number', minimum: 0 },
+            targetSavingsRate: { type: 'number', minimum: 0, maximum: 1 },
+            preferences: {
+              type: 'object',
+              properties: {
+                protectedCategories: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+                priorityReductions: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+                lifestyleImportance: { type: 'number', minimum: 0, maximum: 1 },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: BudgetAdjustmentParams }>,
+      reply: FastifyReply
+    ) => {
+      const startTime = performance.now();
+
+      try {
+        // Validate required parameters
+        if (
+          !request.body.currentBudget ||
+          !request.body.currentBudget.expenses
+        ) {
+          return reply.code(400).send({
+            success: false,
+            error: 'Current budget with expenses is required',
+            executionTime: performance.now() - startTime,
+            cacheHit: false,
+          });
+        }
+
+        const result = financialCalculationEngine.calculateBudgetAdjustments(
+          request.body
+        );
+        const executionTime = performance.now() - startTime;
+
+        reply.send({
+          success: true,
+          data: result,
+          executionTime,
+          cacheHit: false,
+          metadata: {
+            calculationType: 'budget_adjustment',
+            expenseCategoriesAnalyzed:
+              request.body.currentBudget.expenses.length,
             timestamp: new Date().toISOString(),
           },
         });

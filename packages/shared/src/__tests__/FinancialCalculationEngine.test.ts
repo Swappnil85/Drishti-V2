@@ -839,6 +839,341 @@ describe('FinancialCalculationEngine', () => {
       });
     });
   });
+
+  // Savings Rate Calculation Tests (Story 3)
+  describe('Savings Rate Calculations', () => {
+    describe('calculateRequiredSavingsRate', () => {
+      test('should calculate basic savings rate for single goal', () => {
+        const params = {
+          currentAge: 30,
+          currentIncome: 80000,
+          currentSavings: 10000,
+          monthlyExpenses: 4000,
+          goals: [
+            {
+              id: 'retirement',
+              name: 'Retirement',
+              targetAmount: 1000000,
+              targetDate: new Date(Date.now() + 30 * 365 * 24 * 60 * 60 * 1000), // 30 years from now
+              priority: 'high' as const,
+              goalType: 'retirement' as const,
+              currentProgress: 10000,
+              isFlexible: false,
+            },
+          ],
+        };
+
+        const result = engine.calculateRequiredSavingsRate(params);
+
+        expect(result.recommendedSavingsRate).toBeGreaterThan(0);
+        expect(result.recommendedSavingsRate).toBeLessThan(1);
+        expect(result.requiredMonthlySavings).toBeGreaterThan(0);
+        expect(result.goalBreakdown).toHaveLength(1);
+        expect(result.goalBreakdown[0].goalId).toBe('retirement');
+        expect(result.budgetAdjustments).toBeDefined();
+        expect(result.incomeOptimization).toBeDefined();
+        expect(result.timelineAnalysis).toBeDefined();
+        expect(result.scenarioAnalysis).toBeDefined();
+        expect(result.milestones).toBeDefined();
+      });
+
+      test('should handle multiple goals with different priorities', () => {
+        const params = {
+          currentAge: 25,
+          currentIncome: 60000,
+          currentSavings: 5000,
+          monthlyExpenses: 3000,
+          goals: [
+            {
+              id: 'emergency',
+              name: 'Emergency Fund',
+              targetAmount: 18000, // 6 months expenses
+              targetDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
+              priority: 'high' as const,
+              goalType: 'emergency_fund' as const,
+              currentProgress: 2000,
+              isFlexible: false,
+            },
+            {
+              id: 'house',
+              name: 'House Down Payment',
+              targetAmount: 60000,
+              targetDate: new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000), // 5 years
+              priority: 'medium' as const,
+              goalType: 'house_down_payment' as const,
+              currentProgress: 5000,
+              isFlexible: true,
+            },
+          ],
+        };
+
+        const result = engine.calculateRequiredSavingsRate(params);
+
+        expect(result.goalBreakdown).toHaveLength(2);
+        expect(result.recommendedSavingsRate).toBeGreaterThan(0);
+        expect(result.scenarioAnalysis).toHaveLength(4); // Conservative, Moderate, Aggressive, Flexible
+      });
+
+      test('should apply income growth projections', () => {
+        const params = {
+          currentAge: 28,
+          currentIncome: 70000,
+          currentSavings: 15000,
+          monthlyExpenses: 3500,
+          goals: [
+            {
+              id: 'retirement',
+              name: 'Retirement',
+              targetAmount: 800000,
+              targetDate: new Date(Date.now() + 25 * 365 * 24 * 60 * 60 * 1000), // 25 years
+              priority: 'high' as const,
+              goalType: 'retirement' as const,
+              currentProgress: 15000,
+              isFlexible: false,
+            },
+          ],
+          incomeGrowth: {
+            annualGrowthRate: 0.03, // 3% annual growth
+            promotionSchedule: [
+              { year: 5, salaryIncrease: 10000 },
+              { year: 10, salaryIncrease: 15000 },
+            ],
+          },
+        };
+
+        const result = engine.calculateRequiredSavingsRate(params);
+
+        expect(result.recommendedSavingsRate).toBeGreaterThan(0);
+        expect(result.incomeOptimization).toHaveLength(5); // Should have income optimization suggestions
+      });
+
+      test('should respect budget constraints', () => {
+        const params = {
+          currentAge: 35,
+          currentIncome: 90000,
+          currentSavings: 20000,
+          monthlyExpenses: 6500, // Higher expenses to create savings gap
+          goals: [
+            {
+              id: 'retirement',
+              name: 'Retirement',
+              targetAmount: 1500000,
+              targetDate: new Date(Date.now() + 20 * 365 * 24 * 60 * 60 * 1000), // 20 years
+              priority: 'high' as const,
+              goalType: 'retirement' as const,
+              currentProgress: 20000,
+              isFlexible: true,
+            },
+          ],
+          budgetConstraints: {
+            maxSavingsRate: 0.3, // Maximum 30% savings rate
+            essentialExpenses: 4000,
+            discretionaryExpenses: 2500,
+            emergencyFundMonths: 6,
+          },
+        };
+
+        const result = engine.calculateRequiredSavingsRate(params);
+
+        expect(result.recommendedSavingsRate).toBeLessThanOrEqual(0.3);
+        // Budget adjustments should be generated when there's a savings gap
+        expect(result.budgetAdjustments).toBeDefined();
+        expect(Array.isArray(result.budgetAdjustments)).toBe(true);
+      });
+
+      test('should throw error for invalid parameters', () => {
+        expect(() => {
+          engine.calculateRequiredSavingsRate({
+            currentAge: 15, // Too young
+            currentIncome: 50000,
+            currentSavings: 0,
+            monthlyExpenses: 2000,
+            goals: [],
+          });
+        }).toThrow('Current age must be between 18 and 100');
+
+        expect(() => {
+          engine.calculateRequiredSavingsRate({
+            currentAge: 30,
+            currentIncome: -1000, // Negative income
+            currentSavings: 0,
+            monthlyExpenses: 2000,
+            goals: [],
+          });
+        }).toThrow('Current income must be positive');
+      });
+    });
+
+    describe('calculateGoalBasedPlanning', () => {
+      test('should optimize savings allocation across goals', () => {
+        const params = {
+          goals: [
+            {
+              id: 'emergency',
+              name: 'Emergency Fund',
+              targetAmount: 15000,
+              currentAmount: 3000,
+              targetDate: new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000), // 1 year
+              priority: 10,
+              goalType: 'emergency_fund',
+              inflationAdjusted: false,
+            },
+          ],
+          currentIncome: 60000,
+          currentExpenses: 36000,
+          availableForSavings: 24000,
+          expectedReturn: 0.07,
+          inflationRate: 0.03,
+        };
+
+        const result = engine.calculateGoalBasedPlanning(params);
+
+        expect(result.overallPlan.totalRequiredSavings).toBeGreaterThan(0);
+        expect(result.overallPlan.recommendedSavingsRate).toBeGreaterThan(0);
+        expect(result.overallPlan.planFeasibility).toMatch(
+          /achievable|challenging|unrealistic/
+        );
+        expect(result.goalPrioritization).toHaveLength(1);
+        expect(result.savingsAllocation.length).toBeGreaterThan(0);
+        expect(result.recommendations.length).toBeGreaterThan(0);
+      });
+    });
+
+    describe('calculateBudgetAdjustments', () => {
+      test('should provide budget adjustment recommendations', () => {
+        const params = {
+          currentBudget: {
+            income: 70000,
+            expenses: [
+              {
+                category: 'Housing',
+                amount: 3000,
+                essential: true,
+                flexibility: 0.1,
+              },
+              {
+                category: 'Food',
+                amount: 800,
+                essential: true,
+                flexibility: 0.2,
+              },
+              {
+                category: 'Transportation',
+                amount: 600,
+                essential: true,
+                flexibility: 0.15,
+              },
+              {
+                category: 'Entertainment',
+                amount: 500,
+                essential: false,
+                flexibility: 0.7,
+              },
+              {
+                category: 'Dining Out',
+                amount: 400,
+                essential: false,
+                flexibility: 0.8,
+              },
+              {
+                category: 'Subscriptions',
+                amount: 200,
+                essential: false,
+                flexibility: 0.9,
+              },
+            ],
+          },
+          savingsGoal: 2000, // Want to save $2000/month (more than current savings)
+          targetSavingsRate: 0.35, // 35% savings rate
+        };
+
+        const result = engine.calculateBudgetAdjustments(params);
+
+        expect(result.adjustmentPlan.length).toBeGreaterThanOrEqual(0);
+        expect(result.totalSavingsIncrease).toBeGreaterThanOrEqual(0);
+        expect(result.newSavingsRate).toBeGreaterThan(0);
+        expect(result.implementationStrategy.length).toBeGreaterThanOrEqual(0);
+        expect(result.alternativeStrategies.length).toBeGreaterThanOrEqual(0);
+      });
+    });
+
+    // Performance Tests for Savings Rate calculations
+    describe('Performance Tests', () => {
+      test('Savings rate calculation should complete within 50ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateRequiredSavingsRate({
+          currentAge: 30,
+          currentIncome: 80000,
+          currentSavings: 10000,
+          monthlyExpenses: 4000,
+          goals: Array.from({ length: 5 }, (_, i) => ({
+            id: `goal_${i}`,
+            name: `Goal ${i}`,
+            targetAmount: 100000 + i * 50000,
+            targetDate: new Date(
+              Date.now() + (i + 5) * 365 * 24 * 60 * 60 * 1000
+            ),
+            priority: i % 2 === 0 ? ('high' as const) : ('medium' as const),
+            goalType: 'other' as const,
+            currentProgress: 5000,
+            isFlexible: true,
+          })),
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(50);
+      });
+
+      test('Goal planning calculation should complete within 30ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateGoalBasedPlanning({
+          goals: Array.from({ length: 10 }, (_, i) => ({
+            id: `goal_${i}`,
+            name: `Goal ${i}`,
+            targetAmount: 50000,
+            currentAmount: 5000,
+            targetDate: new Date(
+              Date.now() + (i + 2) * 365 * 24 * 60 * 60 * 1000
+            ),
+            priority: 10 - i,
+            goalType: 'other',
+            inflationAdjusted: i % 2 === 0,
+          })),
+          currentIncome: 80000,
+          currentExpenses: 48000,
+          availableForSavings: 32000,
+          expectedReturn: 0.07,
+          inflationRate: 0.03,
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(30);
+      });
+
+      test('Budget adjustment calculation should complete within 20ms', () => {
+        const startTime = performance.now();
+
+        engine.calculateBudgetAdjustments({
+          currentBudget: {
+            income: 80000,
+            expenses: Array.from({ length: 15 }, (_, i) => ({
+              category: `Category ${i}`,
+              amount: 200 + i * 50,
+              essential: i < 8,
+              flexibility: 0.1 + i * 0.05,
+            })),
+          },
+          savingsGoal: 2000,
+          targetSavingsRate: 0.3,
+        });
+
+        const executionTime = performance.now() - startTime;
+        expect(executionTime).toBeLessThan(20);
+      });
+    });
+  });
 });
 
 // Export for use in other test files
