@@ -1,13 +1,13 @@
 # Epic 7: Financial Calculation Engine
 
 **Status**: ✅ COMPLETED
-**Version**: v1.7.1
+**Version**: v1.7.4
 **Completion Date**: August 6, 2025
-**Stories Completed**: Story 1 (Future Value Projections) + Story 2 (FIRE Number Calculator)
+**Stories Completed**: Story 1 (Future Value Projections) + Story 2 (FIRE Number Calculator) + Story 3 (Required Savings Rate Calculator) + Story 4 (Coast FIRE Calculator)
 
 ## 📋 Executive Summary
 
-Epic 7 successfully implements a comprehensive Financial Calculation Engine that provides accurate, secure, and performant financial calculations for the Drishti application. The implementation includes compound interest calculations, Monte Carlo simulations, comprehensive FIRE projections with multiple variants, healthcare cost projections, Social Security integration, debt payoff strategies, and real-time performance optimization with comprehensive security measures.
+Epic 7 successfully implements a comprehensive Financial Calculation Engine that provides accurate, secure, and performant financial calculations for the Drishti application. The implementation includes compound interest calculations, Monte Carlo simulations, comprehensive FIRE projections with multiple variants, Coast FIRE and Barista FIRE calculations, healthcare cost projections, Social Security integration, debt payoff strategies, geographic arbitrage analysis, and real-time performance optimization with comprehensive security measures.
 
 ### Epic 7 Stories Completed
 
@@ -25,6 +25,22 @@ Epic 7 successfully implements a comprehensive Financial Calculation Engine that
 - Healthcare cost projections for early retirement scenarios
 - Social Security integration with benefit optimization
 - Comprehensive stress testing under various economic scenarios
+
+**Story 3**: ✅ COMPLETED - "As a user, I want to calculate required savings rate for my goals"
+
+- Goal-based savings rate calculations with multiple financial goals
+- Budget optimization with income growth projections and constraint handling
+- Advanced goal prioritization and allocation optimization algorithms
+- Comprehensive budget adjustment recommendations with actionable insights
+
+**Story 4**: ✅ COMPLETED - "As a user, I want Coast FIRE calculations"
+
+- Coast FIRE analysis with multiple coast points (ages 30, 35, 40, 45, 50)
+- Barista FIRE scenarios with part-time work analysis and feasibility scoring
+- Geographic arbitrage calculations with cost-of-living adjustments
+- Healthcare coverage gap analysis with Medicare bridge planning
+- Comprehensive stress testing under market crash and economic scenarios
+- Timeline visualization with contribution and coast phases
 
 ## 🎯 Key Achievements
 
