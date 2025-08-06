@@ -550,6 +550,7 @@ describe('FinancialCalculationEngine', () => {
 
       test('should handle annual expenses input', () => {
         const params = {
+          monthlyExpenses: 0,
           annualExpenses: 48000,
         };
 
@@ -1177,4 +1178,4 @@ describe('FinancialCalculationEngine', () => {
 });
 
 // Export for use in other test files
-export { engine };
+// export { engine };

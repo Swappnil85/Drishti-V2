@@ -143,7 +143,9 @@ export class CalculationSecurity {
       };
     } catch (error) {
       errors.push('Invalid input format');
-      securityWarnings.push(`Input validation error: ${error.message}`);
+      securityWarnings.push(
+        `Input validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       return { isValid: false, errors, securityWarnings };
     }
   }
@@ -410,7 +412,9 @@ export class CalculationSecurity {
         warnings,
       };
     } catch (error) {
-      warnings.push(`Result validation error: ${error.message}`);
+      warnings.push(
+        `Result validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       return {
         isValid: false,
         warnings,

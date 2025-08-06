@@ -160,7 +160,9 @@ export class FinancialCalculationEngine {
         false,
         1
       );
-      throw new Error(`Compound interest calculation failed: ${error.message}`);
+      throw new Error(
+        `Compound interest calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -352,7 +354,9 @@ export class FinancialCalculationEngine {
         false,
         params.iterations
       );
-      throw new Error(`Monte Carlo simulation failed: ${error.message}`);
+      throw new Error(
+        `Monte Carlo simulation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -789,7 +793,16 @@ export class FinancialCalculationEngine {
           .filter(Boolean);
       }
 
-      const payoffSchedule = [];
+      const payoffSchedule: Array<{
+        month: number;
+        debtId: string;
+        debtName: string;
+        payment: number;
+        principalPayment: number;
+        interestPayment: number;
+        remainingBalance: number;
+        isPaidOff: boolean;
+      }> = [];
       const debtOrder = [];
       let totalInterest = 0;
       let currentMonth = 0;
@@ -890,7 +903,9 @@ export class FinancialCalculationEngine {
         false,
         params.debts.length
       );
-      throw new Error(`Debt payoff calculation failed: ${error.message}`);
+      throw new Error(
+        `Debt payoff calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -1108,7 +1123,9 @@ export class FinancialCalculationEngine {
     } catch (error) {
       const executionTime = performance.now() - startTime;
       this.recordPerformance('calculateFIRENumber', executionTime, false, 1);
-      throw new Error(`FIRE number calculation failed: ${error.message}`);
+      throw new Error(
+        `FIRE number calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -1164,7 +1181,7 @@ export class FinancialCalculationEngine {
       const costOfLivingIndex = params.costOfLivingIndex || 1.0;
 
       // Geographic cost-of-living adjustments by category
-      const geographicMultipliers = {
+      const geographicMultipliers: Record<string, number> = {
         housing: costOfLivingIndex * 1.2, // Housing is most sensitive
         food: costOfLivingIndex * 0.8, // Food less sensitive
         transportation: costOfLivingIndex * 0.9,
@@ -1307,7 +1324,7 @@ export class FinancialCalculationEngine {
         params.expenseCategories?.length || 0
       );
       throw new Error(
-        `Expense-based FIRE calculation failed: ${error.message}`
+        `Expense-based FIRE calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -1577,7 +1594,9 @@ export class FinancialCalculationEngine {
         false,
         0
       );
-      throw new Error(`Healthcare cost projection failed: ${error.message}`);
+      throw new Error(
+        `Healthcare cost projection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -1838,7 +1857,7 @@ export class FinancialCalculationEngine {
         0
       );
       throw new Error(
-        `Social Security and stress testing calculation failed: ${error.message}`
+        `Social Security and stress testing calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -1866,7 +1885,9 @@ export class FinancialCalculationEngine {
     // Clean up old cache entries if we're at the limit
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     this.cache.set(key, {
@@ -2195,7 +2216,19 @@ export class FinancialCalculationEngine {
     // If total required savings exceeds maximum, adjust timelines for flexible goals
     const goalBreakdown = sortedGoals.map(goal => {
       const originalGoal = params.goals.find(g => g.id === goal.goalId)!;
-      let adjustedGoal = { ...goal };
+      let adjustedGoal: {
+        goalId: string;
+        goalName: string;
+        requiredMonthlySavings: number;
+        monthsToGoal: number;
+        priority: 'high' | 'medium' | 'low';
+        achievabilityScore: number;
+        timelineAdjustment?: {
+          originalDate: Date;
+          adjustedDate: Date;
+          reasonForAdjustment: string;
+        };
+      } = { ...goal };
 
       if (totalRequiredSavings > maxMonthlySavings && originalGoal.isFlexible) {
         // Extend timeline to reduce required monthly savings
