@@ -170,6 +170,14 @@ export interface ScenarioAssumptions {
   savings_rate: number;
   retirement_age: number;
   life_expectancy: number;
+  // Enhanced assumptions for Epic 9
+  emergency_fund_months?: number;
+  healthcare_inflation?: number;
+  tax_rate?: number;
+  social_security_benefit?: number;
+  pension_benefit?: number;
+  geographic_location?: string;
+  cost_of_living_adjustment?: number;
   [key: string]: any; // Allow additional custom assumptions
 }
 
@@ -305,11 +313,107 @@ export interface CreateScenarioDto {
   description?: string;
   assumptions?: Partial<ScenarioAssumptions>;
   is_default?: boolean;
+  // Enhanced fields for Epic 9
+  template_type?: ScenarioTemplateType;
+  tags?: string[];
+  color?: string;
+  emoji?: string;
+  folder?: string;
+}
+
+// Scenario template types for Epic 9
+export type ScenarioTemplateType =
+  | 'optimistic'
+  | 'pessimistic'
+  | 'conservative'
+  | 'job_loss'
+  | 'career_change'
+  | 'inheritance'
+  | 'marriage'
+  | 'divorce'
+  | 'home_purchase'
+  | 'children'
+  | 'education_costs'
+  | 'recession'
+  | 'inflation'
+  | 'market_boom'
+  | 'custom';
+
+// Enhanced scenario interface for Epic 9
+export interface EnhancedScenario extends Scenario {
+  template_type?: ScenarioTemplateType;
+  tags?: string[];
+  color?: string;
+  emoji?: string;
+  folder?: string;
+  version?: number;
+  parent_scenario_id?: string;
+  is_shared?: boolean;
+  shared_with?: string[];
+  last_calculated_at?: string;
+  calculation_status?: 'pending' | 'calculating' | 'completed' | 'error';
 }
 
 export interface UpdateScenarioDto extends Partial<CreateScenarioDto> {
   projections?: Partial<ScenarioProjections>;
   is_active?: boolean;
+}
+
+// Scenario template definition for Epic 9
+export interface ScenarioTemplate {
+  id: string;
+  name: string;
+  description: string;
+  type: ScenarioTemplateType;
+  category: 'financial' | 'life_event' | 'economic' | 'personal';
+  assumptions: ScenarioAssumptions;
+  tags: string[];
+  color: string;
+  emoji: string;
+  popularity_score: number;
+  is_premium?: boolean;
+  created_by?: 'system' | 'community' | 'user';
+  usage_count?: number;
+}
+
+// Scenario validation result for Epic 9
+export interface ScenarioValidationResult {
+  isValid: boolean;
+  errors: Array<{
+    field: string;
+    message: string;
+    severity: 'error' | 'warning' | 'info';
+  }>;
+  warnings: Array<{
+    field: string;
+    message: string;
+    suggestion?: string;
+  }>;
+  feasibilityScore: number; // 0-100
+  riskLevel: 'low' | 'medium' | 'high' | 'extreme';
+}
+
+// Scenario comparison interface for Epic 9
+export interface ScenarioComparison {
+  scenarios: EnhancedScenario[];
+  metrics: {
+    fire_date: Date[];
+    required_savings: number[];
+    final_net_worth: number[];
+    success_probability: number[];
+    risk_score: number[];
+  };
+  differences: Array<{
+    metric: string;
+    values: number[];
+    significance: 'low' | 'medium' | 'high';
+    explanation: string;
+  }>;
+  recommendation: {
+    preferred_scenario_id: string;
+    reasoning: string;
+    confidence: number;
+  };
 }
 
 export interface CreateAccountTransactionDto {
