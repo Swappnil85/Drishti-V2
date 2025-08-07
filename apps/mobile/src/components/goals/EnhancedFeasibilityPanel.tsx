@@ -18,7 +18,7 @@ import {
   FIREGoalFeasibility,
 } from '@drishti/shared/types/financial';
 import { Button, Card, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 import {
   EnhancedFeasibilityService,
   EnhancedFeasibilityAnalysis,
@@ -48,7 +48,7 @@ export const EnhancedFeasibilityPanel: React.FC<
   );
 
   const enhancedFeasibilityService = EnhancedFeasibilityService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap } = useHaptic();
 
   useEffect(() => {
     loadEnhancedAnalysis();
@@ -70,12 +70,12 @@ export const EnhancedFeasibilityPanel: React.FC<
   };
 
   const handleTabPress = async (tab: typeof activeTab) => {
-    await hapticService.impact('light');
+    await buttonTap();
     setActiveTab(tab);
   };
 
   const handleTimelineSelection = async (timeline: AlternativeTimeline) => {
-    await hapticService.impact('medium');
+    await buttonTap();
     onTimelineAdjustment?.(timeline);
   };
 

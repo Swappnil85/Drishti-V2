@@ -23,7 +23,7 @@ import {
 } from '@drishti/shared/types/financial';
 import { FIREGoalService } from '../../services/financial/FIREGoalService';
 import { Button, Card, Container, Icon } from '../../components/ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 import ProgressVisualization from '../../components/goals/ProgressVisualization';
 import MilestoneCelebration from '../../components/goals/MilestoneCelebration';
 import GoalAdjustmentWizard from '../../components/goals/GoalAdjustmentWizard';
@@ -51,7 +51,7 @@ const GoalDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
   const [showSplittingWizard, setShowSplittingWizard] = useState(false);
 
   const fireGoalService = FIREGoalService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap } = useHaptic();
   const goalSuspensionService = GoalSuspensionService.getInstance();
 
   // Mock user profile and spending data (would come from user data in real app)
@@ -135,17 +135,17 @@ const GoalDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleEditGoal = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
     navigation.navigate('EditGoal', { goalId });
   };
 
   const handleAdjustGoal = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
     setShowAdjustmentWizard(true);
   };
 
   const handleSplitGoal = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
     setShowSplittingWizard(true);
   };
 
@@ -200,7 +200,7 @@ const GoalDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleTabPress = async (tab: typeof activeTab) => {
-    await hapticService.impact('light');
+    await buttonTap();
     setActiveTab(tab);
   };
 

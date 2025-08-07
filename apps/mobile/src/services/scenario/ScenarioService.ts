@@ -5,8 +5,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Q } from '@nozbe/watermelondb';
-import database from '../../database';
+import database, { Q } from '../../database';
 import Scenario from '../../database/models/Scenario';
 import {
   EnhancedScenario,
@@ -77,7 +76,12 @@ export class ScenarioService {
     };
     this.apiService = ApiService.getInstance();
     this.errorHandler = ErrorHandlingService.getInstance();
-    this.initializeTemplates();
+    // Initialize templates asynchronously without blocking constructor
+    this.initializeTemplates().catch(error => {
+      console.error('Failed to initialize templates:', error);
+      // Set default templates as fallback
+      this.templates = this.getDefaultTemplates();
+    });
   }
 
   public static getInstance(): ScenarioService {
@@ -92,10 +96,14 @@ export class ScenarioService {
    */
   private async initializeTemplates(): Promise<void> {
     try {
-      // Load templates from cache first
-      const cachedTemplates = await AsyncStorage.getItem('scenario_templates');
-      if (cachedTemplates) {
-        this.templates = JSON.parse(cachedTemplates);
+      // Check if AsyncStorage is available (might not be on web)
+      if (typeof AsyncStorage !== 'undefined' && AsyncStorage.getItem) {
+        // Load templates from cache first
+        const cachedTemplates =
+          await AsyncStorage.getItem('scenario_templates');
+        if (cachedTemplates) {
+          this.templates = JSON.parse(cachedTemplates);
+        }
       }
 
       // Load default templates if cache is empty
@@ -480,10 +488,13 @@ export class ScenarioService {
    */
   private async cacheTemplates(): Promise<void> {
     try {
-      await AsyncStorage.setItem(
-        'scenario_templates',
-        JSON.stringify(this.templates)
-      );
+      // Check if AsyncStorage is available (might not be on web)
+      if (typeof AsyncStorage !== 'undefined' && AsyncStorage.setItem) {
+        await AsyncStorage.setItem(
+          'scenario_templates',
+          JSON.stringify(this.templates)
+        );
+      }
     } catch (error) {
       this.errorHandler.handleError(error as Error, {
         context: 'ScenarioService.cacheTemplates',
@@ -524,6 +535,9 @@ export class ScenarioService {
       }
 
       // Create scenario in local database
+      if (!database) {
+        throw new Error('Database not available');
+      }
       const scenario = await database.write(async () => {
         const scenariosCollection = database.get<Scenario>('scenarios');
         return await scenariosCollection.create(scenario => {
@@ -540,16 +554,15 @@ export class ScenarioService {
       });
 
       // Convert to enhanced scenario
-      const enhancedScenario: EnhancedScenario = {
-        ...scenario.toAPI(),
-        template_type: scenarioData.template_type,
-        tags: scenarioData.tags || [],
-        color: scenarioData.color || '#2196F3',
-        emoji: scenarioData.emoji || '📊',
-        folder: scenarioData.folder,
-        version: 1,
-        calculation_status: 'pending',
-      };
+      const enhancedScenario = this.convertToEnhanced(scenario);
+      // Override with provided data
+      enhancedScenario.template_type = scenarioData.template_type || 'custom';
+      enhancedScenario.tags = scenarioData.tags || [];
+      enhancedScenario.color = scenarioData.color || '#2196F3';
+      enhancedScenario.emoji = scenarioData.emoji || '📊';
+      enhancedScenario.folder = scenarioData.folder;
+      enhancedScenario.version = 1;
+      enhancedScenario.calculation_status = 'pending';
 
       // Cache the scenario
       this.cache.set(enhancedScenario.id, enhancedScenario);
@@ -700,6 +713,9 @@ export class ScenarioService {
     filters?: ScenarioSearchFilters
   ): Promise<EnhancedScenario[]> {
     try {
+      if (!database) {
+        return [];
+      }
       const scenariosCollection = database.get<Scenario>('scenarios');
       let query = scenariosCollection.query(Q.where('is_active', true));
 
@@ -772,6 +788,9 @@ export class ScenarioService {
         return this.cache.get(id)!;
       }
 
+      if (!database) {
+        return null;
+      }
       const scenariosCollection = database.get<Scenario>('scenarios');
       const scenario = await scenariosCollection.find(id);
 
@@ -800,6 +819,9 @@ export class ScenarioService {
     updates: UpdateScenarioDto
   ): Promise<EnhancedScenario | null> {
     try {
+      if (!database) {
+        return null;
+      }
       const scenariosCollection = database.get<Scenario>('scenarios');
       const scenario = await scenariosCollection.find(id);
 
@@ -868,6 +890,9 @@ export class ScenarioService {
    */
   public async deleteScenario(id: string): Promise<boolean> {
     try {
+      if (!database) {
+        return false;
+      }
       const scenariosCollection = database.get<Scenario>('scenarios');
       const scenario = await scenariosCollection.find(id);
 
@@ -929,9 +954,40 @@ export class ScenarioService {
   /**
    * Convert Scenario model to EnhancedScenario
    */
-  private convertToEnhanced(scenario: Scenario): EnhancedScenario {
+  private convertToEnhanced(scenario: any): EnhancedScenario {
+    // Handle both WatermelonDB models and plain objects
+    const baseData = scenario.toAPI
+      ? scenario.toAPI()
+      : {
+          id: scenario.id,
+          user_id: scenario.userId || scenario.user_id,
+          name: scenario.name,
+          description: scenario.description,
+          assumptions:
+            scenario.assumptions ||
+            (scenario.assumptionsRaw
+              ? JSON.parse(scenario.assumptionsRaw)
+              : {}),
+          projections:
+            scenario.projections ||
+            (scenario.projectionsRaw
+              ? JSON.parse(scenario.projectionsRaw)
+              : {}),
+          is_active:
+            scenario.isActive !== undefined
+              ? scenario.isActive
+              : scenario.is_active,
+          is_default:
+            scenario.isDefault !== undefined
+              ? scenario.isDefault
+              : scenario.is_default,
+          created_at: scenario.createdAt || scenario.created_at,
+          updated_at: scenario.updatedAt || scenario.updated_at,
+          synced_at: scenario.syncedAt || scenario.synced_at,
+        };
+
     return {
-      ...scenario.toAPI(),
+      ...baseData,
       template_type: 'custom', // Default, could be stored in metadata
       tags: [], // Default, could be stored in metadata
       color: '#2196F3', // Default
@@ -1096,6 +1152,30 @@ export class ScenarioService {
     } catch (error) {
       // Handle sync error - will retry later
       throw error;
+    }
+  }
+
+  /**
+   * Get all unique tags from scenarios
+   */
+  public async getTags(): Promise<string[]> {
+    try {
+      const scenarios = await this.getScenarios();
+      const tagSet = new Set<string>();
+
+      scenarios.forEach(scenario => {
+        if (scenario.tags) {
+          scenario.tags.forEach(tag => tagSet.add(tag));
+        }
+      });
+
+      return Array.from(tagSet).sort();
+    } catch (error) {
+      this.errorHandler.handleError(error as Error, {
+        context: 'ScenarioService.getTags',
+        severity: 'low',
+      });
+      return [];
     }
   }
 }

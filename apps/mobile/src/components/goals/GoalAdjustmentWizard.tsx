@@ -22,7 +22,7 @@ import {
   FIREGoalProgress,
 } from '@drishti/shared/types/financial';
 import { Button, Input, Card, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 
 interface GoalAdjustmentWizardProps {
   visible: boolean;
@@ -159,7 +159,7 @@ export const GoalAdjustmentWizard: React.FC<GoalAdjustmentWizardProps> = ({
     useState<AdjustmentImpact | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  const hapticService = HapticService.getInstance();
+  const { buttonTap, successFeedback, errorFeedback } = useHaptic();
 
   const steps = [
     'Select Life Event',
@@ -176,7 +176,7 @@ export const GoalAdjustmentWizard: React.FC<GoalAdjustmentWizardProps> = ({
   }, [currentStep, adjustmentType, adjustmentValues]);
 
   const handleNext = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -186,7 +186,7 @@ export const GoalAdjustmentWizard: React.FC<GoalAdjustmentWizardProps> = ({
   };
 
   const handleBack = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -265,7 +265,7 @@ export const GoalAdjustmentWizard: React.FC<GoalAdjustmentWizardProps> = ({
 
   const handleConfirmAdjustment = async () => {
     try {
-      await hapticService.success();
+      await successFeedback();
 
       const adjustedGoal: FinancialGoal = {
         ...goal,
@@ -303,7 +303,7 @@ export const GoalAdjustmentWizard: React.FC<GoalAdjustmentWizardProps> = ({
 
       handleClose();
     } catch (error) {
-      await hapticService.error();
+      await errorFeedback();
       Alert.alert(
         'Error',
         'Failed to save goal adjustments. Please try again.'

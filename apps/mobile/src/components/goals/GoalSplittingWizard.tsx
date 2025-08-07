@@ -23,7 +23,7 @@ import {
   CreateFIREGoalDto,
 } from '@drishti/shared/types/financial';
 import { Button, Input, Card, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 
 interface GoalSplittingWizardProps {
   visible: boolean;
@@ -124,12 +124,12 @@ export const GoalSplittingWizard: React.FC<GoalSplittingWizardProps> = ({
     reasoning: '',
   });
 
-  const hapticService = HapticService.getInstance();
+  const { buttonTap, successFeedback, errorFeedback } = useHaptic();
 
   const steps = ['Choose Strategy', 'Configure Split', 'Review & Create'];
 
   const handleNext = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep < steps.length - 1) {
       if (currentStep === 0 && selectedStrategy) {
@@ -142,7 +142,7 @@ export const GoalSplittingWizard: React.FC<GoalSplittingWizardProps> = ({
   };
 
   const handleBack = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -283,7 +283,7 @@ export const GoalSplittingWizard: React.FC<GoalSplittingWizardProps> = ({
 
   const handleCreateSplit = async () => {
     try {
-      await hapticService.success();
+      await successFeedback();
 
       // Create new goals based on split configuration
       const newGoals: FinancialGoal[] = splitConfig.goals.map(
@@ -315,7 +315,7 @@ export const GoalSplittingWizard: React.FC<GoalSplittingWizardProps> = ({
       onSplitComplete(newGoals, splitConfig.strategy);
       handleClose();
     } catch (error) {
-      await hapticService.error();
+      await errorFeedback();
       Alert.alert('Error', 'Failed to split goal. Please try again.');
     }
   };

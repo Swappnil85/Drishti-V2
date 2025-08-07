@@ -24,7 +24,7 @@ import {
 } from '@drishti/shared/types/financial';
 import { FIREGoalService } from '../../services/financial/FIREGoalService';
 import { Button, Input, Card, Container } from '../../components/ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 
 type Props = GoalsStackScreenProps<'CreateGoal'>;
 
@@ -62,7 +62,7 @@ const CreateGoalScreen: React.FC<Props> = ({ navigation }) => {
   const [isCreating, setIsCreating] = useState(false);
 
   const fireGoalService = FIREGoalService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap, successFeedback, errorFeedback } = useHaptic();
 
   useEffect(() => {
     loadTemplates();
@@ -107,7 +107,7 @@ const CreateGoalScreen: React.FC<Props> = ({ navigation }) => {
   ];
 
   const handleNext = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -117,7 +117,7 @@ const CreateGoalScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleBack = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -129,13 +129,13 @@ const CreateGoalScreen: React.FC<Props> = ({ navigation }) => {
   const handleCreateGoal = async () => {
     try {
       setIsCreating(true);
-      await hapticService.impact('medium');
+      await buttonTap();
 
       const goal = await fireGoalService.createFIREGoal(
         goalData as CreateFIREGoalDto
       );
 
-      await hapticService.success();
+      await successFeedback();
       Alert.alert(
         'Goal Created!',
         `Your ${goalData.name} goal has been created successfully.`,
@@ -149,7 +149,7 @@ const CreateGoalScreen: React.FC<Props> = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      await hapticService.error();
+      await errorFeedback();
       Alert.alert('Error', 'Failed to create goal. Please try again.', [
         { text: 'OK' },
       ]);

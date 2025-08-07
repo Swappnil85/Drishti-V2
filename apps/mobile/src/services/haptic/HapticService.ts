@@ -7,9 +7,9 @@ import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type HapticPattern = 
+export type HapticPattern =
   | 'light'
-  | 'medium' 
+  | 'medium'
   | 'heavy'
   | 'success'
   | 'warning'
@@ -23,7 +23,7 @@ export type HapticPattern =
   | 'notification_error'
   | 'custom';
 
-export type HapticContext = 
+export type HapticContext =
   | 'button_tap'
   | 'toggle_switch'
   | 'slider_change'
@@ -80,10 +80,10 @@ class HapticService {
     try {
       // Check platform support
       this.isSupported = Platform.OS === 'ios' || Platform.OS === 'android';
-      
+
       // Load saved configuration
       await this.loadConfig();
-      
+
       console.log('Haptic service initialized:', {
         supported: this.isSupported,
         enabled: this.config.enabled,
@@ -135,10 +135,14 @@ class HapticService {
   /**
    * Trigger haptic feedback
    */
-  async trigger(pattern: HapticPattern, context?: HapticContext, options?: {
-    intensity?: number;
-    force?: boolean;
-  }): Promise<boolean> {
+  async trigger(
+    pattern: HapticPattern,
+    context?: HapticContext,
+    options?: {
+      intensity?: number;
+      force?: boolean;
+    }
+  ): Promise<boolean> {
     // Check if haptics are enabled and supported
     if (!this.isSupported || (!this.config.enabled && !options?.force)) {
       return false;
@@ -156,7 +160,7 @@ class HapticService {
     try {
       // Apply intensity scaling
       const intensity = options?.intensity ?? this.config.intensity;
-      
+
       // Execute haptic feedback based on pattern
       await this.executeHapticPattern(pattern, intensity);
       success = true;
@@ -165,7 +169,7 @@ class HapticService {
       this.logHapticEvent({
         id: eventId,
         pattern,
-        context: context || 'unknown',
+        context: context || 'general',
         timestamp: startTime,
         intensity,
         duration: Date.now() - startTime,
@@ -175,12 +179,12 @@ class HapticService {
       return true;
     } catch (error) {
       console.error('Haptic feedback failed:', error);
-      
+
       // Log failed haptic event
       this.logHapticEvent({
         id: eventId,
         pattern,
-        context: context || 'unknown',
+        context: context || 'general',
         timestamp: startTime,
         intensity: options?.intensity ?? this.config.intensity,
         duration: Date.now() - startTime,
@@ -194,7 +198,10 @@ class HapticService {
   /**
    * Execute specific haptic pattern
    */
-  private async executeHapticPattern(pattern: HapticPattern, intensity: number) {
+  private async executeHapticPattern(
+    pattern: HapticPattern,
+    intensity: number
+  ) {
     switch (pattern) {
       case 'light':
       case 'impact_light':
@@ -213,12 +220,16 @@ class HapticService {
 
       case 'success':
       case 'notification_success':
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
         break;
 
       case 'warning':
       case 'notification_warning':
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning
+        );
         break;
 
       case 'error':
@@ -373,7 +384,9 @@ class HapticService {
   }
 
   async enableContext(context: HapticContext) {
-    this.config.disabledContexts = this.config.disabledContexts.filter(c => c !== context);
+    this.config.disabledContexts = this.config.disabledContexts.filter(
+      c => c !== context
+    );
     await this.saveConfig();
   }
 
@@ -391,7 +404,7 @@ class HapticService {
    */
   private logHapticEvent(event: HapticEvent) {
     this.events.push(event);
-    
+
     // Keep only last 1000 events
     if (this.events.length > 1000) {
       this.events = this.events.slice(-1000);
@@ -456,14 +469,19 @@ class HapticService {
    * Test haptic patterns
    */
   async testPattern(pattern: HapticPattern) {
-    return this.trigger(pattern, 'unknown', { force: true });
+    return this.trigger(pattern, 'general', { force: true });
   }
 
   async testAllPatterns() {
     const patterns: HapticPattern[] = [
-      'light', 'medium', 'heavy', 
-      'success', 'warning', 'error', 
-      'selection', 'custom'
+      'light',
+      'medium',
+      'heavy',
+      'success',
+      'warning',
+      'error',
+      'selection',
+      'custom',
     ];
 
     for (let i = 0; i < patterns.length; i++) {

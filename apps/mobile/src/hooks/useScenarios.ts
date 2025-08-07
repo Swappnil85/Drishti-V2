@@ -25,7 +25,11 @@ export interface UseScenariosReturn {
   scenarios: EnhancedScenario[];
   templates: ScenarioTemplate[];
   stats: ScenarioStats | null;
-  folders: Array<{ name: string; count: number; scenarios: EnhancedScenario[] }>;
+  folders: Array<{
+    name: string;
+    count: number;
+    scenarios: EnhancedScenario[];
+  }>;
   tags: string[];
 
   // State
@@ -35,16 +39,27 @@ export interface UseScenariosReturn {
 
   // Actions
   createScenario: (data: CreateScenarioDto) => Promise<EnhancedScenario | null>;
-  updateScenario: (id: string, updates: UpdateScenarioDto) => Promise<EnhancedScenario | null>;
+  updateScenario: (
+    id: string,
+    updates: UpdateScenarioDto
+  ) => Promise<EnhancedScenario | null>;
   deleteScenario: (id: string) => Promise<boolean>;
-  cloneScenario: (id: string, newName: string) => Promise<EnhancedScenario | null>;
-  createFromTemplate: (templateType: ScenarioTemplateType, customizations?: Partial<CreateScenarioDto>) => Promise<EnhancedScenario | null>;
-  validateScenario: (data: Partial<CreateScenarioDto>) => Promise<ScenarioValidationResult>;
-  
+  cloneScenario: (
+    id: string,
+    newName: string
+  ) => Promise<EnhancedScenario | null>;
+  createFromTemplate: (
+    templateType: ScenarioTemplateType,
+    customizations?: Partial<CreateScenarioDto>
+  ) => Promise<EnhancedScenario | null>;
+  validateScenario: (
+    data: Partial<CreateScenarioDto>
+  ) => Promise<ScenarioValidationResult>;
+
   // Search and filtering
   searchScenarios: (filters: ScenarioSearchFilters) => Promise<void>;
   clearSearch: () => void;
-  
+
   // Refresh
   refresh: () => Promise<void>;
   refreshTemplates: () => Promise<void>;
@@ -60,19 +75,25 @@ export interface UseScenariosOptions {
 /**
  * Hook for comprehensive scenario management
  */
-export const useScenarios = (options: UseScenariosOptions = {}): UseScenariosReturn => {
+export const useScenarios = (
+  options: UseScenariosOptions = {}
+): UseScenariosReturn => {
   const { autoLoad = true, enableRealTimeUpdates = true, filters } = options;
-  
+
   // State
   const [scenarios, setScenarios] = useState<EnhancedScenario[]>([]);
   const [templates, setTemplates] = useState<ScenarioTemplate[]>([]);
   const [stats, setStats] = useState<ScenarioStats | null>(null);
-  const [folders, setFolders] = useState<Array<{ name: string; count: number; scenarios: EnhancedScenario[] }>>([]);
+  const [folders, setFolders] = useState<
+    Array<{ name: string; count: number; scenarios: EnhancedScenario[] }>
+  >([]);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentFilters, setCurrentFilters] = useState<ScenarioSearchFilters | undefined>(filters);
+  const [currentFilters, setCurrentFilters] = useState<
+    ScenarioSearchFilters | undefined
+  >(filters);
 
   // Haptic feedback
   const { successFeedback, errorFeedback } = useHaptic();
@@ -86,7 +107,8 @@ export const useScenarios = (options: UseScenariosOptions = {}): UseScenariosRet
       const scenarioList = await scenarioService.getScenarios(currentFilters);
       setScenarios(scenarioList);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load scenarios';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load scenarios';
       setError(errorMessage);
       errorFeedback();
     }
@@ -161,120 +183,159 @@ export const useScenarios = (options: UseScenariosOptions = {}): UseScenariosRet
   /**
    * Create scenario
    */
-  const createScenario = useCallback(async (data: CreateScenarioDto): Promise<EnhancedScenario | null> => {
-    try {
-      setError(null);
-      const newScenario = await scenarioService.createScenario(data);
-      if (newScenario) {
-        await loadAllData(); // Refresh all data
-        successFeedback();
+  const createScenario = useCallback(
+    async (data: CreateScenarioDto): Promise<EnhancedScenario | null> => {
+      try {
+        setError(null);
+        const newScenario = await scenarioService.createScenario(data);
+        if (newScenario) {
+          await loadAllData(); // Refresh all data
+          successFeedback();
+        }
+        return newScenario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create scenario';
+        setError(errorMessage);
+        errorFeedback();
+        return null;
       }
-      return newScenario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create scenario';
-      setError(errorMessage);
-      errorFeedback();
-      return null;
-    }
-  }, [loadAllData, successFeedback, errorFeedback]);
+    },
+    [loadAllData, successFeedback, errorFeedback]
+  );
 
   /**
    * Update scenario
    */
-  const updateScenario = useCallback(async (id: string, updates: UpdateScenarioDto): Promise<EnhancedScenario | null> => {
-    try {
-      setError(null);
-      const updatedScenario = await scenarioService.updateScenario(id, updates);
-      if (updatedScenario) {
-        await loadAllData(); // Refresh all data
-        successFeedback();
+  const updateScenario = useCallback(
+    async (
+      id: string,
+      updates: UpdateScenarioDto
+    ): Promise<EnhancedScenario | null> => {
+      try {
+        setError(null);
+        const updatedScenario = await scenarioService.updateScenario(
+          id,
+          updates
+        );
+        if (updatedScenario) {
+          await loadAllData(); // Refresh all data
+          successFeedback();
+        }
+        return updatedScenario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update scenario';
+        setError(errorMessage);
+        errorFeedback();
+        return null;
       }
-      return updatedScenario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update scenario';
-      setError(errorMessage);
-      errorFeedback();
-      return null;
-    }
-  }, [loadAllData, successFeedback, errorFeedback]);
+    },
+    [loadAllData, successFeedback, errorFeedback]
+  );
 
   /**
    * Delete scenario
    */
-  const deleteScenario = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      setError(null);
-      const success = await scenarioService.deleteScenario(id);
-      if (success) {
-        await loadAllData(); // Refresh all data
-        successFeedback();
+  const deleteScenario = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        setError(null);
+        const success = await scenarioService.deleteScenario(id);
+        if (success) {
+          await loadAllData(); // Refresh all data
+          successFeedback();
+        }
+        return success;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to delete scenario';
+        setError(errorMessage);
+        errorFeedback();
+        return false;
       }
-      return success;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete scenario';
-      setError(errorMessage);
-      errorFeedback();
-      return false;
-    }
-  }, [loadAllData, successFeedback, errorFeedback]);
+    },
+    [loadAllData, successFeedback, errorFeedback]
+  );
 
   /**
    * Clone scenario
    */
-  const cloneScenario = useCallback(async (id: string, newName: string): Promise<EnhancedScenario | null> => {
-    try {
-      setError(null);
-      const clonedScenario = await scenarioService.cloneScenario(id, newName);
-      if (clonedScenario) {
-        await loadAllData(); // Refresh all data
-        successFeedback();
+  const cloneScenario = useCallback(
+    async (id: string, newName: string): Promise<EnhancedScenario | null> => {
+      try {
+        setError(null);
+        const clonedScenario = await scenarioService.cloneScenario(id, newName);
+        if (clonedScenario) {
+          await loadAllData(); // Refresh all data
+          successFeedback();
+        }
+        return clonedScenario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to clone scenario';
+        setError(errorMessage);
+        errorFeedback();
+        return null;
       }
-      return clonedScenario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to clone scenario';
-      setError(errorMessage);
-      errorFeedback();
-      return null;
-    }
-  }, [loadAllData, successFeedback, errorFeedback]);
+    },
+    [loadAllData, successFeedback, errorFeedback]
+  );
 
   /**
    * Create from template
    */
-  const createFromTemplate = useCallback(async (
-    templateType: ScenarioTemplateType,
-    customizations?: Partial<CreateScenarioDto>
-  ): Promise<EnhancedScenario | null> => {
-    try {
-      setError(null);
-      const newScenario = await scenarioService.createFromTemplate(templateType, customizations);
-      if (newScenario) {
-        await loadAllData(); // Refresh all data
-        successFeedback();
+  const createFromTemplate = useCallback(
+    async (
+      templateType: ScenarioTemplateType,
+      customizations?: Partial<CreateScenarioDto>
+    ): Promise<EnhancedScenario | null> => {
+      try {
+        setError(null);
+        const newScenario = await scenarioService.createFromTemplate(
+          templateType,
+          customizations
+        );
+        if (newScenario) {
+          await loadAllData(); // Refresh all data
+          successFeedback();
+        }
+        return newScenario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to create scenario from template';
+        setError(errorMessage);
+        errorFeedback();
+        return null;
       }
-      return newScenario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create scenario from template';
-      setError(errorMessage);
-      errorFeedback();
-      return null;
-    }
-  }, [loadAllData, successFeedback, errorFeedback]);
+    },
+    [loadAllData, successFeedback, errorFeedback]
+  );
 
   /**
    * Validate scenario
    */
-  const validateScenario = useCallback(async (data: Partial<CreateScenarioDto>): Promise<ScenarioValidationResult> => {
-    return await scenarioService.validateScenario(data);
-  }, []);
+  const validateScenario = useCallback(
+    async (
+      data: Partial<CreateScenarioDto>
+    ): Promise<ScenarioValidationResult> => {
+      return await scenarioService.validateScenario(data);
+    },
+    []
+  );
 
   /**
    * Search scenarios
    */
-  const searchScenarios = useCallback(async (searchFilters: ScenarioSearchFilters) => {
-    setCurrentFilters(searchFilters);
-    await loadScenarios();
-  }, [loadScenarios]);
+  const searchScenarios = useCallback(
+    async (searchFilters: ScenarioSearchFilters) => {
+      setCurrentFilters(searchFilters);
+      await loadScenarios();
+    },
+    [loadScenarios]
+  );
 
   /**
    * Clear search

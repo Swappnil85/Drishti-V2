@@ -9,21 +9,22 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScenariosStackParamList } from '../../types/navigation';
 import { SCREEN_OPTIONS } from '../../constants/navigation';
 
-// Scenario Screens
-import ScenariosListScreen from '../../screens/scenarios/ScenariosListScreen';
-import ScenarioDetailsScreen from '../../screens/scenarios/ScenarioDetailsScreen';
-import CreateScenarioScreen from '../../screens/scenarios/CreateScenarioScreen';
-import EditScenarioScreen from '../../screens/scenarios/EditScenarioScreen';
-import ScenarioComparisonScreen from '../../screens/scenarios/ScenarioComparisonScreen';
-import StressTestScreen from '../../screens/scenarios/StressTestScreen';
-import ScenarioTemplatesScreen from '../../screens/scenarios/ScenarioTemplatesScreen';
+// Scenario Screens - temporarily using test screen for debugging
+import TestScenariosScreen from '../../screens/scenarios/TestScenariosScreen';
+// import ScenariosListScreen from '../../screens/scenarios/ScenariosListScreen';
+// import ScenarioDetailsScreen from '../../screens/scenarios/ScenarioDetailsScreen';
+// import CreateScenarioScreen from '../../screens/scenarios/CreateScenarioScreen';
+// import EditScenarioScreen from '../../screens/scenarios/EditScenarioScreen';
+// import ScenarioComparisonScreen from '../../screens/scenarios/ScenarioComparisonScreen';
+// import StressTestScreen from '../../screens/scenarios/StressTestScreen';
+// import ScenarioTemplatesScreen from '../../screens/scenarios/ScenarioTemplatesScreen';
 
 const Stack = createNativeStackNavigator<ScenariosStackParamList>();
 
 const ScenariosNavigator: React.FC = () => {
   return (
     <Stack.Navigator
-      initialRouteName="ScenariosList"
+      initialRouteName='ScenariosList'
       screenOptions={{
         ...SCREEN_OPTIONS,
         headerStyle: {
@@ -33,29 +34,26 @@ const ScenariosNavigator: React.FC = () => {
       }}
     >
       <Stack.Screen
-        name="ScenariosList"
-        component={ScenariosListScreen}
+        name='ScenariosList'
+        component={TestScenariosScreen}
         options={{
           title: 'Scenarios',
           headerLargeTitle: true,
-          headerSearchBarOptions: {
-            placeholder: 'Search scenarios...',
-            hideWhenScrolling: true,
-          },
         }}
       />
-      
+
+      {/* Temporarily commented out for debugging
       <Stack.Screen
-        name="ScenarioDetails"
+        name='ScenarioDetails'
         component={ScenarioDetailsScreen}
         options={{
           title: 'Scenario Details',
           headerBackTitle: 'Scenarios',
         }}
       />
-      
+
       <Stack.Screen
-        name="CreateScenario"
+        name='CreateScenario'
         component={CreateScenarioScreen}
         options={{
           title: 'Create Scenario',
@@ -63,9 +61,9 @@ const ScenariosNavigator: React.FC = () => {
           presentation: 'modal',
         }}
       />
-      
+
       <Stack.Screen
-        name="EditScenario"
+        name='EditScenario'
         component={EditScenarioScreen}
         options={{
           title: 'Edit Scenario',
@@ -73,33 +71,34 @@ const ScenariosNavigator: React.FC = () => {
           presentation: 'modal',
         }}
       />
-      
+
       <Stack.Screen
-        name="ScenarioComparison"
+        name='ScenarioComparison'
         component={ScenarioComparisonScreen}
         options={{
           title: 'Compare Scenarios',
           headerBackTitle: 'Back',
         }}
       />
-      
+
       <Stack.Screen
-        name="StressTest"
+        name='StressTest'
         component={StressTestScreen}
         options={{
           title: 'Stress Test',
           headerBackTitle: 'Back',
         }}
       />
-      
+
       <Stack.Screen
-        name="ScenarioTemplates"
+        name='ScenarioTemplates'
         component={ScenarioTemplatesScreen}
         options={{
           title: 'Scenario Templates',
           headerBackTitle: 'Back',
         }}
       />
+      */}
     </Stack.Navigator>
   );
 };

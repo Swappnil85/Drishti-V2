@@ -4,12 +4,24 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import HapticService, { HapticPattern, HapticContext, HapticConfig } from '../services/haptic/HapticService';
+import HapticService, {
+  HapticPattern,
+  HapticContext,
+  HapticConfig,
+} from '../services/haptic/HapticService';
 
 export interface UseHapticReturn {
   // Basic haptic methods
-  trigger: (pattern: HapticPattern, context?: HapticContext) => Promise<boolean>;
-  
+  trigger: (
+    pattern: HapticPattern,
+    context?: HapticContext
+  ) => Promise<boolean>;
+
+  // Impact methods
+  impactLight: () => Promise<boolean>;
+  impactMedium: () => Promise<boolean>;
+  impactHeavy: () => Promise<boolean>;
+
   // Contextual haptic methods
   buttonTap: () => Promise<boolean>;
   toggleSwitch: (isOn: boolean) => Promise<boolean>;
@@ -31,7 +43,7 @@ export interface UseHapticReturn {
   tabSwitch: () => Promise<boolean>;
   longPress: () => Promise<boolean>;
   doubleTap: () => Promise<boolean>;
-  
+
   // Configuration
   isEnabled: boolean;
   config: HapticConfig;
@@ -39,11 +51,11 @@ export interface UseHapticReturn {
   setIntensity: (intensity: number) => Promise<void>;
   setContextualFeedback: (enabled: boolean) => Promise<void>;
   updateConfig: (config: Partial<HapticConfig>) => Promise<void>;
-  
+
   // Testing
   testPattern: (pattern: HapticPattern) => Promise<boolean>;
   testAllPatterns: () => Promise<void>;
-  
+
   // Analytics
   getStats: () => ReturnType<typeof HapticService.getHapticStats>;
   clearStats: () => void;
@@ -73,26 +85,61 @@ export const useHaptic = (): UseHapticReturn => {
   }, []);
 
   // Basic trigger method
-  const trigger = useCallback(async (pattern: HapticPattern, context?: HapticContext) => {
-    return HapticService.trigger(pattern, context);
-  }, []);
+  const trigger = useCallback(
+    async (pattern: HapticPattern, context?: HapticContext) => {
+      return HapticService.trigger(pattern, context);
+    },
+    []
+  );
+
+  // Impact methods
+  const impactLight = useCallback(
+    () => HapticService.trigger('light', 'general'),
+    []
+  );
+  const impactMedium = useCallback(
+    () => HapticService.trigger('medium', 'general'),
+    []
+  );
+  const impactHeavy = useCallback(
+    () => HapticService.trigger('heavy', 'general'),
+    []
+  );
 
   // Contextual haptic methods
   const buttonTap = useCallback(() => HapticService.buttonTap(), []);
-  const toggleSwitch = useCallback((isOn: boolean) => HapticService.toggleSwitch(isOn), []);
+  const toggleSwitch = useCallback(
+    (isOn: boolean) => HapticService.toggleSwitch(isOn),
+    []
+  );
   const sliderChange = useCallback(() => HapticService.sliderChange(), []);
   const swipeAction = useCallback(() => HapticService.swipeAction(), []);
   const pullRefresh = useCallback(() => HapticService.pullRefresh(), []);
   const navigation = useCallback(() => HapticService.navigation(), []);
-  const formValidationError = useCallback(() => HapticService.formValidationError(), []);
-  const formValidationSuccess = useCallback(() => HapticService.formValidationSuccess(), []);
+  const formValidationError = useCallback(
+    () => HapticService.formValidationError(),
+    []
+  );
+  const formValidationSuccess = useCallback(
+    () => HapticService.formValidationSuccess(),
+    []
+  );
   const achievement = useCallback(() => HapticService.achievement(), []);
   const milestone = useCallback(() => HapticService.milestone(), []);
   const errorFeedback = useCallback(() => HapticService.errorFeedback(), []);
-  const successFeedback = useCallback(() => HapticService.successFeedback(), []);
-  const loadingComplete = useCallback(() => HapticService.loadingComplete(), []);
+  const successFeedback = useCallback(
+    () => HapticService.successFeedback(),
+    []
+  );
+  const loadingComplete = useCallback(
+    () => HapticService.loadingComplete(),
+    []
+  );
   const dataUpdate = useCallback(() => HapticService.dataUpdate(), []);
-  const gestureRecognition = useCallback(() => HapticService.gestureRecognition(), []);
+  const gestureRecognition = useCallback(
+    () => HapticService.gestureRecognition(),
+    []
+  );
   const modalOpen = useCallback(() => HapticService.modalOpen(), []);
   const modalClose = useCallback(() => HapticService.modalClose(), []);
   const tabSwitch = useCallback(() => HapticService.tabSwitch(), []);
@@ -142,7 +189,12 @@ export const useHaptic = (): UseHapticReturn => {
   return {
     // Basic methods
     trigger,
-    
+
+    // Impact methods
+    impactLight,
+    impactMedium,
+    impactHeavy,
+
     // Contextual methods
     buttonTap,
     toggleSwitch,
@@ -164,7 +216,7 @@ export const useHaptic = (): UseHapticReturn => {
     tabSwitch,
     longPress,
     doubleTap,
-    
+
     // Configuration
     isEnabled,
     config,
@@ -172,11 +224,11 @@ export const useHaptic = (): UseHapticReturn => {
     setIntensity,
     setContextualFeedback,
     updateConfig,
-    
+
     // Testing
     testPattern,
     testAllPatterns,
-    
+
     // Analytics
     getStats,
     clearStats,
@@ -189,9 +241,12 @@ export const useHaptic = (): UseHapticReturn => {
 export const useContextualHaptic = (context: HapticContext) => {
   const { trigger } = useHaptic();
 
-  const triggerHaptic = useCallback((pattern: HapticPattern = 'light') => {
-    return trigger(pattern, context);
-  }, [trigger, context]);
+  const triggerHaptic = useCallback(
+    (pattern: HapticPattern = 'light') => {
+      return trigger(pattern, context);
+    },
+    [trigger, context]
+  );
 
   return triggerHaptic;
 };
@@ -209,7 +264,7 @@ export const useButtonHaptic = () => {
  */
 export const useFormHaptic = () => {
   const { formValidationError, formValidationSuccess } = useHaptic();
-  
+
   return {
     error: formValidationError,
     success: formValidationSuccess,
@@ -221,7 +276,7 @@ export const useFormHaptic = () => {
  */
 export const useNavigationHaptic = () => {
   const { navigation, tabSwitch, modalOpen, modalClose } = useHaptic();
-  
+
   return {
     navigate: navigation,
     switchTab: tabSwitch,
@@ -235,7 +290,7 @@ export const useNavigationHaptic = () => {
  */
 export const useAchievementHaptic = () => {
   const { achievement, milestone, successFeedback } = useHaptic();
-  
+
   return {
     achievement,
     milestone,

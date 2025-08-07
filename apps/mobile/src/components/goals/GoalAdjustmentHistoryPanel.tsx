@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { FinancialGoal } from '@drishti/shared/types/financial';
 import { Button, Card, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 import {
   GoalAdjustmentHistoryService,
   GoalAdjustment,
@@ -46,7 +46,7 @@ export const GoalAdjustmentHistoryPanel: React.FC<
   >('timeline');
 
   const historyService = GoalAdjustmentHistoryService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap } = useHaptic();
 
   useEffect(() => {
     loadHistoryData();
@@ -76,7 +76,7 @@ export const GoalAdjustmentHistoryPanel: React.FC<
   };
 
   const handleTabPress = async (tab: typeof activeTab) => {
-    await hapticService.impact('light');
+    await buttonTap();
     setActiveTab(tab);
   };
 
@@ -101,7 +101,7 @@ export const GoalAdjustmentHistoryPanel: React.FC<
           text: 'Rollback',
           style: 'destructive',
           onPress: async () => {
-            await hapticService.impact('medium');
+            await buttonTap();
             const success =
               await historyService.rollbackAdjustment(adjustmentId);
 

@@ -19,7 +19,7 @@ import {
   FIREGoalProgress,
 } from '@drishti/shared/types/financial';
 import { Button, Card, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 import {
   AutomatedAdjustmentService,
   AutomatedAdjustmentSuggestion,
@@ -64,7 +64,7 @@ export const AutomatedSuggestionsPanel: React.FC<
 
   const automatedAdjustmentService = AutomatedAdjustmentService.getInstance();
   const lifeEventService = LifeEventImpactModelingService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap, successFeedback, errorFeedback } = useHaptic();
 
   useEffect(() => {
     loadSuggestions();
@@ -100,7 +100,7 @@ export const AutomatedSuggestionsPanel: React.FC<
   const handleApplySuggestion = async (
     suggestion: AutomatedAdjustmentSuggestion
   ) => {
-    await hapticService.impact('medium');
+    await buttonTap();
 
     if (suggestion.automationPossible) {
       Alert.alert(
@@ -121,21 +121,21 @@ export const AutomatedSuggestionsPanel: React.FC<
                   );
 
                 if (result.success) {
-                  await hapticService.success();
+                  await successFeedback();
                   onSuggestionApplied?.(suggestion);
                   // Remove applied suggestion
                   setSuggestions(prev =>
                     prev.filter(s => s.id !== suggestion.id)
                   );
                 } else {
-                  await hapticService.error();
+                  await errorFeedback();
                   Alert.alert(
                     'Error',
                     result.error || 'Failed to apply suggestion'
                   );
                 }
               } catch (error) {
-                await hapticService.error();
+                await errorFeedback();
                 Alert.alert('Error', 'Failed to apply suggestion');
               }
             },
@@ -159,7 +159,7 @@ export const AutomatedSuggestionsPanel: React.FC<
   };
 
   const handleDismissSuggestion = async (suggestionId: string) => {
-    await hapticService.impact('light');
+    await buttonTap();
 
     Alert.alert(
       'Dismiss Suggestion',

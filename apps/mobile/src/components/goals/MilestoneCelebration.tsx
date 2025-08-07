@@ -14,9 +14,12 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { FIREGoalProgress, FinancialGoal } from '@drishti/shared/types/financial';
+import {
+  FIREGoalProgress,
+  FinancialGoal,
+} from '@drishti/shared/types/financial';
 import { Card, Button, Icon } from '../ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 
 interface MilestoneCelebrationProps {
   goal: FinancialGoal;
@@ -47,14 +50,16 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   onMilestoneAcknowledged,
 }) => {
   const [showCelebration, setShowCelebration] = useState(false);
-  const [currentMilestone, setCurrentMilestone] = useState<Milestone | null>(null);
+  const [currentMilestone, setCurrentMilestone] = useState<Milestone | null>(
+    null
+  );
   const [milestones, setMilestones] = useState<Milestone[]>([]);
-  
+
   const celebrationAnimation = useRef(new Animated.Value(0)).current;
   const confettiAnimation = useRef(new Animated.Value(0)).current;
   const scaleAnimation = useRef(new Animated.Value(0)).current;
-  
-  const hapticService = HapticService.getInstance();
+
+  const { successFeedback } = useHaptic();
 
   useEffect(() => {
     initializeMilestones();
@@ -65,26 +70,28 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   }, [progress.progressPercentage, milestones]);
 
   const initializeMilestones = () => {
-    const initialMilestones: Milestone[] = MILESTONE_THRESHOLDS.map((threshold, index) => ({
-      id: `${goal.id}_milestone_${threshold}`,
-      goalId: goal.id,
-      percentage: threshold,
-      amount: (goal.target_amount * threshold) / 100,
-      achievedDate: '',
-      title: getMilestoneTitle(threshold),
-      description: getMilestoneDescription(threshold, goal.target_amount),
-      celebrationType: getCelebrationType(threshold),
-      isAchieved: progress.progressPercentage >= threshold,
-      isAcknowledged: false, // Would be loaded from storage in real implementation
-    }));
+    const initialMilestones: Milestone[] = MILESTONE_THRESHOLDS.map(
+      (threshold, index) => ({
+        id: `${goal.id}_milestone_${threshold}`,
+        goalId: goal.id,
+        percentage: threshold,
+        amount: (goal.target_amount * threshold) / 100,
+        achievedDate: '',
+        title: getMilestoneTitle(threshold),
+        description: getMilestoneDescription(threshold, goal.target_amount),
+        celebrationType: getCelebrationType(threshold),
+        isAchieved: progress.progressPercentage >= threshold,
+        isAcknowledged: false, // Would be loaded from storage in real implementation
+      })
+    );
 
     setMilestones(initialMilestones);
   };
 
   const checkForNewMilestones = () => {
     const newlyAchievedMilestone = milestones.find(
-      milestone => 
-        !milestone.isAchieved && 
+      milestone =>
+        !milestone.isAchieved &&
         progress.progressPercentage >= milestone.percentage
     );
 
@@ -95,8 +102,8 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
         achievedDate: new Date().toISOString(),
       };
 
-      setMilestones(prev => 
-        prev.map(m => m.id === updatedMilestone.id ? updatedMilestone : m)
+      setMilestones(prev =>
+        prev.map(m => (m.id === updatedMilestone.id ? updatedMilestone : m))
       );
 
       triggerCelebration(updatedMilestone);
@@ -106,10 +113,10 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   const triggerCelebration = async (milestone: Milestone) => {
     setCurrentMilestone(milestone);
     setShowCelebration(true);
-    
+
     // Haptic feedback
-    await hapticService.success();
-    
+    await successFeedback();
+
     // Start animations
     Animated.parallel([
       Animated.spring(scaleAnimation, {
@@ -148,8 +155,10 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
         isAcknowledged: true,
       };
 
-      setMilestones(prev => 
-        prev.map(m => m.id === acknowledgedMilestone.id ? acknowledgedMilestone : m)
+      setMilestones(prev =>
+        prev.map(m =>
+          m.id === acknowledgedMilestone.id ? acknowledgedMilestone : m
+        )
       );
 
       onMilestoneAcknowledged?.(acknowledgedMilestone);
@@ -159,28 +168,39 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
     scaleAnimation.setValue(0);
     celebrationAnimation.setValue(0);
     confettiAnimation.setValue(0);
-    
+
     setShowCelebration(false);
     setCurrentMilestone(null);
   };
 
   const getMilestoneTitle = (percentage: number): string => {
     switch (percentage) {
-      case 10: return '🎯 First Steps!';
-      case 25: return '🚀 Quarter Way There!';
-      case 50: return '🎉 Halfway Hero!';
-      case 75: return '⭐ Three Quarters Strong!';
-      case 90: return '🔥 Almost FIRE!';
-      case 100: return '🏆 FIRE Achieved!';
-      default: return `${percentage}% Complete!`;
+      case 10:
+        return '🎯 First Steps!';
+      case 25:
+        return '🚀 Quarter Way There!';
+      case 50:
+        return '🎉 Halfway Hero!';
+      case 75:
+        return '⭐ Three Quarters Strong!';
+      case 90:
+        return '🔥 Almost FIRE!';
+      case 100:
+        return '🏆 FIRE Achieved!';
+      default:
+        return `${percentage}% Complete!`;
     }
   };
 
-  const getMilestoneDescription = (percentage: number, targetAmount: number): string => {
+  const getMilestoneDescription = (
+    percentage: number,
+    targetAmount: number
+  ): string => {
     const amount = (targetAmount * percentage) / 100;
-    const formattedAmount = amount >= 1000000 
-      ? `$${(amount / 1000000).toFixed(1)}M`
-      : `$${(amount / 1000).toFixed(0)}K`;
+    const formattedAmount =
+      amount >= 1000000
+        ? `$${(amount / 1000000).toFixed(1)}M`
+        : `$${(amount / 1000).toFixed(0)}K`;
 
     switch (percentage) {
       case 10:
@@ -200,7 +220,9 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
     }
   };
 
-  const getCelebrationType = (percentage: number): Milestone['celebrationType'] => {
+  const getCelebrationType = (
+    percentage: number
+  ): Milestone['celebrationType'] => {
     if (percentage === 100) return 'major';
     if (percentage >= 50) return 'major';
     return 'minor';
@@ -210,7 +232,7 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
     return (
       <View style={styles.milestoneList}>
         <Text style={styles.milestoneListTitle}>Milestones</Text>
-        {milestones.map((milestone) => (
+        {milestones.map(milestone => (
           <View
             key={milestone.id}
             style={[
@@ -220,27 +242,31 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
           >
             <View style={styles.milestoneIcon}>
               {milestone.isAchieved ? (
-                <Icon name="check-circle" size={20} color="#28A745" />
+                <Icon name='check-circle' size={20} color='#28A745' />
               ) : (
-                <Icon name="circle" size={20} color="#E9ECEF" />
+                <Icon name='circle' size={20} color='#E9ECEF' />
               )}
             </View>
-            
+
             <View style={styles.milestoneContent}>
-              <Text style={[
-                styles.milestoneTitle,
-                milestone.isAchieved && styles.achievedMilestoneText,
-              ]}>
-                {milestone.percentage}% - ${(milestone.amount / 1000).toFixed(0)}K
+              <Text
+                style={[
+                  styles.milestoneTitle,
+                  milestone.isAchieved && styles.achievedMilestoneText,
+                ]}
+              >
+                {milestone.percentage}% - $
+                {(milestone.amount / 1000).toFixed(0)}K
               </Text>
-              
+
               {milestone.isAchieved && milestone.achievedDate && (
                 <Text style={styles.achievedDate}>
-                  Achieved {new Date(milestone.achievedDate).toLocaleDateString()}
+                  Achieved{' '}
+                  {new Date(milestone.achievedDate).toLocaleDateString()}
                 </Text>
               )}
             </View>
-            
+
             {milestone.isAchieved && !milestone.isAcknowledged && (
               <View style={styles.newBadge}>
                 <Text style={styles.newBadgeText}>NEW</Text>
@@ -261,7 +287,7 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
       <Modal
         visible={showCelebration}
         transparent
-        animationType="none"
+        animationType='none'
         onRequestClose={handleCelebrationClose}
       >
         <View style={styles.celebrationOverlay}>
@@ -289,9 +315,13 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
                   styles.confettiPiece,
                   {
                     left: Math.random() * screenWidth,
-                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][
-                      Math.floor(Math.random() * 5)
-                    ],
+                    backgroundColor: [
+                      '#FF6B6B',
+                      '#4ECDC4',
+                      '#45B7D1',
+                      '#96CEB4',
+                      '#FFEAA7',
+                    ][Math.floor(Math.random() * 5)],
                   },
                 ]}
               />
@@ -309,10 +339,12 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
             ]}
           >
             <View style={styles.celebrationHeader}>
-              <Text style={[
-                styles.celebrationTitle,
-                isMajorMilestone && styles.majorCelebrationTitle,
-              ]}>
+              <Text
+                style={[
+                  styles.celebrationTitle,
+                  isMajorMilestone && styles.majorCelebrationTitle,
+                ]}
+              >
                 {currentMilestone.title}
               </Text>
             </View>
@@ -336,10 +368,15 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
                   </Text>
                   <Text style={styles.statLabel}>Saved</Text>
                 </View>
-                
+
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>
-                    ${((goal.target_amount - currentMilestone.amount) / 1000).toFixed(0)}K
+                    $
+                    {(
+                      (goal.target_amount - currentMilestone.amount) /
+                      1000
+                    ).toFixed(0)}
+                    K
                   </Text>
                   <Text style={styles.statLabel}>Remaining</Text>
                 </View>
@@ -348,7 +385,7 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
 
             <View style={styles.celebrationActions}>
               <Button
-                title="Continue Journey"
+                title='Continue Journey'
                 onPress={handleCelebrationClose}
                 style={styles.continueButton}
               />

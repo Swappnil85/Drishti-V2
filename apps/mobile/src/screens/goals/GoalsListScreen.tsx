@@ -24,7 +24,7 @@ import {
 } from '@drishti/shared/types/financial';
 import { FIREGoalService } from '../../services/financial/FIREGoalService';
 import { Button, Card, Container, Icon } from '../../components/ui';
-import { HapticService } from '../../services/HapticService';
+import { useHaptic } from '../../hooks/useHaptic';
 
 type Props = GoalsStackScreenProps<'GoalsList'>;
 
@@ -37,7 +37,7 @@ const GoalsListScreen: React.FC<Props> = ({ navigation }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fireGoalService = FIREGoalService.getInstance();
-  const hapticService = HapticService.getInstance();
+  const { buttonTap } = useHaptic();
 
   useFocusEffect(
     useCallback(() => {
@@ -81,12 +81,12 @@ const GoalsListScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleCreateGoal = async () => {
-    await hapticService.impact('light');
+    await buttonTap();
     navigation.navigate('CreateGoal');
   };
 
   const handleGoalPress = async (goal: FinancialGoal) => {
-    await hapticService.impact('light');
+    await buttonTap();
     navigation.navigate('GoalDetails', { goalId: goal.id });
   };
 
