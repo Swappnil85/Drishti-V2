@@ -198,6 +198,7 @@ describe('FinancialCalculationEngine', () => {
             balance: 5000,
             interestRate: 0.18,
             minimumPayment: 150,
+            type: 'credit_card' as const,
           },
           {
             id: '2',
@@ -205,6 +206,7 @@ describe('FinancialCalculationEngine', () => {
             balance: 3000,
             interestRate: 0.22,
             minimumPayment: 100,
+            type: 'credit_card' as const,
           },
           {
             id: '3',
@@ -212,10 +214,14 @@ describe('FinancialCalculationEngine', () => {
             balance: 15000,
             interestRate: 0.06,
             minimumPayment: 300,
+            type: 'personal_loan' as const,
           },
         ],
         extraPayment: 200,
         strategy: 'snowball',
+        monthlyIncome: 5000,
+        monthlyExpenses: 3000,
+        emergencyFund: 10000,
       };
 
       const result = engine.calculateDebtPayoff(params);
@@ -240,6 +246,7 @@ describe('FinancialCalculationEngine', () => {
             balance: 5000,
             interestRate: 0.18,
             minimumPayment: 150,
+            type: 'credit_card' as const,
           },
           {
             id: '2',
@@ -247,6 +254,7 @@ describe('FinancialCalculationEngine', () => {
             balance: 3000,
             interestRate: 0.22,
             minimumPayment: 100,
+            type: 'credit_card' as const,
           },
           {
             id: '3',
@@ -254,10 +262,14 @@ describe('FinancialCalculationEngine', () => {
             balance: 15000,
             interestRate: 0.06,
             minimumPayment: 300,
+            type: 'auto_loan' as const,
           },
         ],
         extraPayment: 200,
         strategy: 'avalanche',
+        monthlyIncome: 5000,
+        monthlyExpenses: 3000,
+        emergencyFund: 10000,
       };
 
       const result = engine.calculateDebtPayoff(params);
@@ -279,6 +291,7 @@ describe('FinancialCalculationEngine', () => {
             balance: 5000,
             interestRate: 0.18,
             minimumPayment: 150,
+            type: 'credit_card' as const,
           },
           {
             id: '2',
@@ -286,11 +299,15 @@ describe('FinancialCalculationEngine', () => {
             balance: 3000,
             interestRate: 0.22,
             minimumPayment: 100,
+            type: 'credit_card' as const,
           },
         ],
         extraPayment: 100,
         strategy: 'custom',
         customOrder: ['1', '2'],
+        monthlyIncome: 5000,
+        monthlyExpenses: 3000,
+        emergencyFund: 10000,
       };
 
       const result = engine.calculateDebtPayoff(params);
@@ -309,10 +326,14 @@ describe('FinancialCalculationEngine', () => {
             balance: 1000,
             interestRate: 0.12,
             minimumPayment: 50,
+            type: 'credit_card' as const,
           },
         ],
         extraPayment: 50,
         strategy: 'snowball',
+        monthlyIncome: 5000,
+        monthlyExpenses: 3000,
+        emergencyFund: 10000,
       };
 
       const result = engine.calculateDebtPayoff(params);
@@ -374,12 +395,16 @@ describe('FinancialCalculationEngine', () => {
         balance: Math.random() * 10000 + 1000,
         interestRate: Math.random() * 0.2 + 0.05,
         minimumPayment: Math.random() * 200 + 50,
+        type: 'credit_card' as const,
       }));
 
       const params: DebtPayoffParams = {
         debts,
         extraPayment: 500,
         strategy: 'avalanche',
+        monthlyIncome: 8000,
+        monthlyExpenses: 5000,
+        emergencyFund: 15000,
       };
 
       const start = performance.now();
@@ -523,6 +548,9 @@ describe('FinancialCalculationEngine', () => {
         debts: [],
         extraPayment: 100,
         strategy: 'snowball',
+        monthlyIncome: 5000,
+        monthlyExpenses: 3000,
+        emergencyFund: 10000,
       };
 
       expect(() => {
@@ -1563,9 +1591,9 @@ describe('FinancialCalculationEngine', () => {
               expectedReturn: 0.07,
               timeHorizon: 20,
               scenarioTypes: [
-                'great_recession_2008',
-                'covid_crash_2020',
-                'market_correction_10',
+                'great_recession_2008' as const,
+                'covid_crash_2020' as const,
+                'market_correction_10' as const,
               ],
               includeHistoricalData: true,
               confidenceIntervals: [10, 25, 50, 75, 90],
@@ -1618,7 +1646,10 @@ describe('FinancialCalculationEngine', () => {
               monthlyContributions: 0,
               expectedReturn: 0.07,
               timeHorizon: 30,
-              scenarioTypes: ['sustained_low_returns', 'high_inflation_period'],
+              scenarioTypes: [
+                'sustained_low_returns' as const,
+                'high_inflation_period' as const,
+              ],
               withdrawalPhase: {
                 startAge: 65,
                 annualWithdrawal: 40000,
@@ -1650,7 +1681,7 @@ describe('FinancialCalculationEngine', () => {
               monthlyContributions: 2000,
               expectedReturn: 0.07,
               timeHorizon: 15,
-              scenarioTypes: ['bear_market_20'],
+              scenarioTypes: ['bear_market_20' as const],
               rebalancingStrategy: {
                 type: 'threshold' as const,
                 frequency: 'quarterly' as const,
@@ -1679,7 +1710,7 @@ describe('FinancialCalculationEngine', () => {
                 monthlyContributions: 1000,
                 expectedReturn: 0.07,
                 timeHorizon: 10,
-                scenarioTypes: ['market_correction_10'],
+                scenarioTypes: ['market_correction_10' as const],
               });
             }).toThrow('Portfolio value cannot be negative');
 
@@ -1689,7 +1720,7 @@ describe('FinancialCalculationEngine', () => {
                 monthlyContributions: -500, // Negative contributions
                 expectedReturn: 0.07,
                 timeHorizon: 10,
-                scenarioTypes: ['market_correction_10'],
+                scenarioTypes: ['market_correction_10' as const],
               });
             }).toThrow('Monthly contributions cannot be negative');
 
@@ -1699,7 +1730,7 @@ describe('FinancialCalculationEngine', () => {
                 monthlyContributions: 1000,
                 expectedReturn: 0.07,
                 timeHorizon: 0, // Invalid time horizon
-                scenarioTypes: ['market_correction_10'],
+                scenarioTypes: ['market_correction_10' as const],
               });
             }).toThrow('Time horizon must be between 1 and 50 years');
 
@@ -1709,25 +1740,25 @@ describe('FinancialCalculationEngine', () => {
                 monthlyContributions: 1000,
                 expectedReturn: 1.5, // Invalid return
                 timeHorizon: 10,
-                scenarioTypes: ['market_correction_10'],
+                scenarioTypes: ['market_correction_10' as const],
               });
             }).toThrow('Expected return must be between -100% and 100%');
           });
 
           test('should handle all scenario types', () => {
             const allScenarioTypes = [
-              'great_recession_2008',
-              'covid_crash_2020',
-              'dot_com_crash_2000',
-              'black_monday_1987',
-              'stagflation_1970s',
-              'lost_decade_japan',
-              'sustained_low_returns',
-              'high_inflation_period',
-              'rising_interest_rates',
-              'market_correction_10',
-              'bear_market_20',
-              'severe_recession_30',
+              'great_recession_2008' as const,
+              'covid_crash_2020' as const,
+              'dot_com_crash_2000' as const,
+              'black_monday_1987' as const,
+              'stagflation_1970s' as const,
+              'lost_decade_japan' as const,
+              'sustained_low_returns' as const,
+              'high_inflation_period' as const,
+              'rising_interest_rates' as const,
+              'market_correction_10' as const,
+              'bear_market_20' as const,
+              'severe_recession_30' as const,
             ];
 
             const params = {
@@ -2473,9 +2504,9 @@ describe('FinancialCalculationEngine', () => {
             expectedReturn: 0.07,
             timeHorizon: 20,
             scenarioTypes: [
-              'great_recession_2008',
-              'covid_crash_2020',
-              'market_correction_10',
+              'great_recession_2008' as const,
+              'covid_crash_2020' as const,
+              'market_correction_10' as const,
             ],
             simulationIterations: 1000,
             includeRecoveryAnalysis: true,
@@ -2531,12 +2562,12 @@ describe('FinancialCalculationEngine', () => {
             expectedReturn: 0.07,
             timeHorizon: 30,
             scenarioTypes: [
-              'great_recession_2008',
-              'covid_crash_2020',
-              'dot_com_crash_2000',
-              'stagflation_1970s',
-              'sustained_low_returns',
-              'high_inflation_period',
+              'great_recession_2008' as const,
+              'covid_crash_2020' as const,
+              'dot_com_crash_2000' as const,
+              'stagflation_1970s' as const,
+              'sustained_low_returns' as const,
+              'high_inflation_period' as const,
             ],
             simulationIterations: 2000,
             includeRecoveryAnalysis: true,

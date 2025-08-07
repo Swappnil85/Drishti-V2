@@ -281,21 +281,21 @@ export class SecurityMonitor extends EventEmitter {
 
     report += `🚨 Events by Severity:\n`;
     Object.entries(stats.eventsBySeverity).forEach(([severity, count]) => {
-      if (count > 0) {
+      if (typeof count === 'number' && count > 0) {
         report += `- ${severity.toUpperCase()}: ${count}\n`;
       }
     });
 
     report += `\n📋 Events by Type:\n`;
     Object.entries(stats.eventsByType).forEach(([type, count]) => {
-      if (count > 0) {
+      if (typeof count === 'number' && count > 0) {
         report += `- ${type.replace(/_/g, ' ').toUpperCase()}: ${count}\n`;
       }
     });
 
     if (stats.topSuspiciousIPs.length > 0) {
       report += `\n🚩 Top Suspicious IPs:\n`;
-      stats.topSuspiciousIPs.forEach((ip, index) => {
+      stats.topSuspiciousIPs.forEach((ip: string, index: number) => {
         report += `${index + 1}. ${ip}\n`;
       });
     }

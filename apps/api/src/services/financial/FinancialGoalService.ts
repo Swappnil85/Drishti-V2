@@ -157,6 +157,26 @@ export class FinancialGoalService {
   }
 
   /**
+   * Get all goals for a user
+   */
+  async getGoalsByUserId(userId: string): Promise<FinancialGoal[]> {
+    try {
+      const result = await query<FinancialGoal>(
+        `
+        SELECT * FROM financial_goals
+        WHERE user_id = $1 AND is_active = true
+        ORDER BY target_date ASC, created_at DESC
+        `,
+        [userId]
+      );
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching user goals:', error);
+      throw new Error('Failed to fetch user goals');
+    }
+  }
+
+  /**
    * Get a specific financial goal by ID
    */
   async getGoalById(

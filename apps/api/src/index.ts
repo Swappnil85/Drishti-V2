@@ -5,6 +5,8 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import compress from '@fastify/compress';
+import websocket from '@fastify/websocket';
 import dotenv from 'dotenv';
 import {
   initializeDatabase,
@@ -17,6 +19,13 @@ import { authRoutes } from './routes/auth';
 import { financialRoutes } from './routes/financial';
 import { syncRoutes } from './routes/sync';
 import calculationsRoutes from './routes/calculations';
+import { monitoringRoutes } from './routes/monitoring';
+// import { graphqlRoutes } from './routes/graphql';
+// import { batchRoutes } from './routes/batch';
+import { cacheService } from './services/cache/CacheService';
+// import { websocketService } from './services/websocket/WebSocketService';
+import { healthMonitoringService } from './services/monitoring/HealthMonitoringService';
+import { databaseOptimizationService } from './services/database/DatabaseOptimizationService';
 
 // Load environment variables
 dotenv.config();
@@ -29,14 +38,43 @@ const fastify = Fastify({
 
 // Register plugins
 async function registerPlugins() {
+  // Performance and compression
+  await fastify.register(compress, {
+    global: true,
+    encodings: ['gzip', 'deflate'],
+  });
+
+  // WebSocket support
+  await fastify.register(websocket);
+
   // Security
-  await fastify.register(helmet);
+  await fastify.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  });
+
   await fastify.register(cors, {
     origin: process.env.CORS_ORIGIN || true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
+
   await fastify.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute',
+    skipOnError: true,
+    addHeaders: {
+      'x-ratelimit-limit': true,
+      'x-ratelimit-remaining': true,
+      'x-ratelimit-reset': true,
+    },
   });
 
   // Documentation
@@ -44,11 +82,17 @@ async function registerPlugins() {
     swagger: {
       info: {
         title: 'Drishti API',
-        description: 'AI-powered visual assistance API',
-        version: '2.0.0',
+        description:
+          'FIRE Planning Application API with comprehensive financial tools',
+        version: '2.1.0',
+        contact: {
+          name: 'Drishti API Support',
+          email: 'api@drishti.com',
+        },
       },
-      host: 'localhost:3000',
-      schemes: ['http', 'https'],
+      host: process.env.API_HOST || 'localhost:3000',
+      schemes:
+        process.env.NODE_ENV === 'production' ? ['https'] : ['http', 'https'],
       consumes: ['application/json'],
       produces: ['application/json'],
       securityDefinitions: {
@@ -59,28 +103,79 @@ async function registerPlugins() {
           description: 'Enter: Bearer {token}',
         },
       },
+      tags: [
+        {
+          name: 'Authentication',
+          description: 'User authentication and authorization',
+        },
+        {
+          name: 'Financial',
+          description: 'Financial accounts and goals management',
+        },
+        {
+          name: 'Calculations',
+          description: 'Financial calculations and projections',
+        },
+        {
+          name: 'Batch',
+          description: 'Bulk operations for efficient data processing',
+        },
+        {
+          name: 'Monitoring',
+          description: 'Health checks and system monitoring',
+        },
+        { name: 'Sync', description: 'Data synchronization endpoints' },
+      ],
     },
   });
 
   await fastify.register(swaggerUi, {
     routePrefix: '/docs',
     uiConfig: {
-      docExpansion: 'full',
-      deepLinking: false,
+      docExpansion: 'list',
+      deepLinking: true,
+      displayOperationId: true,
+      defaultModelsExpandDepth: 2,
     },
+    staticCSP: true,
   });
 
-  // Register authentication routes
+  // API Versioning - V1 Routes (Legacy)
+  await fastify.register(
+    async function (fastify) {
+      await fastify.register(authRoutes, { prefix: '/auth' });
+      await fastify.register(financialRoutes, { prefix: '/financial' });
+      await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      await fastify.register(syncRoutes, { prefix: '/sync' });
+    },
+    { prefix: '/v1' }
+  );
+
+  // API Versioning - V2 Routes (Current)
+  await fastify.register(
+    async function (fastify) {
+      await fastify.register(authRoutes, { prefix: '/auth' });
+      await fastify.register(financialRoutes, { prefix: '/financial' });
+      await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      await fastify.register(syncRoutes, { prefix: '/sync' });
+      await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
+      // await fastify.register(batchRoutes, { prefix: '/batch' });
+      // await fastify.register(graphqlRoutes, { prefix: '/graphql' });
+    },
+    { prefix: '/v2' }
+  );
+
+  // Default routes (current version)
   await fastify.register(authRoutes, { prefix: '/auth' });
-
-  // Register financial routes
   await fastify.register(financialRoutes, { prefix: '/financial' });
-
-  // Register calculation routes
   await fastify.register(calculationsRoutes, { prefix: '/calculations' });
-
-  // Register sync routes
   await fastify.register(syncRoutes, { prefix: '/sync' });
+  await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
+  // await fastify.register(batchRoutes, { prefix: '/batch' });
+  // await fastify.register(graphqlRoutes, { prefix: '/graphql' });
+
+  // WebSocket routes
+  // websocketService.registerRoutes(fastify);
 }
 
 // Routes
@@ -195,13 +290,29 @@ const start = async () => {
   }
 };
 
-// Graceful shutdown
-const gracefulShutdown = async () => {
-  console.log('🛑 Shutting down gracefully...');
+// Enhanced graceful shutdown
+const gracefulShutdown = async (signal?: string) => {
+  console.log(
+    `🛑 ${signal || 'Shutdown signal'} received, shutting down gracefully...`
+  );
   try {
+    // Stop accepting new connections
     await fastify.close();
+    console.log('✅ HTTP server closed');
+
+    // Shutdown monitoring services
+    healthMonitoringService.shutdown();
+    console.log('✅ Health monitoring service stopped');
+
+    // Shutdown database optimization service
+    await databaseOptimizationService.shutdown();
+    console.log('✅ Database optimization service stopped');
+
+    // Close database connections
     await closeDatabase();
-    console.log('✅ Server shut down complete');
+    console.log('✅ Database connections closed');
+
+    console.log('✅ Graceful shutdown completed successfully');
     process.exit(0);
   } catch (err) {
     console.error('❌ Error during shutdown:', err);

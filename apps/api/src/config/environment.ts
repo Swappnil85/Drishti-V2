@@ -26,10 +26,10 @@ const environmentSchema = z.object({
     .string()
     .transform(val => val === 'true')
     .default('false'),
-  DB_POOL_MIN: z.string().transform(Number).default(2),
-  DB_POOL_MAX: z.string().transform(Number).default(20),
-  DB_CONNECTION_TIMEOUT: z.string().transform(Number).default(30000),
-  DB_IDLE_TIMEOUT: z.string().transform(Number).default(600000),
+  DB_POOL_MIN: z.string().transform(Number).default('2'),
+  DB_POOL_MAX: z.string().transform(Number).default('20'),
+  DB_CONNECTION_TIMEOUT: z.string().transform(Number).default('30000'),
+  DB_IDLE_TIMEOUT: z.string().transform(Number).default('600000'),
 
   // JWT Configuration
   JWT_ACCESS_SECRET: z
@@ -47,35 +47,35 @@ const environmentSchema = z.object({
   SESSION_SECRET: z
     .string()
     .min(32, 'Session secret must be at least 32 characters'),
-  SESSION_TIMEOUT: z.string().transform(Number).default(3600000),
-  MAX_CONCURRENT_SESSIONS: z.string().transform(Number).default(5),
+  SESSION_TIMEOUT: z.string().transform(Number).default('3600000'),
+  MAX_CONCURRENT_SESSIONS: z.string().transform(Number).default('5'),
 
   // Security Configuration
-  BCRYPT_ROUNDS: z.string().transform(Number).default(12),
-  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default(900000),
-  RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default(5),
-  ACCOUNT_LOCK_DURATION: z.string().transform(Number).default(3600000),
-  MAX_FAILED_LOGIN_ATTEMPTS: z.string().transform(Number).default(5),
+  BCRYPT_ROUNDS: z.string().transform(Number).default('12'),
+  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default('900000'),
+  RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default('5'),
+  ACCOUNT_LOCK_DURATION: z.string().transform(Number).default('3600000'),
+  MAX_FAILED_LOGIN_ATTEMPTS: z.string().transform(Number).default('5'),
 
   // CORS Configuration
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CORS_CREDENTIALS: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
 
   // SSL/TLS Configuration
   HTTPS_ENABLED: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
   SSL_CERT_PATH: z.string().optional(),
   SSL_KEY_PATH: z.string().optional(),
   SSL_CA_PATH: z.string().optional(),
   FORCE_HTTPS: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
 
   // OAuth Configuration (Optional)
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -88,11 +88,11 @@ const environmentSchema = z.object({
 
   // Email Configuration
   SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().transform(Number).default(587),
+  SMTP_PORT: z.string().transform(Number).default('587'),
   SMTP_SECURE: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   FROM_EMAIL: z.string().email().optional(),
@@ -101,13 +101,13 @@ const environmentSchema = z.object({
   // Redis Configuration
   REDIS_URL: z.string().url().optional(),
   REDIS_HOST: z.string().optional(),
-  REDIS_PORT: z.string().transform(Number).default(6379),
+  REDIS_PORT: z.string().transform(Number).default('6379'),
   REDIS_PASSWORD: z.string().optional(),
-  REDIS_DB: z.string().transform(Number).default(0),
+  REDIS_DB: z.string().transform(Number).default('0'),
   REDIS_TLS: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
 
   // Monitoring and Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
@@ -116,47 +116,47 @@ const environmentSchema = z.object({
   ENABLE_REQUEST_LOGGING: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
   ENABLE_ERROR_TRACKING: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
 
   // Health Check Configuration
   HEALTH_CHECK_ENABLED: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
   HEALTH_CHECK_PATH: z.string().default('/health'),
-  HEALTH_CHECK_TIMEOUT: z.string().transform(Number).default(5000),
+  HEALTH_CHECK_TIMEOUT: z.string().transform(Number).default('5000'),
 
   // Feature Flags
   ENABLE_REGISTRATION: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
   ENABLE_OAUTH: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
   ENABLE_EMAIL_VERIFICATION: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
   ENABLE_PASSWORD_RESET: z
     .string()
     .transform(val => val === 'true')
-    .default(true),
+    .default('true'),
 
   // Debug Configuration
   DEBUG: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
   ENABLE_SWAGGER: z
     .string()
     .transform(val => val === 'true')
-    .default(false),
+    .default('false'),
 });
 
 /**

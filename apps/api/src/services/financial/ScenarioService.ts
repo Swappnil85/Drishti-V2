@@ -154,6 +154,26 @@ export class ScenarioService {
   }
 
   /**
+   * Get all scenarios for a user
+   */
+  async getScenariosByUserId(userId: string): Promise<Scenario[]> {
+    try {
+      const result = await query<Scenario>(
+        `
+        SELECT * FROM scenarios
+        WHERE user_id = $1 AND is_active = true
+        ORDER BY created_at DESC
+        `,
+        [userId]
+      );
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching user scenarios:', error);
+      throw new Error('Failed to fetch user scenarios');
+    }
+  }
+
+  /**
    * Get a specific scenario by ID
    */
   async getScenarioById(

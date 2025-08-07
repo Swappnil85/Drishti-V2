@@ -5,11 +5,41 @@
 
 import { query, transaction } from '../../db/connection';
 import { AppError, SystemErrors, ValidationErrors } from '../../utils/errors';
-import type { 
-  FinancialInstitution, 
-  InstitutionType, 
-  AccountType 
-} from '@drishti/shared/types/financial';
+// Temporary interfaces until shared types are updated
+interface FinancialInstitution {
+  id: string;
+  name: string;
+  type: InstitutionType;
+  institution_type: InstitutionType;
+  website?: string;
+  phone?: string;
+  address?: string;
+  routing_number?: string;
+  swift_code?: string;
+  default_interest_rates?: Record<string, number>;
+  logo_url?: string;
+  country?: string;
+  supported_account_types?: AccountType[];
+  metadata?: Record<string, any>;
+  synced_at?: string;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+type InstitutionType =
+  | 'bank'
+  | 'credit_union'
+  | 'investment'
+  | 'insurance'
+  | 'other';
+type AccountType =
+  | 'checking'
+  | 'savings'
+  | 'investment'
+  | 'credit_card'
+  | 'loan'
+  | 'other';
 
 // DTOs for institution operations
 export interface CreateFinancialInstitutionDto {
@@ -151,9 +181,10 @@ class FinancialInstitutionService {
         paramIndex++;
       }
 
-      const whereClause = whereConditions.length > 0 
-        ? `WHERE ${whereConditions.join(' AND ')}`
-        : '';
+      const whereClause =
+        whereConditions.length > 0
+          ? `WHERE ${whereConditions.join(' AND ')}`
+          : '';
 
       // Get total count
       const countResult = await query(
@@ -195,7 +226,9 @@ class FinancialInstitutionService {
   /**
    * Get institution by ID
    */
-  async getInstitutionById(institutionId: string): Promise<FinancialInstitution | null> {
+  async getInstitutionById(
+    institutionId: string
+  ): Promise<FinancialInstitution | null> {
     try {
       const result = await query<FinancialInstitution>(
         `
@@ -219,7 +252,9 @@ class FinancialInstitutionService {
   /**
    * Get institution by routing number
    */
-  async getInstitutionByRoutingNumber(routingNumber: string): Promise<FinancialInstitution | null> {
+  async getInstitutionByRoutingNumber(
+    routingNumber: string
+  ): Promise<FinancialInstitution | null> {
     try {
       const result = await query<FinancialInstitution>(
         `
@@ -255,7 +290,11 @@ class FinancialInstitutionService {
       // Build dynamic update query
       Object.entries(updateData).forEach(([key, value]) => {
         if (value !== undefined) {
-          if (key === 'default_interest_rates' || key === 'supported_account_types' || key === 'metadata') {
+          if (
+            key === 'default_interest_rates' ||
+            key === 'supported_account_types' ||
+            key === 'metadata'
+          ) {
             setClause.push(`${key} = $${paramIndex}`);
             queryParams.push(JSON.stringify(value));
           } else {
@@ -297,7 +336,7 @@ class FinancialInstitutionService {
    * Get default interest rate for account type at institution
    */
   async getDefaultInterestRate(
-    institutionId: string, 
+    institutionId: string,
     accountType: AccountType
   ): Promise<number> {
     try {
@@ -306,7 +345,10 @@ class FinancialInstitutionService {
         return 0.01; // Default 1% if institution not found
       }
 
-      const rates = institution.default_interest_rates as Record<AccountType, number>;
+      const rates = institution.default_interest_rates as Record<
+        AccountType,
+        number
+      >;
       return rates[accountType] || 0.01;
     } catch (error) {
       return 0.01; // Default fallback
@@ -320,6 +362,7 @@ class FinancialInstitutionService {
     return {
       id: row.id,
       name: row.name,
+      type: row.institution_type,
       institution_type: row.institution_type,
       routing_number: row.routing_number,
       swift_code: row.swift_code,
@@ -327,15 +370,18 @@ class FinancialInstitutionService {
       logo_url: row.logo_url,
       country: row.country,
       is_active: row.is_active,
-      default_interest_rates: typeof row.default_interest_rates === 'string' 
-        ? JSON.parse(row.default_interest_rates) 
-        : row.default_interest_rates,
-      supported_account_types: typeof row.supported_account_types === 'string'
-        ? JSON.parse(row.supported_account_types)
-        : row.supported_account_types,
-      metadata: typeof row.metadata === 'string' 
-        ? JSON.parse(row.metadata) 
-        : row.metadata,
+      default_interest_rates:
+        typeof row.default_interest_rates === 'string'
+          ? JSON.parse(row.default_interest_rates)
+          : row.default_interest_rates,
+      supported_account_types:
+        typeof row.supported_account_types === 'string'
+          ? JSON.parse(row.supported_account_types)
+          : row.supported_account_types,
+      metadata:
+        typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata)
+          : row.metadata,
       created_at: row.created_at.toISOString(),
       updated_at: row.updated_at.toISOString(),
       synced_at: row.synced_at?.toISOString(),

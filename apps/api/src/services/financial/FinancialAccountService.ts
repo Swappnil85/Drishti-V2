@@ -149,6 +149,26 @@ export class FinancialAccountService {
   }
 
   /**
+   * Get all accounts for a user
+   */
+  async getAccountsByUserId(userId: string): Promise<FinancialAccount[]> {
+    try {
+      const result = await query<FinancialAccount>(
+        `
+        SELECT * FROM financial_accounts
+        WHERE user_id = $1 AND is_active = true
+        ORDER BY created_at DESC
+        `,
+        [userId]
+      );
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching user accounts:', error);
+      throw new Error('Failed to fetch user accounts');
+    }
+  }
+
+  /**
    * Get a specific financial account by ID
    */
   async getAccountById(

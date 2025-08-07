@@ -3631,7 +3631,7 @@ export class FinancialCalculationEngine {
 
       // Cache the result
       const cacheKey = `coast_fire_${JSON.stringify(params)}`;
-      this.setCache(cacheKey, result);
+      this.setCache(cacheKey, result, []);
 
       return result;
     } catch (error) {
@@ -3960,7 +3960,7 @@ export class FinancialCalculationEngine {
 
       // Cache the result
       const cacheKey = `barista_fire_${JSON.stringify(params)}`;
-      this.setCache(cacheKey, result);
+      this.setCache(cacheKey, result, []);
 
       return result;
     } catch (error) {
@@ -4185,7 +4185,7 @@ export class FinancialCalculationEngine {
 
       // Cache the result
       const cacheKey = `market_volatility_${JSON.stringify(params)}`;
-      this.setCache(cacheKey, result);
+      this.setCache(cacheKey, result, []);
 
       return result;
     } catch (error) {
@@ -4780,7 +4780,7 @@ export class FinancialCalculationEngine {
 
       // Cache the result
       const cacheKey = `market_stress_test_${JSON.stringify(params)}`;
-      this.setCache(cacheKey, result);
+      this.setCache(cacheKey, result, []);
 
       return result;
     } catch (error) {

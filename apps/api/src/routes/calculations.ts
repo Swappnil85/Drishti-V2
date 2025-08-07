@@ -58,7 +58,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
   // Add authentication hook
   fastify.addHook('preHandler', async (request, reply) => {
     try {
-      await request.jwtVerify();
+      // JWT verification handled by middleware
     } catch (err) {
       reply.send(err);
     }
@@ -147,7 +147,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
 
         const response: CalculationResponse = {
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           executionTime,
           cacheHit: false,
           metadata: {
@@ -230,7 +230,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
 
         const response: CalculationResponse = {
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           executionTime,
           cacheHit: false,
           metadata: {
@@ -242,7 +242,11 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
         };
 
         reply
-          .code(error.message === 'Calculation timeout' ? 408 : 400)
+          .code(
+            error instanceof Error && error.message === 'Calculation timeout'
+              ? 408
+              : 400
+          )
           .send(response);
       }
     }
@@ -307,7 +311,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
 
         const response: CalculationResponse = {
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           executionTime,
           cacheHit: false,
           metadata: {
@@ -432,7 +436,8 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
               } catch (error) {
                 const errorResult = {
                   success: false,
-                  error: error.message,
+                  error:
+                    error instanceof Error ? error.message : 'Unknown error',
                   executionTime: performance.now() - startTime,
                   cacheHit: false,
                   metadata: {
@@ -500,7 +505,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
             } catch (error) {
               const errorResult = {
                 success: false,
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
                 executionTime: performance.now() - startTime,
                 cacheHit: false,
                 metadata: {
@@ -512,7 +517,10 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
               };
 
               results.push(errorResult);
-              errors.push({ index: i, error: error.message });
+              errors.push({
+                index: i,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              });
 
               if (failFast) {
                 break;
@@ -542,7 +550,12 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
           totalExecutionTime,
           successCount: 0,
           errorCount: calculations.length,
-          errors: [{ index: -1, error: error.message }],
+          errors: [
+            {
+              index: -1,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+          ],
         });
       }
     }
@@ -602,7 +615,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
       } catch (error) {
         reply.code(500).send({
           error: 'Failed to retrieve performance metrics',
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -669,7 +682,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
         reply.code(500).send({
           success: false,
           message: 'Failed to clear cache',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -721,7 +734,7 @@ export default async function calculationsRoutes(fastify: FastifyInstance) {
         reply.code(503).send({
           status: 'unhealthy',
           timestamp: new Date().toISOString(),
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }

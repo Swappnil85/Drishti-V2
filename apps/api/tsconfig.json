@@ -13,14 +13,5 @@
     }
   },
   "include": ["src/**/*", "../../packages/shared/src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "src/config/environment.ts",
-    "src/config/database-security.ts",
-    "src/routes/monitoring.ts",
-    "src/services/monitoring/SecurityMonitor.ts"
-  ]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
