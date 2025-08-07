@@ -14,7 +14,20 @@ export type GoalType =
   | 'debt_payoff'
   | 'emergency_fund'
   | 'investment'
+  | 'fire_traditional'
+  | 'fire_lean'
+  | 'fire_fat'
+  | 'fire_coast'
+  | 'fire_barista'
   | 'other';
+
+// FIRE Goal Types for enhanced goal creation
+export type FIREGoalType =
+  | 'fire_traditional'
+  | 'fire_lean'
+  | 'fire_fat'
+  | 'fire_coast'
+  | 'fire_barista';
 export type TransactionType =
   | 'deposit'
   | 'withdrawal'
@@ -69,6 +82,74 @@ export interface FinancialGoal extends BaseEntity {
   description?: string;
   is_active: boolean;
   metadata: Record<string, any>;
+}
+
+// FIRE Goal Metadata for enhanced goal tracking
+export interface FIREGoalMetadata {
+  // FIRE calculation parameters
+  fireType: FIREGoalType;
+  withdrawalRate: number; // Default 0.04 (4% rule)
+  safetyMargin: number; // Additional buffer percentage
+
+  // Expense information
+  monthlyExpenses: number;
+  annualExpenses: number;
+  expenseCategories?: Array<{
+    category: string;
+    monthlyAmount: number;
+    inflationRate: number;
+    essential: boolean;
+  }>;
+
+  // Geographic and lifestyle factors
+  geographicLocation?: string;
+  costOfLivingMultiplier?: number;
+  lifestyleInflationRate?: number;
+
+  // Timeline and age factors
+  currentAge: number;
+  targetRetirementAge?: number;
+  lifeExpectancy?: number;
+
+  // Income and savings
+  currentIncome?: number;
+  expectedIncomeGrowth?: number;
+  currentSavingsRate?: number;
+
+  // Investment assumptions
+  expectedReturn: number;
+  inflationRate: number;
+
+  // Healthcare and benefits
+  healthcareCosts?: number;
+  socialSecurityBenefit?: number;
+  pensionBenefit?: number;
+
+  // Goal-specific settings
+  autoAdjustForInflation: boolean;
+  includeHealthcareBuffer: boolean;
+  includeTaxConsiderations: boolean;
+
+  // Progress tracking
+  milestones?: Array<{
+    percentage: number;
+    amount: number;
+    targetDate?: string;
+    achieved: boolean;
+    achievedDate?: string;
+  }>;
+
+  // Adjustment history
+  adjustmentHistory?: Array<{
+    date: string;
+    previousAmount: number;
+    newAmount: number;
+    reason: string;
+    impact: {
+      timelineChange: number; // months
+      savingsRateChange: number; // percentage
+    };
+  }>;
 }
 
 // Scenario entity
@@ -156,6 +237,62 @@ export interface CreateFinancialGoalDto {
   priority?: Priority;
   description?: string;
   metadata?: Record<string, any>;
+}
+
+// Enhanced FIRE Goal Creation DTO
+export interface CreateFIREGoalDto
+  extends Omit<CreateFinancialGoalDto, 'goal_type' | 'metadata'> {
+  goal_type: FIREGoalType;
+  fireMetadata: FIREGoalMetadata;
+
+  // Template information
+  templateId?: string;
+  templateName?: string;
+
+  // User profile integration
+  useProfileDefaults?: boolean;
+  profileBasedCalculation?: boolean;
+}
+
+// FIRE Goal Template
+export interface FIREGoalTemplate {
+  id: string;
+  name: string;
+  description: string;
+  fireType: FIREGoalType;
+  category: 'beginner' | 'intermediate' | 'advanced' | 'custom';
+
+  // Template defaults
+  defaultMetadata: Partial<FIREGoalMetadata>;
+
+  // Calculation assumptions
+  assumptions: {
+    withdrawalRate: number;
+    expectedReturn: number;
+    inflationRate: number;
+    safetyMargin: number;
+  };
+
+  // Template-specific guidance
+  guidance: {
+    title: string;
+    description: string;
+    tips: string[];
+    warnings?: string[];
+    recommendedFor: string[];
+  };
+
+  // Customization options
+  customizableFields: Array<{
+    field: keyof FIREGoalMetadata;
+    label: string;
+    type: 'number' | 'boolean' | 'select' | 'text';
+    required: boolean;
+    options?: string[];
+    min?: number;
+    max?: number;
+    step?: number;
+  }>;
 }
 
 export interface UpdateFinancialGoalDto
@@ -268,7 +405,20 @@ export const GOAL_TYPES: GoalType[] = [
   'debt_payoff',
   'emergency_fund',
   'investment',
+  'fire_traditional',
+  'fire_lean',
+  'fire_fat',
+  'fire_coast',
+  'fire_barista',
   'other',
+];
+
+export const FIRE_GOAL_TYPES: FIREGoalType[] = [
+  'fire_traditional',
+  'fire_lean',
+  'fire_fat',
+  'fire_coast',
+  'fire_barista',
 ];
 export const TRANSACTION_TYPES: TransactionType[] = [
   'deposit',
@@ -1696,3 +1846,103 @@ export interface BatchCalculationResponse {
 
 export const DEFAULT_CURRENCY: Currency = 'USD';
 export const DEFAULT_PRIORITY: Priority = 3;
+
+// FIRE Goal Progress Tracking
+export interface FIREGoalProgress {
+  goalId: string;
+  currentAmount: number;
+  targetAmount: number;
+  progressPercentage: number;
+
+  // Timeline tracking
+  timeElapsed: number; // months since goal creation
+  estimatedTimeRemaining: number; // months to completion
+  originalTimeline: number; // original estimated months
+
+  // Velocity tracking
+  monthlyProgress: number; // average monthly progress
+  progressVelocity: 'accelerating' | 'steady' | 'decelerating' | 'stalled';
+  velocityTrend: number; // percentage change in velocity
+
+  // Milestone tracking
+  nextMilestone: {
+    percentage: number;
+    amount: number;
+    estimatedDate: string;
+  };
+
+  // Projections
+  projectedCompletionDate: string;
+  confidenceLevel: number; // 0-100 based on consistency
+
+  // Comparison to initial projections
+  varianceAnalysis: {
+    timelineVariance: number; // months ahead/behind
+    amountVariance: number; // dollars ahead/behind
+    savingsRateVariance: number; // percentage difference
+  };
+}
+
+// FIRE Goal Feasibility Analysis
+export interface FIREGoalFeasibility {
+  goalId: string;
+  feasibilityScore: number; // 0-100
+  feasibilityRating: 'excellent' | 'good' | 'challenging' | 'unrealistic';
+
+  // Current vs required metrics
+  currentSavingsRate: number;
+  requiredSavingsRate: number;
+  savingsRateGap: number;
+
+  currentMonthlyContribution: number;
+  requiredMonthlyContribution: number;
+  contributionGap: number;
+
+  // Risk factors
+  riskFactors: Array<{
+    type:
+      | 'income'
+      | 'expenses'
+      | 'market'
+      | 'timeline'
+      | 'health'
+      | 'inflation';
+    severity: 'low' | 'medium' | 'high';
+    description: string;
+    impact: string;
+    mitigation: string;
+  }>;
+
+  // Recommendations
+  recommendations: Array<{
+    category:
+      | 'savings_rate'
+      | 'timeline'
+      | 'target_amount'
+      | 'income'
+      | 'expenses';
+    priority: 'high' | 'medium' | 'low';
+    action: string;
+    impact: string;
+    difficulty: 'easy' | 'moderate' | 'difficult';
+    estimatedTimeframe: string;
+  }>;
+
+  // Alternative scenarios
+  alternativeScenarios: Array<{
+    name: string;
+    adjustments: string[];
+    newTimeline: number;
+    newTargetAmount: number;
+    feasibilityScore: number;
+    tradeoffs: string[];
+  }>;
+
+  // Sensitivity analysis
+  sensitivityAnalysis: {
+    incomeChange: { change: number; impact: string }[];
+    expenseChange: { change: number; impact: string }[];
+    returnChange: { change: number; impact: string }[];
+    timelineChange: { change: number; impact: string }[];
+  };
+}
