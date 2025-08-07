@@ -25,6 +25,8 @@ import {
 import { FIREGoalService } from '../../services/financial/FIREGoalService';
 import { Button, Card, Container, Icon } from '../../components/ui';
 import { useHaptic } from '../../hooks/useHaptic';
+import { useOffline, useOfflineFeature } from '../../hooks/useOffline';
+import OfflineIndicator from '../../components/sync/OfflineIndicator';
 
 type Props = GoalsStackScreenProps<'GoalsList'>;
 
@@ -38,6 +40,9 @@ const GoalsListScreen: React.FC<Props> = ({ navigation }) => {
 
   const fireGoalService = FIREGoalService.getInstance();
   const { buttonTap } = useHaptic();
+  const { isOfflineMode, offlineStatusText } = useOffline();
+  const { isAvailable: isGoalTrackingAvailable, performOperation } =
+    useOfflineFeature('goalTracking');
 
   useFocusEffect(
     useCallback(() => {

@@ -40,6 +40,7 @@ import {
 } from '@drishti/shared';
 import { database } from '../../database';
 import { Q } from '@nozbe/watermelondb';
+import { offlineService } from '../sync/OfflineService';
 
 // Cache configuration
 const CACHE_PREFIX = 'calculation_cache_';
@@ -100,6 +101,12 @@ export class CalculationService {
       // Perform calculation
       const result =
         financialCalculationEngine.calculateCompoundInterestDetailed(params);
+
+      // Record offline calculation
+      await offlineService.recordOfflineCalculation(
+        'compound_interest',
+        params
+      );
 
       // Cache the result
       if (useCache) {

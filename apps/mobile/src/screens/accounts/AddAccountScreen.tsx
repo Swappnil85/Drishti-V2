@@ -34,6 +34,8 @@ import { institutionService } from '../../services/financial/InstitutionService'
 import { database } from '../../database';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFormHaptic } from '../../hooks/useHaptic';
+import { useOffline, useOfflineFeature } from '../../hooks/useOffline';
+import OfflineIndicator from '../../components/sync/OfflineIndicator';
 import { accountValidationService } from '../../services/financial/AccountValidationService';
 import type {
   AccountType,
@@ -90,6 +92,9 @@ const AddAccountScreen: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
   const { user } = useAuth();
   const formHaptic = useFormHaptic();
+  const { isOfflineMode, offlineStatusText } = useOffline();
+  const { isAvailable: isAccountManagementAvailable, performOperation } =
+    useOfflineFeature('accountManagement');
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -283,10 +288,12 @@ const AddAccountScreen: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
 
     try {
+      let newAccountId: string;
+
       await database.write(async () => {
         const accountsCollection = database.get('financial_accounts');
 
-        await accountsCollection.create((account: any) => {
+        const newAccount = await accountsCollection.create((account: any) => {
           account.userId = user?.id;
           account.name = formData.name.trim();
           account.accountType = formData.accountType;
@@ -308,20 +315,39 @@ const AddAccountScreen: React.FC<Props> = ({ navigation }) => {
             createdVia: 'mobile_app',
           };
         });
+
+        newAccountId = newAccount.id;
       });
+
+      // Queue offline operation if offline
+      if (isOfflineMode && isAccountManagementAvailable) {
+        await performOperation(
+          'create',
+          'financial_accounts',
+          newAccountId!,
+          {
+            userId: user?.id,
+            name: formData.name.trim(),
+            accountType: formData.accountType,
+            balance: parseFloat(formData.balance),
+            currency: formData.currency,
+          },
+          'normal'
+        );
+      }
 
       await formHaptic.success();
 
-      Alert.alert(
-        'Account Created',
-        `${formData.name} has been added successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      const successMessage = isOfflineMode
+        ? `${formData.name} has been created offline. Changes will sync when you're back online.`
+        : `${formData.name} has been added successfully!`;
+
+      Alert.alert('Account Created', successMessage, [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error) {
       console.error('Error creating account:', error);
       await formHaptic.error();
@@ -667,6 +693,18 @@ const AddAccountScreen: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.content}>
           {renderProgressIndicator()}
+
+          {/* Offline Indicator */}
+          {isOfflineMode && (
+            <View style={styles.offlineIndicatorContainer}>
+              <OfflineIndicator
+                showText={true}
+                showAnalytics={false}
+                style={styles.offlineIndicator}
+              />
+            </View>
+          )}
+
           {renderStepContent()}
         </View>
         {renderActions()}
@@ -731,6 +769,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
     fontWeight: '500',
+  },
+  offlineIndicatorContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  offlineIndicator: {
+    marginBottom: 0,
   },
 });
 

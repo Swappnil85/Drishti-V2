@@ -34,6 +34,15 @@ import { database } from '../../database';
 import FinancialAccount from '../../database/models/FinancialAccount';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFormHaptic } from '../../hooks/useHaptic';
+import { useOffline, useOfflineFeature } from '../../hooks/useOffline';
+import OfflineIndicator from '../../components/sync/OfflineIndicator';
+import EnhancedSyncIndicator from '../../components/sync/EnhancedSyncIndicator';
+import AdvancedConflictResolutionModal from '../../components/sync/AdvancedConflictResolutionModal';
+import {
+  useEnhancedSync,
+  usePlaidIntegration,
+} from '../../hooks/useEnhancedSync';
+import { useAdvancedConflictResolution } from '../../hooks/useAdvancedConflictResolution';
 import type { AccountType } from '@drishti/shared/types/financial';
 
 type Props = AccountsStackScreenProps<'AccountsList'>;
@@ -52,6 +61,36 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
   const { user } = useAuth();
   const formHaptic = useFormHaptic();
+  const { isOfflineMode, offlineStatusText, offlineStatusColor } = useOffline();
+  const { isAvailable: isAccountManagementAvailable, performOperation } =
+    useOfflineFeature('accountManagement');
+
+  // Enhanced sync hooks
+  const {
+    networkQuality,
+    isSyncing: isEnhancedSyncing,
+    performAdaptiveSync,
+    networkQualityDescription,
+  } = useEnhancedSync();
+
+  const {
+    totalConnections,
+    activeConnections,
+    syncAllBalances,
+    isSyncing: isPlaidSyncing,
+  } = usePlaidIntegration();
+
+  // Advanced conflict resolution hooks
+  const {
+    conflicts,
+    isResolving,
+    resolveConflict,
+    bulkResolveConflicts,
+    autoResolveConflicts,
+    totalConflicts,
+    criticalConflicts,
+    hasCriticalConflicts,
+  } = useAdvancedConflictResolution();
 
   const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
   const [filteredAccounts, setFilteredAccounts] = useState<FinancialAccount[]>(
@@ -64,6 +103,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [showConflictResolution, setShowConflictResolution] = useState(false);
   const [summary, setSummary] = useState<AccountSummary>({
     totalAccounts: 0,
     totalBalance: 0,
@@ -265,9 +305,13 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleDeleteAccount = (account: FinancialAccount) => {
+    const offlineMessage = isOfflineMode
+      ? " (Changes will sync when you're back online)"
+      : '';
+
     Alert.alert(
       'Delete Account',
-      `Are you sure you want to delete "${account.name}"? This will move the account to trash where it can be recovered for 30 days.`,
+      `Are you sure you want to delete "${account.name}"? This will move the account to trash where it can be recovered for 30 days.${offlineMessage}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -282,21 +326,32 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
                 });
               });
 
+              // Queue offline operation if offline
+              if (isOfflineMode && isAccountManagementAvailable) {
+                await performOperation(
+                  'update',
+                  'financial_accounts',
+                  account.id,
+                  { isActive: false, updatedAt: new Date() },
+                  'normal'
+                );
+              }
+
               await formHaptic.success();
               await loadAccounts();
 
-              // Show recovery option
-              Alert.alert(
-                'Account Deleted',
-                'Account has been moved to trash. You can recover it from the Account Recovery screen.',
-                [
-                  { text: 'OK' },
-                  {
-                    text: 'View Recovery',
-                    onPress: () => navigation.navigate('AccountRecovery'),
-                  },
-                ]
-              );
+              // Show recovery option with offline status
+              const message = isOfflineMode
+                ? "Account has been deleted offline. Changes will sync when you're back online. You can recover it from the Account Recovery screen."
+                : 'Account has been moved to trash. You can recover it from the Account Recovery screen.';
+
+              Alert.alert('Account Deleted', message, [
+                { text: 'OK' },
+                {
+                  text: 'View Recovery',
+                  onPress: () => navigation.navigate('AccountRecovery'),
+                },
+              ]);
             } catch (error) {
               console.error('Error deleting account:', error);
               await formHaptic.error();
@@ -391,6 +446,71 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
       );
     });
     setBulkUpdateVisible(false);
+  };
+
+  // Conflict resolution handlers
+  const handleShowConflictResolution = () => {
+    setShowConflictResolution(true);
+  };
+
+  const handleConflictResolve = async (
+    conflict: any,
+    resolution: any,
+    mergedData?: any
+  ) => {
+    try {
+      await resolveConflict(conflict, resolution, mergedData);
+      Alert.alert(
+        'Conflict Resolved',
+        'The sync conflict has been resolved successfully.'
+      );
+    } catch (error) {
+      console.error('Failed to resolve conflict:', error);
+      Alert.alert(
+        'Resolution Failed',
+        'Failed to resolve the conflict. Please try again.'
+      );
+    }
+  };
+
+  const handleBulkConflictResolve = async (
+    conflictsToResolve: any[],
+    options: any
+  ) => {
+    try {
+      const result = await bulkResolveConflicts(conflictsToResolve, options);
+      Alert.alert(
+        'Bulk Resolution Complete',
+        `Resolved ${result.resolved} conflicts. ${result.failed} failed. ${result.skipped} skipped.`
+      );
+      setShowConflictResolution(false);
+    } catch (error) {
+      console.error('Failed to bulk resolve conflicts:', error);
+      Alert.alert(
+        'Bulk Resolution Failed',
+        'Failed to resolve conflicts in bulk. Please try again.'
+      );
+    }
+  };
+
+  const handleAutoConflictResolve = async (conflictsToResolve: any[]) => {
+    try {
+      const result = await autoResolveConflicts(conflictsToResolve);
+      Alert.alert(
+        'Auto-Resolution Complete',
+        `Automatically resolved ${result.resolved.length} conflicts. ${result.remaining.length} require manual attention.`
+      );
+
+      if (result.remaining.length === 0) {
+        setShowConflictResolution(false);
+      }
+    } catch (error) {
+      console.error('Failed to auto-resolve conflicts:', error);
+      Alert.alert(
+        'Auto-Resolution Failed',
+        'Failed to automatically resolve conflicts. Please try again.'
+      );
+    }
   };
 
   const handleCancelQuickUpdate = () => {
@@ -728,7 +848,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           {/* Account Info */}
-          <Flex direction='column' gap='xs' style={{flex: 1}}>
+          <Flex direction='column' gap='xs' style={{ flex: 1 }}>
             <Flex direction='row' align='center' justify='space-between'>
               <Text
                 style={[
@@ -884,6 +1004,56 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.container}>
         {/* Summary Card */}
         <View style={styles.header}>
+          {/* Sync Indicators */}
+          <View style={styles.syncIndicators}>
+            {/* Offline Indicator */}
+            {isOfflineMode && (
+              <OfflineIndicator
+                showText={true}
+                showAnalytics={false}
+                style={styles.offlineIndicator}
+              />
+            )}
+
+            {/* Enhanced Sync Indicator */}
+            <EnhancedSyncIndicator
+              showText={true}
+              showNetworkQuality={true}
+              showPlaidStatus={totalConnections > 0}
+              style={styles.enhancedSyncIndicator}
+              testID='enhanced-sync-indicator'
+            />
+
+            {/* Conflict Resolution Indicator */}
+            {totalConflicts > 0 && (
+              <TouchableOpacity
+                style={[
+                  styles.conflictIndicator,
+                  hasCriticalConflicts && styles.criticalConflictIndicator,
+                ]}
+                onPress={handleShowConflictResolution}
+                testID='conflict-resolution-indicator'
+              >
+                <Icon
+                  name={hasCriticalConflicts ? 'warning' : 'info'}
+                  size='sm'
+                  color={hasCriticalConflicts ? '#ef4444' : '#f59e0b'}
+                />
+                <Text
+                  style={[
+                    styles.conflictText,
+                    {
+                      color: hasCriticalConflicts ? '#ef4444' : '#f59e0b',
+                    },
+                  ]}
+                >
+                  {totalConflicts} Conflict{totalConflicts > 1 ? 's' : ''}
+                  {criticalConflicts > 0 && ` (${criticalConflicts} Critical)`}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           {renderSummaryCard()}
           {renderFilterBar()}
         </View>
@@ -937,6 +1107,17 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
           onCancel={handleCancelBulkUpdate}
           visible={bulkUpdateVisible}
         />
+
+        {/* Advanced Conflict Resolution Modal */}
+        <AdvancedConflictResolutionModal
+          visible={showConflictResolution}
+          conflicts={conflicts}
+          onResolve={handleConflictResolve}
+          onBulkResolve={handleBulkConflictResolve}
+          onAutoResolve={handleAutoConflictResolve}
+          onClose={() => setShowConflictResolution(false)}
+          testID='advanced-conflict-resolution-modal'
+        />
       </View>
     </ScreenTemplate>
   );
@@ -949,6 +1130,39 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     gap: 12,
+  },
+  syncIndicators: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+    flexWrap: 'wrap',
+  },
+  offlineIndicator: {
+    flex: 0,
+  },
+  enhancedSyncIndicator: {
+    flex: 1,
+    minWidth: 200,
+  },
+  conflictIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderWidth: 1,
+    borderColor: '#f59e0b',
+    gap: 6,
+  },
+  criticalConflictIndicator: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: '#ef4444',
+  },
+  conflictText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   summaryCardTouchable: {
     // No additional styles needed, TouchableOpacity handles touch feedback
