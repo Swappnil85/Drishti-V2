@@ -11,19 +11,27 @@ export interface CertInfo {
 export class CertificateMonitor {
   async fetchServerCertificate(host: string, port = 443): Promise<CertInfo> {
     return new Promise((resolve, reject) => {
-      const req = https.request({ host, port, method: 'GET' }, res => {
-        const cert = res.socket.getPeerCertificate(true);
-        resolve({
-          valid_from: cert.valid_from,
-          valid_to: cert.valid_to,
-          subject: cert.subject,
-          issuer: cert.issuer,
-          fingerprint256: cert.fingerprint256,
+      try {
+        const req = https.request({ host, port, method: 'GET' }, res => {
+          const anySocket = res.socket as any;
+          const cert =
+            anySocket && typeof anySocket.getPeerCertificate === 'function'
+              ? anySocket.getPeerCertificate(true)
+              : {};
+          resolve({
+            valid_from: (cert as any).valid_from,
+            valid_to: (cert as any).valid_to,
+            subject: (cert as any).subject,
+            issuer: (cert as any).issuer,
+            fingerprint256: (cert as any).fingerprint256,
+          });
+          res.resume();
         });
-        res.resume();
-      });
-      req.on('error', reject);
-      req.end();
+        req.on('error', reject);
+        req.end();
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 

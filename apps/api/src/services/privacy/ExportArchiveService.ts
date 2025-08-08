@@ -26,8 +26,10 @@ export class ExportArchiveService {
       const archive = archiver('zip', { zlib: { level: 9 } });
 
       archive.on('data', (chunk: Buffer) => chunks.push(chunk));
-      archive.on('warning', err => console.warn('Archive warning:', err));
-      archive.on('error', reject);
+      archive.on('warning', (err: any) =>
+        console.warn('Archive warning:', err)
+      );
+      archive.on('error', (err: any) => reject(err));
       archive.on('end', () => resolve(Buffer.concat(chunks)));
 
       files.forEach(f => archive.append(f.content, { name: f.name }));

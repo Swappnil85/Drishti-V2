@@ -19,43 +19,49 @@ export class RetentionScheduler {
 
   private setupProcessors() {
     // Process scheduled deletions
-    this.queue.process('scheduled-deletion', async (job) => {
+    this.queue.process('scheduled-deletion', async job => {
       const { userId, scheduledDeletionDate, retentionPolicy } = job.data;
-      
+
       console.log(`Processing scheduled deletion for user ${userId}`);
-      
+
       try {
         // Execute the deletion
         const result = await privacyService.deleteUserData(userId, {});
-        
+
         // Log the completion
         await query(
           `INSERT INTO deletion_log (user_id, deletion_type, scheduled_date, completed_date, receipt_hash, retention_policy)
            VALUES ($1, 'scheduled', $2, NOW(), $3, $4)`,
           [userId, scheduledDeletionDate, result.receiptHash, retentionPolicy]
         );
-        
-        console.log(`Completed scheduled deletion for user ${userId}, receipt: ${result.receiptHash}`);
+
+        console.log(
+          `Completed scheduled deletion for user ${userId}, receipt: ${result.receiptHash}`
+        );
         return { success: true, receiptHash: result.receiptHash };
-        
       } catch (error) {
         console.error(`Failed scheduled deletion for user ${userId}:`, error);
-        
+
         // Log the failure
         await query(
           `INSERT INTO deletion_log (user_id, deletion_type, scheduled_date, error, retention_policy)
            VALUES ($1, 'scheduled_failed', $2, $3, $4)`,
-          [userId, scheduledDeletionDate, (error as Error).message, retentionPolicy]
+          [
+            userId,
+            scheduledDeletionDate,
+            (error as Error).message,
+            retentionPolicy,
+          ]
         );
-        
+
         throw error;
       }
     });
 
     // Process retention policy enforcement
-    this.queue.process('retention-enforcement', async (job) => {
+    this.queue.process('retention-enforcement', async job => {
       console.log('Running retention policy enforcement');
-      
+
       try {
         // Find users with expired retention periods
         const expiredUsers = await query(`
@@ -66,23 +72,32 @@ export class RetentionScheduler {
           AND u.is_active = true
         `);
 
-        console.log(`Found ${expiredUsers.rows.length} users with expired retention periods`);
+        console.log(
+          `Found ${expiredUsers.rows.length} users with expired retention periods`
+        );
 
         for (const user of expiredUsers.rows) {
           // Schedule immediate deletion
-          await this.queue.add('scheduled-deletion', {
-            userId: user.id,
-            scheduledDeletionDate: user.deletion_date,
-            retentionPolicy: 'user_requested'
-          }, {
-            attempts: 3,
-            backoff: 'exponential',
-            delay: 1000 // 1 second delay
-          });
+          await this.queue.add(
+            'scheduled-deletion',
+            {
+              userId: user.id,
+              scheduledDeletionDate: user.deletion_date,
+              retentionPolicy: 'user_requested',
+            },
+            {
+              attempts: 3,
+              backoff: { type: 'exponential' },
+              delay: 1000, // 1 second delay
+            }
+          );
         }
 
         // Find inactive users based on retention policy
-        const retentionDays = parseInt(process.env.USER_RETENTION_DAYS || '2555', 10); // ~7 years default
+        const retentionDays = parseInt(
+          process.env.USER_RETENTION_DAYS || '2555',
+          10
+        ); // ~7 years default
         const inactiveUsers = await query(`
           SELECT u.id, u.email, u.updated_at
           FROM users u
@@ -91,13 +106,20 @@ export class RetentionScheduler {
           AND u.preferences->>'pendingDeletionAt' IS NULL
         `);
 
-        console.log(`Found ${inactiveUsers.rows.length} inactive users for retention enforcement`);
+        console.log(
+          `Found ${inactiveUsers.rows.length} inactive users for retention enforcement`
+        );
 
         for (const user of inactiveUsers.rows) {
           // Schedule deletion with grace period
-          const gracePeriodDays = parseInt(process.env.RETENTION_GRACE_PERIOD_DAYS || '30', 10);
-          const scheduledDate = new Date(Date.now() + gracePeriodDays * 24 * 60 * 60 * 1000);
-          
+          const gracePeriodDays = parseInt(
+            process.env.RETENTION_GRACE_PERIOD_DAYS || '30',
+            10
+          );
+          const scheduledDate = new Date(
+            Date.now() + gracePeriodDays * 24 * 60 * 60 * 1000
+          );
+
           // Update user with pending deletion
           await query(
             `UPDATE users 
@@ -107,25 +129,30 @@ export class RetentionScheduler {
           );
 
           // Schedule the deletion job
-          await this.queue.add('scheduled-deletion', {
-            userId: user.id,
-            scheduledDeletionDate: scheduledDate.toISOString(),
-            retentionPolicy: 'automatic_retention'
-          }, {
-            delay: gracePeriodDays * 24 * 60 * 60 * 1000, // Delay until scheduled date
-            attempts: 3,
-            backoff: 'exponential'
-          });
+          await this.queue.add(
+            'scheduled-deletion',
+            {
+              userId: user.id,
+              scheduledDeletionDate: scheduledDate.toISOString(),
+              retentionPolicy: 'automatic_retention',
+            },
+            {
+              delay: gracePeriodDays * 24 * 60 * 60 * 1000, // Delay until scheduled date
+              attempts: 3,
+              backoff: { type: 'exponential' },
+            }
+          );
 
-          console.log(`Scheduled retention deletion for user ${user.id} on ${scheduledDate.toISOString()}`);
+          console.log(
+            `Scheduled retention deletion for user ${user.id} on ${scheduledDate.toISOString()}`
+          );
         }
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           expiredUsers: expiredUsers.rows.length,
-          inactiveUsers: inactiveUsers.rows.length
+          inactiveUsers: inactiveUsers.rows.length,
         };
-
       } catch (error) {
         console.error('Retention enforcement failed:', error);
         throw error;
@@ -137,43 +164,61 @@ export class RetentionScheduler {
     // Run daily at 3 AM UTC
     await this.queue.add(
       'retention-enforcement',
-      {},
-      { 
+      {
+        userId: 'stub',
+        scheduledDeletionDate: new Date().toISOString(),
+        retentionPolicy: 'system',
+      } as any,
+      {
         repeat: { cron: '0 3 * * *' },
         removeOnComplete: 10,
-        removeOnFail: 5
+        removeOnFail: 5,
       }
     );
     console.log('📅 Daily retention enforcement scheduled');
   }
 
-  async scheduleUserDeletion(userId: string, scheduledDate: Date, retentionPolicy: string) {
+  async scheduleUserDeletion(
+    userId: string,
+    scheduledDate: Date,
+    retentionPolicy: string
+  ) {
     const delay = scheduledDate.getTime() - Date.now();
-    
+
     if (delay <= 0) {
       // Schedule immediately if date is in the past
-      await this.queue.add('scheduled-deletion', {
-        userId,
-        scheduledDeletionDate: scheduledDate.toISOString(),
-        retentionPolicy
-      }, {
-        attempts: 3,
-        backoff: 'exponential'
-      });
+      await this.queue.add(
+        'scheduled-deletion',
+        {
+          userId,
+          scheduledDeletionDate: scheduledDate.toISOString(),
+          retentionPolicy,
+        },
+        {
+          attempts: 3,
+          backoff: { type: 'exponential' },
+        }
+      );
     } else {
       // Schedule for future execution
-      await this.queue.add('scheduled-deletion', {
-        userId,
-        scheduledDeletionDate: scheduledDate.toISOString(),
-        retentionPolicy
-      }, {
-        delay,
-        attempts: 3,
-        backoff: 'exponential'
-      });
+      await this.queue.add(
+        'scheduled-deletion',
+        {
+          userId,
+          scheduledDeletionDate: scheduledDate.toISOString(),
+          retentionPolicy,
+        },
+        {
+          delay,
+          attempts: 3,
+          backoff: { type: 'exponential' },
+        }
+      );
     }
 
-    console.log(`Scheduled deletion for user ${userId} at ${scheduledDate.toISOString()}`);
+    console.log(
+      `Scheduled deletion for user ${userId} at ${scheduledDate.toISOString()}`
+    );
   }
 
   async cancelScheduledDeletion(userId: string) {

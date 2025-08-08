@@ -19,7 +19,7 @@ async function reportViolation(payload: any) {
 export function createPinnedAxios(baseURL: string): AxiosInstance {
   const instance = axios.create({ baseURL, timeout: 10000 });
 
-  instance.defaults.adapter = async (config: AxiosRequestConfig) => {
+  (instance.defaults as any).adapter = async (config: AxiosRequestConfig) => {
     const url = (config.baseURL || '') + (config.url || '');
 
     // Ensure HTTPS and host allowlist
@@ -51,11 +51,15 @@ export function createPinnedAxios(baseURL: string): AxiosInstance {
           ...(headers as any),
         },
         body,
-        timeoutInterval: config.timeout || 10000,
+        timeoutInterval: (config as any).timeout || 10000,
         sslPinning,
       });
     } catch (e: any) {
-      await reportViolation({ url, reason: e?.message || 'pinning_failed', expectedHosts: pinningConfig.allowedHosts });
+      await reportViolation({
+        url,
+        reason: e?.message || 'pinning_failed',
+        expectedHosts: pinningConfig.allowedHosts,
+      });
       throw e;
     }
 
@@ -75,10 +79,9 @@ export function createPinnedAxios(baseURL: string): AxiosInstance {
       statusText,
       headers: responseHeaders,
       config,
-      request: null as any,
-    } as any;
-  } as any;
+      request: null,
+    };
+  };
 
-  return instance as any;
+  return instance;
 }
-
