@@ -12,11 +12,86 @@ export interface DeletionOptions {
   scheduleDays?: number; // if provided, schedule deletion in future instead of immediate
 }
 
+const IS_PREVIEW = String(process.env.PREVIEW_MODE).toLowerCase() === 'true';
+
+// Simple in-memory preview store for PREVIEW_MODE
+const previewStore = {
+  consent: new Map<string, Record<string, any>>(),
+  history: new Map<string, Array<any>>(),
+  userData: new Map<string, Record<string, any>>(),
+};
+
+function getPreviewUserData(userId: string) {
+  if (!previewStore.userData.has(userId)) {
+    const sample = {
+      user: {
+        id: userId,
+        email: 'dev@drishti.app',
+        name: 'Development User',
+        avatar_url: null,
+        email_verified: true,
+        is_active: true,
+        preferences: {
+          consent: {
+            marketing: false,
+            analytics: true,
+            personalization: false,
+          },
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      accounts: [
+        {
+          id: 'acc_1',
+          user_id: userId,
+          name: 'Checking',
+          account_type: 'checking',
+          institution: 'Demo Bank',
+          balance: 1234.56,
+          currency: 'USD',
+        },
+      ],
+      goals: [
+        {
+          id: 'goal_1',
+          user_id: userId,
+          name: 'Emergency Fund',
+          target_amount: 5000,
+        },
+      ],
+      scenarios: [
+        {
+          id: 'scn_1',
+          user_id: userId,
+          name: 'Baseline',
+          created_at: new Date().toISOString(),
+        },
+      ],
+      sessions: [],
+    };
+    previewStore.userData.set(userId, sample);
+  }
+  return previewStore.userData.get(userId)!;
+}
+
 export class PrivacyService {
   async getUserData(userId: string, types?: ExportOptions['types']) {
     const include = new Set(
       types ?? ['user', 'accounts', 'goals', 'scenarios']
     );
+
+    // Preview mode returns sample data without DB
+    if (IS_PREVIEW) {
+      const sample = getPreviewUserData(userId);
+      const results: Record<string, any> = {};
+      if (include.has('user')) results.user = sample.user;
+      if (include.has('accounts')) results.accounts = sample.accounts;
+      if (include.has('goals')) results.goals = sample.goals;
+      if (include.has('scenarios')) results.scenarios = sample.scenarios;
+      if (include.has('sessions')) results.sessions = sample.sessions;
+      return results;
+    }
 
     const results: Record<string, any> = {};
 
@@ -67,6 +142,57 @@ export class PrivacyService {
 
   async exportData(userId: string, options: ExportOptions = {}) {
     const { format = 'json', types } = options;
+
+    // In preview, synthesize data without heavy generators
+    if (IS_PREVIEW) {
+      const data = await this.getUserData(userId, types);
+      if (format === 'json') {
+        return { format, exportedAt: new Date().toISOString(), data };
+      }
+      if (format === 'csv') {
+        const singleType =
+          (types && types.length === 1 ? types[0] : undefined) ?? 'accounts';
+        const dataset = (data as any)[singleType] ?? [];
+        return {
+          format,
+          type: singleType,
+          exportedAt: new Date().toISOString(),
+          csv: this.toCSV(dataset),
+        };
+      }
+      if (format === 'pdf') {
+        // Return a tiny base64 placeholder PDF in preview
+        const placeholder = Buffer.from(
+          '%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF'
+        );
+        return {
+          format,
+          exportedAt: new Date().toISOString(),
+          pdf: placeholder.toString('base64'),
+        };
+      }
+      if (format === 'zip') {
+        const files = [
+          { name: 'export.json', content: JSON.stringify(data, null, 2) },
+          {
+            name: 'accounts.csv',
+            content: this.toCSV((data as any).accounts || []),
+          },
+        ];
+        // Naive zip: return JSON bundle base64 to preview
+        const bundle = Buffer.from(
+          JSON.stringify({ preview: true, files }),
+          'utf8'
+        ).toString('base64');
+        return {
+          format,
+          exportedAt: new Date().toISOString(),
+          zip: bundle,
+        } as any;
+      }
+      return { format: 'json', exportedAt: new Date().toISOString(), data };
+    }
+
     const data = await this.getUserData(userId, types);
 
     if (format === 'json') {
@@ -147,6 +273,20 @@ export class PrivacyService {
         ? options.scheduleDays
         : 0;
 
+    if (IS_PREVIEW) {
+      // Simulate scheduling or immediate delete
+      const now = new Date().toISOString();
+      const receiptHash = this.generateReceiptHash({
+        userId,
+        now,
+        scheduleDays,
+      });
+      if (scheduleDays > 0) {
+        return { scheduled: true, scheduleDays, receiptHash };
+      }
+      return { scheduled: false, performedAt: now, receiptHash };
+    }
+
     if (scheduleDays > 0) {
       // Store a pending deletion schedule in users.preferences JSONB
       await query(
@@ -223,6 +363,15 @@ export class PrivacyService {
 
   // Get user consent preferences from users.preferences JSONB
   async getUserConsent(userId: string) {
+    if (IS_PREVIEW) {
+      return (
+        previewStore.consent.get(userId) || {
+          marketing: false,
+          analytics: true,
+          personalization: false,
+        }
+      );
+    }
     const res = await query(`SELECT preferences FROM users WHERE id = $1`, [
       userId,
     ]);
@@ -238,6 +387,22 @@ export class PrivacyService {
 
   // Update user consent preferences in users.preferences JSONB
   async updateUserConsent(userId: string, consent: Record<string, any>) {
+    if (IS_PREVIEW) {
+      previewStore.consent.set(userId, consent);
+      // Write to history
+      const hist = previewStore.history.get(userId) || [];
+      hist.unshift({
+        id: `prev_${Date.now()}`,
+        user_id: userId,
+        consent,
+        policy_version: '1.0.0',
+        user_agent: 'preview',
+        ip_address: '127.0.0.1',
+        created_at: new Date().toISOString(),
+      });
+      previewStore.history.set(userId, hist.slice(0, 100));
+      return { success: true };
+    }
     await query(
       `UPDATE users SET preferences =
         CASE WHEN preferences IS NULL THEN jsonb_build_object('consent', $2::jsonb)
@@ -252,6 +417,10 @@ export class PrivacyService {
 
   // Consent history for auditability
   async getConsentHistory(userId: string, limit = 50) {
+    if (IS_PREVIEW) {
+      const hist = previewStore.history.get(userId) || [];
+      return hist.slice(0, limit);
+    }
     const res = await query(
       `SELECT id, user_id, consent, policy_version, user_agent, ip_address, created_at
        FROM consent_audit WHERE user_id = $1
@@ -268,6 +437,20 @@ export class PrivacyService {
     policyVersion: string,
     context?: { ip?: string; ua?: string }
   ) {
+    if (IS_PREVIEW) {
+      const hist = previewStore.history.get(userId) || [];
+      hist.unshift({
+        id: `prev_${Date.now()}`,
+        user_id: userId,
+        consent,
+        policy_version: policyVersion,
+        user_agent: context?.ua || 'preview',
+        ip_address: context?.ip || '127.0.0.1',
+        created_at: new Date().toISOString(),
+      });
+      previewStore.history.set(userId, hist.slice(0, 100));
+      return;
+    }
     await query(
       `INSERT INTO consent_audit (user_id, consent, policy_version, user_agent, ip_address, created_at)
        VALUES ($1, $2::jsonb, $3, $4, $5, NOW())`,
