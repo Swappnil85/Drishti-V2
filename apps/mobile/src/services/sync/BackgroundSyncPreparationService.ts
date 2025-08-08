@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { database } from '../../database';
 import { Q } from '@nozbe/watermelondb';
 import { syncManager } from './SyncManager';
-import { enhancedSyncManager } from './EnhancedSyncManager';
 import { ErrorHandlingService } from '../ErrorHandlingService';
 
 // Background sync preparation interfaces
@@ -157,11 +156,11 @@ export class BackgroundSyncPreparationService {
   private setupPreparationTriggers(): void {
     // Network change trigger
     if (this.preparationStrategy.preparationTriggers.onNetworkChange) {
-      enhancedSyncManager.addNetworkListener(async quality => {
-        if (quality.quality === 'good' || quality.quality === 'excellent') {
-          await this.performBackgroundPreparation();
-        }
-      });
+      // TODO: Setup network listener without circular dependency
+      // This will be handled by the EnhancedSyncManager when it initializes
+      console.log(
+        'Network change trigger setup deferred to avoid circular dependency'
+      );
     }
 
     // App foreground trigger would be handled by app state changes

@@ -6,6 +6,8 @@ import { websocketService } from '../services/websocket/WebSocketService';
 import { advancedAuthService } from '../services/auth/AdvancedAuthService';
 import { securityMiddleware } from '../middleware/security';
 import { jwtService } from '../auth/jwt';
+import { securityMonitor } from '../services/monitoring/SecurityMonitor';
+import { certificateMonitor } from '../services/monitoring/CertificateMonitor';
 
 /**
  * Enhanced Monitoring and Health Check Routes
@@ -130,6 +132,57 @@ export async function monitoringRoutes(fastify: FastifyInstance) {
               : 'Failed to get security metrics',
         });
       }
+      // Security violations summary (pinning, suspicious)
+      fastify.get(
+        '/security/violations',
+        { preHandler: requireAdmin },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+          try {
+            const hours = parseInt((request.query as any)?.hours) || 24;
+            const events =
+              (securityMonitor as any).getRecentEvents?.(hours) || [];
+            const pinning = events.filter(
+              (e: any) => e.details?.activityType === 'pinning_violation'
+            );
+            return reply.send({
+              success: true,
+              hours,
+              total: events.length,
+              pinning: pinning.length,
+            });
+          } catch (error) {
+            return reply
+              .code(500)
+              .send({ success: false, error: 'Failed to get violations' });
+          }
+        }
+      );
+
+      // Certificate freshness metric
+      fastify.get(
+        '/security/certificates/freshness',
+        { preHandler: requireAdmin },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+          try {
+            const host = (request.query as any)?.host || 'api.drishti.app';
+            const info = await certificateMonitor.fetchServerCertificate(
+              host,
+              443
+            );
+            const expiresAt = info.valid_to
+              ? new Date(info.valid_to).getTime()
+              : 0;
+            const daysRemaining = expiresAt
+              ? Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24))
+              : null;
+            return reply.send({ success: true, host, daysRemaining, info });
+          } catch (error) {
+            return reply
+              .code(500)
+              .send({ success: false, error: 'Failed to compute freshness' });
+          }
+        }
+      );
     }
   );
 
@@ -435,7 +488,7 @@ async function getSystemMetrics(): Promise<any> {
 async function getDatabaseMetrics(): Promise<any> {
   try {
     const result = await query(`
-      SELECT 
+      SELECT
         pg_database_size(current_database()) as database_size,
         (SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()) as active_connections,
         (SELECT setting FROM pg_settings WHERE name = 'max_connections') as max_connections,

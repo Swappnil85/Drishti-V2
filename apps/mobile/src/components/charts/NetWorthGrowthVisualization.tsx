@@ -25,7 +25,7 @@ import {
   VictoryLabel,
   VictoryLegend,
   VictoryZoomContainer,
-} from 'victory-native';
+} from 'victory';
 import { Card, Icon, Button, Flex } from '../ui';
 import { useChartHaptics } from '../../hooks/useChartHaptics';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -93,7 +93,9 @@ interface PeerComparisonData {
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationProps> = ({
+export const NetWorthGrowthVisualization: React.FC<
+  NetWorthGrowthVisualizationProps
+> = ({
   historicalData,
   projectedData = [],
   accountBreakdown = [],
@@ -108,18 +110,23 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
   showPeerComparison = true,
   showSeasonalAnalysis = false,
 }) => {
-  const [activeView, setActiveView] = useState<'growth' | 'breakdown' | 'trends' | 'comparison'>('growth');
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'1Y' | '5Y' | '10Y' | 'ALL'>('5Y');
+  const [activeView, setActiveView] = useState<
+    'growth' | 'breakdown' | 'trends' | 'comparison'
+  >('growth');
+  const [selectedTimeRange, setSelectedTimeRange] = useState<
+    '1Y' | '5Y' | '10Y' | 'ALL'
+  >('5Y');
   const [zoomDomain, setZoomDomain] = useState<any>(undefined);
 
   const { onDataPointTap, onMilestoneAchieved } = useChartHaptics();
   const { theme } = useTheme();
-  const { isHighContrastEnabled, highContrastTheme, getChartColors } = useHighContrastTheme();
+  const { isHighContrastEnabled, highContrastTheme, getChartColors } =
+    useHighContrastTheme();
 
   const getFilteredData = () => {
     const now = new Date();
     const cutoffDate = new Date();
-    
+
     switch (selectedTimeRange) {
       case '1Y':
         cutoffDate.setFullYear(now.getFullYear() - 1);
@@ -133,22 +140,26 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
       case 'ALL':
         return historicalData;
     }
-    
+
     return historicalData.filter(point => new Date(point.date) >= cutoffDate);
   };
 
   const calculateTrendAnalysis = (data: NetWorthDataPoint[]) => {
     if (data.length < 2) return null;
-    
+
     const firstPoint = data[0];
     const lastPoint = data[data.length - 1];
     const totalGrowth = lastPoint.netWorth - firstPoint.netWorth;
     const totalGrowthPercentage = (totalGrowth / firstPoint.netWorth) * 100;
-    
+
     // Calculate CAGR (Compound Annual Growth Rate)
-    const years = (new Date(lastPoint.date).getTime() - new Date(firstPoint.date).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-    const cagr = Math.pow(lastPoint.netWorth / firstPoint.netWorth, 1 / years) - 1;
-    
+    const years =
+      (new Date(lastPoint.date).getTime() -
+        new Date(firstPoint.date).getTime()) /
+      (365.25 * 24 * 60 * 60 * 1000);
+    const cagr =
+      Math.pow(lastPoint.netWorth / firstPoint.netWorth, 1 / years) - 1;
+
     return {
       totalGrowth,
       totalGrowthPercentage,
@@ -159,19 +170,23 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
 
   const renderNetWorthGrowthChart = () => {
     const filteredData = getFilteredData();
-    const chartColors = isHighContrastEnabled ? getChartColors(3) : [theme.colors.primary, theme.colors.secondary, theme.colors.success];
-    
+    const chartColors = isHighContrastEnabled
+      ? getChartColors(3)
+      : [theme.colors.primary, theme.colors.secondary, theme.colors.success];
+
     const historicalChartData = filteredData.map(point => ({
       x: new Date(point.date),
       y: point.netWorth,
       ...point,
     }));
 
-    const projectedChartData = showProjections ? projectedData.map(point => ({
-      x: new Date(point.date),
-      y: point.netWorth,
-      ...point,
-    })) : [];
+    const projectedChartData = showProjections
+      ? projectedData.map(point => ({
+          x: new Date(point.date),
+          y: point.netWorth,
+          ...point,
+        }))
+      : [];
 
     return (
       <VictoryChart
@@ -189,28 +204,36 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
       >
         <VictoryAxis
           dependentAxis
-          tickFormat={(t) => `$${(t / 1000).toFixed(0)}K`}
+          tickFormat={t => `$${(t / 1000).toFixed(0)}K`}
           style={{
-            tickLabels: { 
-              fontSize: 10, 
-              fill: isHighContrastEnabled ? highContrastTheme.colors.chartText : theme.colors.text 
+            tickLabels: {
+              fontSize: 10,
+              fill: isHighContrastEnabled
+                ? highContrastTheme.colors.chartText
+                : theme.colors.text,
             },
-            grid: { 
-              stroke: isHighContrastEnabled ? highContrastTheme.colors.chartGrid : theme.colors.border, 
-              strokeWidth: 0.5 
+            grid: {
+              stroke: isHighContrastEnabled
+                ? highContrastTheme.colors.chartGrid
+                : theme.colors.border,
+              strokeWidth: 0.5,
             },
           }}
         />
         <VictoryAxis
-          tickFormat={(t) => new Date(t).getFullYear().toString()}
+          tickFormat={t => new Date(t).getFullYear().toString()}
           style={{
-            tickLabels: { 
-              fontSize: 10, 
-              fill: isHighContrastEnabled ? highContrastTheme.colors.chartText : theme.colors.text 
+            tickLabels: {
+              fontSize: 10,
+              fill: isHighContrastEnabled
+                ? highContrastTheme.colors.chartText
+                : theme.colors.text,
             },
-            grid: { 
-              stroke: isHighContrastEnabled ? highContrastTheme.colors.chartGrid : theme.colors.border, 
-              strokeWidth: 0.5 
+            grid: {
+              stroke: isHighContrastEnabled
+                ? highContrastTheme.colors.chartGrid
+                : theme.colors.border,
+              strokeWidth: 0.5,
             },
           }}
         />
@@ -218,8 +241,8 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
         {/* Historical data area */}
         <VictoryArea
           data={historicalChartData}
-          x="x"
-          y="y"
+          x='x'
+          y='y'
           style={{
             data: {
               fill: chartColors[0],
@@ -230,7 +253,7 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
           }}
           animate={{
             duration: 1000,
-            onLoad: { duration: 500 }
+            onLoad: { duration: 500 },
           }}
         />
 
@@ -238,8 +261,8 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
         {showProjections && projectedChartData.length > 0 && (
           <VictoryLine
             data={projectedChartData}
-            x="x"
-            y="y"
+            x='x'
+            y='y'
             style={{
               data: {
                 stroke: chartColors[1],
@@ -258,37 +281,45 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
               y: milestone.amount,
               ...milestone,
             }))}
-            x="x"
-            y="y"
+            x='x'
+            y='y'
             size={8}
             style={{
               data: {
                 fill: ({ datum }) => {
                   switch (datum.type) {
-                    case 'achievement': return chartColors[2];
-                    case 'goal': return theme.colors.primary;
-                    case 'warning': return theme.colors.warning;
-                    default: return theme.colors.text;
+                    case 'achievement':
+                      return chartColors[2];
+                    case 'goal':
+                      return theme.colors.primary;
+                    case 'warning':
+                      return theme.colors.warning;
+                    default:
+                      return theme.colors.text;
                   }
                 },
               },
             }}
             labelComponent={<VictoryTooltip />}
-            events={[{
-              target: "data",
-              eventHandlers: {
-                onPress: () => {
-                  return [{
-                    target: "data",
-                    mutation: (props) => {
-                      onMilestonePress?.(props.datum);
-                      onMilestoneAchieved();
-                      return null;
-                    }
-                  }];
-                }
-              }
-            }]}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPress: () => {
+                    return [
+                      {
+                        target: 'data',
+                        mutation: props => {
+                          onMilestonePress?.(props.datum);
+                          onMilestoneAchieved();
+                          return null;
+                        },
+                      },
+                    ];
+                  },
+                },
+              },
+            ]}
           />
         )}
 
@@ -299,8 +330,8 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
               x: point.x,
               y: peerComparison.averageNetWorth,
             }))}
-            x="x"
-            y="y"
+            x='x'
+            y='y'
             style={{
               data: {
                 stroke: theme.colors.textSecondary,
@@ -326,21 +357,21 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
       >
         <VictoryAxis dependentAxis />
         <VictoryAxis />
-        
+
         <VictoryBar
           data={accountBreakdown.map((account, index) => ({
             x: account.accountName,
             y: account.contribution,
             fill: account.color,
           }))}
-          x="x"
-          y="y"
+          x='x'
+          y='y'
           style={{
             data: { fill: ({ datum }) => datum.fill },
           }}
           animate={{
             duration: 1000,
-            onLoad: { duration: 500 }
+            onLoad: { duration: 500 },
           }}
         />
       </VictoryChart>
@@ -350,7 +381,7 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
   const renderTrendAnalysis = () => {
     const filteredData = getFilteredData();
     const analysis = calculateTrendAnalysis(filteredData);
-    
+
     if (!analysis) return null;
 
     return (
@@ -358,31 +389,55 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
         <Text style={[styles.analysisTitle, { color: theme.colors.text }]}>
           Trend Analysis ({selectedTimeRange})
         </Text>
-        
+
         <View style={styles.analysisGrid}>
           <View style={styles.analysisItem}>
-            <Text style={[styles.analysisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.analysisLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Total Growth
             </Text>
-            <Text style={[styles.analysisValue, { color: theme.colors.success }]}>
+            <Text
+              style={[styles.analysisValue, { color: theme.colors.success }]}
+            >
               ${analysis.totalGrowth.toLocaleString()}
             </Text>
-            <Text style={[styles.analysisPercentage, { color: theme.colors.success }]}>
+            <Text
+              style={[
+                styles.analysisPercentage,
+                { color: theme.colors.success },
+              ]}
+            >
               {analysis.totalGrowthPercentage.toFixed(1)}%
             </Text>
           </View>
-          
+
           <View style={styles.analysisItem}>
-            <Text style={[styles.analysisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.analysisLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               CAGR
             </Text>
-            <Text style={[styles.analysisValue, { color: theme.colors.primary }]}>
+            <Text
+              style={[styles.analysisValue, { color: theme.colors.primary }]}
+            >
               {analysis.cagr.toFixed(1)}%
             </Text>
           </View>
-          
+
           <View style={styles.analysisItem}>
-            <Text style={[styles.analysisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.analysisLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Avg Monthly
             </Text>
             <Text style={[styles.analysisValue, { color: theme.colors.text }]}>
@@ -397,41 +452,68 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
   const renderPeerComparison = () => {
     if (!showPeerComparison || !peerComparison) return null;
 
-    const currentNetWorth = historicalData[historicalData.length - 1]?.netWorth || 0;
+    const currentNetWorth =
+      historicalData[historicalData.length - 1]?.netWorth || 0;
 
     return (
       <View style={styles.peerComparison}>
         <Text style={[styles.comparisonTitle, { color: theme.colors.text }]}>
           Peer Comparison
         </Text>
-        <Text style={[styles.comparisonSubtitle, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[
+            styles.comparisonSubtitle,
+            { color: theme.colors.textSecondary },
+          ]}
+        >
           {peerComparison.ageGroup} • {peerComparison.incomeRange}
         </Text>
-        
+
         <View style={styles.comparisonGrid}>
           <View style={styles.comparisonItem}>
-            <Text style={[styles.comparisonLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.comparisonLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Your Percentile
             </Text>
-            <Text style={[styles.comparisonValue, { color: theme.colors.primary }]}>
+            <Text
+              style={[styles.comparisonValue, { color: theme.colors.primary }]}
+            >
               {peerComparison.percentile}th
             </Text>
           </View>
-          
+
           <View style={styles.comparisonItem}>
-            <Text style={[styles.comparisonLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.comparisonLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Peer Average
             </Text>
-            <Text style={[styles.comparisonValue, { color: theme.colors.text }]}>
+            <Text
+              style={[styles.comparisonValue, { color: theme.colors.text }]}
+            >
               ${peerComparison.averageNetWorth.toLocaleString()}
             </Text>
           </View>
-          
+
           <View style={styles.comparisonItem}>
-            <Text style={[styles.comparisonLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.comparisonLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Top 10%
             </Text>
-            <Text style={[styles.comparisonValue, { color: theme.colors.success }]}>
+            <Text
+              style={[styles.comparisonValue, { color: theme.colors.success }]}
+            >
               ${peerComparison.topPercentileNetWorth.toLocaleString()}
             </Text>
           </View>
@@ -453,19 +535,33 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
           style={[
             styles.viewButton,
             activeView === view.key && styles.activeViewButton,
-            { backgroundColor: activeView === view.key ? theme.colors.primary : theme.colors.surface }
+            {
+              backgroundColor:
+                activeView === view.key
+                  ? theme.colors.primary
+                  : theme.colors.surface,
+            },
           ]}
           onPress={() => setActiveView(view.key as any)}
         >
           <Icon
             name={view.icon}
             size={16}
-            color={activeView === view.key ? theme.colors.onPrimary : theme.colors.text}
+            color={
+              activeView === view.key
+                ? theme.colors.onPrimary
+                : theme.colors.text
+            }
           />
           <Text
             style={[
               styles.viewButtonText,
-              { color: activeView === view.key ? theme.colors.onPrimary : theme.colors.text }
+              {
+                color:
+                  activeView === view.key
+                    ? theme.colors.onPrimary
+                    : theme.colors.text,
+              },
             ]}
           >
             {view.label}
@@ -483,14 +579,24 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
           style={[
             styles.timeRangeButton,
             selectedTimeRange === range && styles.activeTimeRangeButton,
-            { backgroundColor: selectedTimeRange === range ? theme.colors.primary : theme.colors.surface }
+            {
+              backgroundColor:
+                selectedTimeRange === range
+                  ? theme.colors.primary
+                  : theme.colors.surface,
+            },
           ]}
           onPress={() => setSelectedTimeRange(range as any)}
         >
           <Text
             style={[
               styles.timeRangeButtonText,
-              { color: selectedTimeRange === range ? theme.colors.onPrimary : theme.colors.text }
+              {
+                color:
+                  selectedTimeRange === range
+                    ? theme.colors.onPrimary
+                    : theme.colors.text,
+              },
             ]}
           >
             {range}
@@ -526,9 +632,7 @@ export const NetWorthGrowthVisualization: React.FC<NetWorthGrowthVisualizationPr
 
       {renderViewSelector()}
 
-      <View style={[styles.chartContainer, { height }]}>
-        {renderContent()}
-      </View>
+      <View style={[styles.chartContainer, { height }]}>{renderContent()}</View>
     </Card>
   );
 };

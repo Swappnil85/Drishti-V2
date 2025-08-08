@@ -15,14 +15,14 @@ export enum ErrorType {
   CLIENT = 'client',
   SYNC = 'sync',
   STORAGE = 'storage',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface ErrorDetails {
@@ -49,7 +49,7 @@ export interface UserFriendlyError {
   dismissible?: boolean;
 }
 
-class ErrorHandlingService {
+export class ErrorHandlingService {
   private static instance: ErrorHandlingService;
   private errorQueue: ErrorDetails[] = [];
   private maxQueueSize = 100;
@@ -69,13 +69,16 @@ class ErrorHandlingService {
   /**
    * Handle API response errors
    */
-  public handleApiError(error: any, context?: { screen?: string; action?: string }): UserFriendlyError {
+  public handleApiError(
+    error: any,
+    context?: { screen?: string; action?: string }
+  ): UserFriendlyError {
     let errorDetails: ErrorDetails;
 
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
-      
+
       errorDetails = {
         type: this.getErrorTypeFromStatus(status),
         severity: this.getSeverityFromStatus(status),
@@ -84,7 +87,7 @@ class ErrorHandlingService {
         statusCode: status,
         details: data?.details,
         timestamp: new Date().toISOString(),
-        context
+        context,
       };
     } else if (error.request) {
       // Network error
@@ -93,7 +96,7 @@ class ErrorHandlingService {
         severity: ErrorSeverity.HIGH,
         message: 'Network connection failed',
         timestamp: new Date().toISOString(),
-        context
+        context,
       };
     } else {
       // Client error
@@ -102,7 +105,7 @@ class ErrorHandlingService {
         severity: ErrorSeverity.MEDIUM,
         message: error.message || 'An unexpected error occurred',
         timestamp: new Date().toISOString(),
-        context
+        context,
       };
     }
 
@@ -123,7 +126,7 @@ class ErrorHandlingService {
       message: 'Validation failed',
       details: validationErrors,
       timestamp: new Date().toISOString(),
-      context
+      context,
     };
 
     this.logError(errorDetails);
@@ -133,13 +136,16 @@ class ErrorHandlingService {
   /**
    * Handle sync errors
    */
-  public handleSyncError(error: any, context?: { action?: string; entityType?: string }): UserFriendlyError {
+  public handleSyncError(
+    error: any,
+    context?: { action?: string; entityType?: string }
+  ): UserFriendlyError {
     const errorDetails: ErrorDetails = {
       type: ErrorType.SYNC,
       severity: ErrorSeverity.MEDIUM,
       message: error.message || 'Sync operation failed',
       timestamp: new Date().toISOString(),
-      context
+      context,
     };
 
     this.logError(errorDetails);
@@ -149,13 +155,16 @@ class ErrorHandlingService {
   /**
    * Handle storage errors
    */
-  public handleStorageError(error: any, context?: { operation?: string; key?: string }): UserFriendlyError {
+  public handleStorageError(
+    error: any,
+    context?: { operation?: string; key?: string }
+  ): UserFriendlyError {
     const errorDetails: ErrorDetails = {
       type: ErrorType.STORAGE,
       severity: ErrorSeverity.MEDIUM,
       message: error.message || 'Storage operation failed',
       timestamp: new Date().toISOString(),
-      context
+      context,
     };
 
     this.logError(errorDetails);
@@ -165,14 +174,47 @@ class ErrorHandlingService {
   /**
    * Handle authentication errors
    */
-  public handleAuthError(error: any, context?: { action?: string }): UserFriendlyError {
+  public handleAuthError(
+    error: any,
+    context?: { action?: string }
+  ): UserFriendlyError {
     const errorDetails: ErrorDetails = {
       type: ErrorType.AUTHENTICATION,
       severity: ErrorSeverity.HIGH,
       message: error.message || 'Authentication failed',
       code: error.code,
       timestamp: new Date().toISOString(),
-      context
+      context,
+    };
+
+    this.logError(errorDetails);
+    return this.createUserFriendlyError(errorDetails);
+  }
+
+  /**
+   * Generic error handler for any type of error
+   */
+  public handleError(
+    error: any,
+    options?: {
+      context?: string;
+      severity?: 'low' | 'medium' | 'high' | 'critical';
+      screen?: string;
+      action?: string;
+    }
+  ): UserFriendlyError {
+    const severity = this.mapSeverityToEnum(options?.severity || 'medium');
+
+    const errorDetails: ErrorDetails = {
+      type: this.determineErrorType(error),
+      severity,
+      message: error.message || 'An unexpected error occurred',
+      code: error.code,
+      timestamp: new Date().toISOString(),
+      context: {
+        screen: options?.screen,
+        action: options?.action || options?.context,
+      },
     };
 
     this.logError(errorDetails);
@@ -188,22 +230,18 @@ class ErrorHandlingService {
     if (userFriendlyError.action && userFriendlyError.actionText) {
       buttons.push({
         text: userFriendlyError.actionText,
-        onPress: userFriendlyError.action
+        onPress: userFriendlyError.action,
       });
     }
 
     if (userFriendlyError.dismissible !== false) {
       buttons.push({
         text: 'OK',
-        style: 'cancel' as const
+        style: 'cancel' as const,
       });
     }
 
-    Alert.alert(
-      userFriendlyError.title,
-      userFriendlyError.message,
-      buttons
-    );
+    Alert.alert(userFriendlyError.title, userFriendlyError.message, buttons);
   }
 
   /**
@@ -217,7 +255,7 @@ class ErrorHandlingService {
 
     // Add to error queue
     this.errorQueue.push(errorDetails);
-    
+
     // Maintain queue size
     if (this.errorQueue.length > this.maxQueueSize) {
       this.errorQueue.shift();
@@ -235,7 +273,9 @@ class ErrorHandlingService {
   /**
    * Create user-friendly error message
    */
-  private createUserFriendlyError(errorDetails: ErrorDetails): UserFriendlyError {
+  private createUserFriendlyError(
+    errorDetails: ErrorDetails
+  ): UserFriendlyError {
     switch (errorDetails.type) {
       case ErrorType.NETWORK:
         return {
@@ -244,7 +284,7 @@ class ErrorHandlingService {
           actionText: 'Retry',
           action: () => {
             // Retry logic would be handled by the calling component
-          }
+          },
         };
 
       case ErrorType.AUTHENTICATION:
@@ -254,33 +294,36 @@ class ErrorHandlingService {
           actionText: 'Log In',
           action: () => {
             // Navigation to login would be handled by the calling component
-          }
+          },
         };
 
       case ErrorType.AUTHORIZATION:
         return {
           title: 'Access Denied',
-          message: 'You don\'t have permission to perform this action.',
-          dismissible: true
+          message: "You don't have permission to perform this action.",
+          dismissible: true,
         };
 
       case ErrorType.VALIDATION:
-        const validationMessage = this.formatValidationErrors(errorDetails.details);
+        const validationMessage = this.formatValidationErrors(
+          errorDetails.details
+        );
         return {
           title: 'Invalid Input',
           message: validationMessage,
-          dismissible: true
+          dismissible: true,
         };
 
       case ErrorType.SERVER:
         if (errorDetails.statusCode === 503) {
           return {
             title: 'Service Unavailable',
-            message: 'The service is temporarily unavailable. Please try again later.',
+            message:
+              'The service is temporarily unavailable. Please try again later.',
             actionText: 'Retry',
             action: () => {
               // Retry logic
-            }
+            },
           };
         }
         return {
@@ -289,7 +332,7 @@ class ErrorHandlingService {
           actionText: 'Retry',
           action: () => {
             // Retry logic
-          }
+          },
         };
 
       case ErrorType.SYNC:
@@ -299,14 +342,15 @@ class ErrorHandlingService {
           actionText: 'Retry Sync',
           action: () => {
             // Retry sync logic
-          }
+          },
         };
 
       case ErrorType.STORAGE:
         return {
           title: 'Storage Error',
-          message: 'Unable to save data locally. Please check available storage space.',
-          dismissible: true
+          message:
+            'Unable to save data locally. Please check available storage space.',
+          dismissible: true,
         };
 
       default:
@@ -316,7 +360,7 @@ class ErrorHandlingService {
           actionText: 'Retry',
           action: () => {
             // Generic retry logic
-          }
+          },
         };
     }
   }
@@ -324,7 +368,9 @@ class ErrorHandlingService {
   /**
    * Format validation errors for user display
    */
-  private formatValidationErrors(validationErrors?: Record<string, any>): string {
+  private formatValidationErrors(
+    validationErrors?: Record<string, any>
+  ): string {
     if (!validationErrors) {
       return 'Please check your input and try again.';
     }
@@ -377,7 +423,10 @@ class ErrorHandlingService {
    */
   private async saveErrorQueue(): Promise<void> {
     try {
-      await AsyncStorage.setItem('error_queue', JSON.stringify(this.errorQueue));
+      await AsyncStorage.setItem(
+        'error_queue',
+        JSON.stringify(this.errorQueue)
+      );
     } catch (error) {
       console.error('Failed to save error queue:', error);
     }
@@ -430,6 +479,60 @@ class ErrorHandlingService {
         error.userId = userId;
       }
     });
+  }
+
+  /**
+   * Map string severity to enum
+   */
+  private mapSeverityToEnum(
+    severity: 'low' | 'medium' | 'high' | 'critical'
+  ): ErrorSeverity {
+    switch (severity) {
+      case 'low':
+        return ErrorSeverity.LOW;
+      case 'medium':
+        return ErrorSeverity.MEDIUM;
+      case 'high':
+        return ErrorSeverity.HIGH;
+      case 'critical':
+        return ErrorSeverity.CRITICAL;
+      default:
+        return ErrorSeverity.MEDIUM;
+    }
+  }
+
+  /**
+   * Determine error type from error object
+   */
+  private determineErrorType(error: any): ErrorType {
+    if (error.name === 'NetworkError' || error.code === 'NETWORK_ERROR') {
+      return ErrorType.NETWORK;
+    }
+    if (error.name === 'ValidationError' || error.code === 'VALIDATION_ERROR') {
+      return ErrorType.VALIDATION;
+    }
+    if (error.name === 'AuthenticationError' || error.code === 'AUTH_ERROR') {
+      return ErrorType.AUTHENTICATION;
+    }
+    if (
+      error.name === 'AuthorizationError' ||
+      error.code === 'AUTHORIZATION_ERROR'
+    ) {
+      return ErrorType.AUTHORIZATION;
+    }
+    if (error.name === 'SyncError' || error.code === 'SYNC_ERROR') {
+      return ErrorType.SYNC;
+    }
+    if (error.name === 'StorageError' || error.code === 'STORAGE_ERROR') {
+      return ErrorType.STORAGE;
+    }
+    if (error.response?.status >= 500) {
+      return ErrorType.SERVER;
+    }
+    if (error.response?.status >= 400) {
+      return ErrorType.CLIENT;
+    }
+    return ErrorType.UNKNOWN;
   }
 }
 

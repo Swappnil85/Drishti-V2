@@ -12,6 +12,7 @@ config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
 config.resolver.blockList = [
   /node_modules\/better-sqlite3\/.*/,
   /node_modules\/@nozbe\/watermelondb\/adapters\/sqlite\/.*/,
+  /node_modules\/victory-native\/.*/,
   /.*sqlite.*/,
   /.*makeDispatcher.*/,
   /.*DatabaseBridge.*/,

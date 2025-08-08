@@ -31,7 +31,7 @@ import {
   VictoryZoomContainer,
   VictoryBrushContainer,
   VictoryLegend,
-} from 'victory-native';
+} from 'victory';
 import { Card, Icon, Button, Flex } from '../ui';
 import { useChartHaptics } from '../../hooks/useChartHaptics';
 import { useTheme } from '../../contexts/ThemeContext';

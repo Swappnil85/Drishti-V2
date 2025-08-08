@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:migrate": "npx tsx ./src/db/migrations/run-migrations.ts"
   },
   "dependencies": {
     "@fastify/compress": "^8.1.0",
@@ -27,6 +28,7 @@
     "@graphql-tools/utils": "^10.9.1",
     "@react-native-async-storage/async-storage": "1.18.2",
     "apple-signin-auth": "^1.7.5",
+    "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.3.1",
     "drizzle-kit": "^0.19.13",
@@ -40,6 +42,7 @@
     "jsonwebtoken": "^9.0.1",
     "mercurius": "^16.2.0",
     "nodemailer": "^6.9.4",
+    "pdfkit": "^0.17.1",
     "pg": "^8.11.1",
     "pg-pool": "^3.6.1",
     "postgres": "^3.3.5",

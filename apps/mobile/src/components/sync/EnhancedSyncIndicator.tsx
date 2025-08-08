@@ -9,11 +9,104 @@ import {
   Modal,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
-import { Flex, Icon, Button, Badge } from 'native-base';
 import {
   useEnhancedSync,
   usePlaidIntegration,
 } from '../../hooks/useEnhancedSync';
+
+// Simple Badge component for web compatibility
+const Badge = ({ children, colorScheme, variant, size, style }: any) => (
+  <View
+    style={[
+      {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        backgroundColor:
+          colorScheme === 'blue'
+            ? '#3b82f6'
+            : colorScheme === 'green'
+              ? '#10b981'
+              : colorScheme === 'yellow'
+                ? '#f59e0b'
+                : colorScheme === 'red'
+                  ? '#ef4444'
+                  : colorScheme === 'orange'
+                    ? '#f97316'
+                    : '#6b7280',
+      },
+      style,
+    ]}
+  >
+    <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>
+      {children}
+    </Text>
+  </View>
+);
+
+// Simple Button component for web compatibility
+const Button = ({
+  children,
+  onPress,
+  disabled,
+  variant,
+  size,
+  leftIcon,
+  style,
+}: any) => (
+  <TouchableOpacity
+    onPress={onPress}
+    disabled={disabled}
+    style={[
+      {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 6,
+        backgroundColor: variant === 'outline' ? 'transparent' : '#3b82f6',
+        borderWidth: variant === 'outline' ? 1 : 0,
+        borderColor: '#3b82f6',
+        opacity: disabled ? 0.5 : 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+      },
+      style,
+    ]}
+  >
+    {leftIcon}
+    <Text
+      style={{
+        color: variant === 'outline' ? '#3b82f6' : 'white',
+        fontSize: 14,
+        fontWeight: '500',
+      }}
+    >
+      {children}
+    </Text>
+  </TouchableOpacity>
+);
+
+// Simple Icon component for web compatibility
+const Icon = ({ name, size, color, style }: any) => {
+  const iconMap: { [key: string]: string } = {
+    sync: '🔄',
+    'cloud-offline': '☁️',
+    warning: '⚠️',
+    'cloud-done': '✅',
+    cloud: '☁️',
+    'cloud-queue': '⏳',
+    'cloud-off': '❌',
+    close: '✕',
+    'cloud-sync': '🔄',
+    'account-balance': '🏦',
+  };
+
+  return (
+    <Text style={[{ color, fontSize: size === 'sm' ? 16 : 20 }, style]}>
+      {iconMap[name] || '•'}
+    </Text>
+  );
+};
 
 interface EnhancedSyncIndicatorProps {
   showText?: boolean;
@@ -158,7 +251,7 @@ export default function EnhancedSyncIndicator({
         onPress={handlePress}
         testID={testID}
       >
-        <Flex direction='row' align='center' space={2}>
+        <View style={styles.row}>
           {isSyncing || isPlaidSyncing ? (
             <ActivityIndicator size='small' color={getStatusColor()} />
           ) : (
@@ -218,7 +311,7 @@ export default function EnhancedSyncIndicator({
               {pendingChanges + conflictsDetected}
             </Badge>
           )}
-        </Flex>
+        </View>
       </TouchableOpacity>
 
       <Modal
@@ -253,7 +346,7 @@ export default function EnhancedSyncIndicator({
               >
                 Network Quality
               </Text>
-              <Flex direction='row' align='center' justify='space-between'>
+              <View style={styles.rowBetween}>
                 <Text
                   style={[
                     styles.sectionText,
@@ -275,7 +368,7 @@ export default function EnhancedSyncIndicator({
                 >
                   {networkQuality?.quality?.toUpperCase() || 'UNKNOWN'}
                 </Badge>
-              </Flex>
+              </View>
 
               {networkQuality && (
                 <View style={styles.networkDetails}>
@@ -446,7 +539,8 @@ export default function EnhancedSyncIndicator({
                 disabled={isSyncing}
                 variant='outline'
                 size='sm'
-                leftIcon={<Icon name='sync' size='sm' />}
+                leftIcon={<Icon name='sync' size='sm' color='#3b82f6' />}
+                style={styles.actionButton}
               >
                 Adaptive Sync
               </Button>
@@ -456,7 +550,8 @@ export default function EnhancedSyncIndicator({
                 disabled={isSyncing}
                 variant='outline'
                 size='sm'
-                leftIcon={<Icon name='cloud-sync' size='sm' />}
+                leftIcon={<Icon name='cloud-sync' size='sm' color='#3b82f6' />}
+                style={styles.actionButton}
               >
                 Force Sync
               </Button>
@@ -467,7 +562,10 @@ export default function EnhancedSyncIndicator({
                   disabled={isPlaidSyncing}
                   variant='outline'
                   size='sm'
-                  leftIcon={<Icon name='account-balance' size='sm' />}
+                  leftIcon={
+                    <Icon name='account-balance' size='sm' color='#3b82f6' />
+                  }
+                  style={styles.actionButton}
                 >
                   Sync Banks
                 </Button>
@@ -486,6 +584,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   statusText: {
     fontSize: 14,
@@ -544,7 +652,10 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
     marginTop: 16,
+  },
+  actionButton: {
+    marginRight: 8,
+    marginBottom: 8,
   },
 });

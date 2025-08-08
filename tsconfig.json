@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -32,11 +36,18 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@drishti/shared/*": ["packages/shared/src/*"],
-      "@drishti/shared": ["packages/shared/src/index"]
+      "@drishti/shared/*": [
+        "packages/shared/src/*"
+      ],
+      "@drishti/shared": [
+        "packages/shared/src/index"
+      ]
     }
   },
-  "include": ["apps/**/*", "packages/**/*"],
+  "include": [
+    "apps/**/*",
+    "packages/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -57,5 +68,6 @@
     {
       "path": "./packages/shared"
     }
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

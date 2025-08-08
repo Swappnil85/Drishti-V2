@@ -26,7 +26,7 @@ import {
   VictoryTooltip,
   VictoryContainer,
   VictoryLabel,
-} from 'victory-native';
+} from 'victory';
 import {
   FIREGoalProgress,
   FinancialGoal,

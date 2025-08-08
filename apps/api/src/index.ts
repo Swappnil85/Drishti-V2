@@ -20,12 +20,21 @@ import { financialRoutes } from './routes/financial';
 import { syncRoutes } from './routes/sync';
 import calculationsRoutes from './routes/calculations';
 import { monitoringRoutes } from './routes/monitoring';
+import privacyRoutes from './routes/privacy';
+import pinningRoutes from './routes/pinning';
+import certificateRoutes from './routes/certificates';
+import retentionRoutes from './routes/retention';
+import attestationRoutes from './routes/attestation';
+import adminRoutes from './routes/admin';
 // import { graphqlRoutes } from './routes/graphql';
 // import { batchRoutes } from './routes/batch';
 import { cacheService } from './services/cache/CacheService';
 // import { websocketService } from './services/websocket/WebSocketService';
 import { healthMonitoringService } from './services/monitoring/HealthMonitoringService';
 import { databaseOptimizationService } from './services/database/DatabaseOptimizationService';
+import { retentionQueue } from './services/queue/RetentionQueue';
+import { certificateQueue } from './services/queue/CertificateQueue';
+import { retentionScheduler } from './services/queue/RetentionScheduler';
 
 // Load environment variables
 dotenv.config();
@@ -159,6 +168,8 @@ async function registerPlugins() {
       await fastify.register(calculationsRoutes, { prefix: '/calculations' });
       await fastify.register(syncRoutes, { prefix: '/sync' });
       await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
+      await fastify.register(privacyRoutes, { prefix: '' });
+      await fastify.register(retentionRoutes, { prefix: '' });
       // await fastify.register(batchRoutes, { prefix: '/batch' });
       // await fastify.register(graphqlRoutes, { prefix: '/graphql' });
     },
@@ -171,7 +182,12 @@ async function registerPlugins() {
   await fastify.register(calculationsRoutes, { prefix: '/calculations' });
   await fastify.register(syncRoutes, { prefix: '/sync' });
   await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
+  await fastify.register(privacyRoutes, { prefix: '' });
+  await fastify.register(pinningRoutes, { prefix: '' });
+  await fastify.register(certificateRoutes, { prefix: '' });
   // await fastify.register(batchRoutes, { prefix: '/batch' });
+  await fastify.register(attestationRoutes, { prefix: '' });
+  await fastify.register(adminRoutes, { prefix: '' });
   // await fastify.register(graphqlRoutes, { prefix: '/graphql' });
 
   // WebSocket routes
@@ -269,6 +285,23 @@ const start = async () => {
 
     await registerPlugins();
 
+    // Initialize background jobs if Redis is available
+    if (
+      process.env.REDIS_URL &&
+      process.env.ENABLE_BACKGROUND_JOBS !== 'false'
+    ) {
+      try {
+        await retentionQueue.scheduleDaily();
+        await certificateQueue.scheduleDaily();
+        await retentionScheduler.scheduleRetentionEnforcement();
+        console.log(
+          '✅ Background retention, certificate, and scheduler jobs scheduled'
+        );
+      } catch (error) {
+        console.warn('⚠️  Failed to schedule background jobs:', error);
+      }
+    }
+
     const port = parseInt(process.env.PORT || '3000', 10);
     const host = process.env.HOST || '0.0.0.0';
 
@@ -307,6 +340,18 @@ const gracefulShutdown = async (signal?: string) => {
     // Shutdown database optimization service
     await databaseOptimizationService.shutdown();
     console.log('✅ Database optimization service stopped');
+
+    // Shutdown background jobs
+    if (process.env.REDIS_URL) {
+      try {
+        await retentionQueue.shutdown();
+        await certificateQueue.shutdown();
+        await retentionScheduler.shutdown();
+        console.log('✅ Background job queues stopped');
+      } catch (error) {
+        console.warn('⚠️  Error stopping background jobs:', error);
+      }
+    }
 
     // Close database connections
     await closeDatabase();

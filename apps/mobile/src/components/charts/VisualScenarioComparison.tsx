@@ -23,7 +23,7 @@ import {
   VictoryContainer,
   VictoryLegend,
   VictoryZoomContainer,
-} from 'victory-native';
+} from 'victory';
 import { Card, Icon, Button, Flex } from '../ui';
 import { useChartHaptics } from '../../hooks/useChartHaptics';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,7 +32,10 @@ import { useHighContrastTheme } from '../../contexts/HighContrastThemeContext';
 interface VisualScenarioComparisonProps {
   scenarios: ScenarioData[];
   onScenarioPress?: (scenario: ScenarioData) => void;
-  onDataPointPress?: (dataPoint: ScenarioDataPoint, scenario: ScenarioData) => void;
+  onDataPointPress?: (
+    dataPoint: ScenarioDataPoint,
+    scenario: ScenarioData
+  ) => void;
   height?: number;
   showProbabilityWeighting?: boolean;
   showConvergenceDivergence?: boolean;
@@ -70,13 +73,19 @@ interface ScenarioDataPoint {
 
 interface ConvergenceDivergenceAnalysis {
   convergencePoints: Array<{ year: number; scenarios: string[] }>;
-  divergencePoints: Array<{ year: number; scenarios: string[]; magnitude: number }>;
+  divergencePoints: Array<{
+    year: number;
+    scenarios: string[];
+    magnitude: number;
+  }>;
   overallTrend: 'converging' | 'diverging' | 'stable';
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> = ({
+export const VisualScenarioComparison: React.FC<
+  VisualScenarioComparisonProps
+> = ({
   scenarios,
   onScenarioPress,
   onDataPointPress,
@@ -86,70 +95,93 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
   showRiskReturn = true,
   synchronizedZoom = true,
 }) => {
-  const [activeScenarios, setActiveScenarios] = useState<string[]>(scenarios.map(s => s.id));
-  const [viewMode, setViewMode] = useState<'comparison' | 'risk-return' | 'convergence' | 'probability'>('comparison');
+  const [activeScenarios, setActiveScenarios] = useState<string[]>(
+    scenarios.map(s => s.id)
+  );
+  const [viewMode, setViewMode] = useState<
+    'comparison' | 'risk-return' | 'convergence' | 'probability'
+  >('comparison');
   const [zoomDomain, setZoomDomain] = useState<any>(undefined);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
   const { onDataPointTap, onZoomIn } = useChartHaptics();
   const { theme } = useTheme();
-  const { isHighContrastEnabled, highContrastTheme, getChartColors } = useHighContrastTheme();
+  const { isHighContrastEnabled, highContrastTheme, getChartColors } =
+    useHighContrastTheme();
 
   const toggleScenario = async (scenarioId: string) => {
     await onDataPointTap();
-    setActiveScenarios(prev => 
-      prev.includes(scenarioId) 
+    setActiveScenarios(prev =>
+      prev.includes(scenarioId)
         ? prev.filter(id => id !== scenarioId)
         : [...prev, scenarioId]
     );
   };
 
   const calculateConvergenceDivergence = (): ConvergenceDivergenceAnalysis => {
-    const activeScenarioData = scenarios.filter(s => activeScenarios.includes(s.id));
+    const activeScenarioData = scenarios.filter(s =>
+      activeScenarios.includes(s.id)
+    );
     const convergencePoints: Array<{ year: number; scenarios: string[] }> = [];
-    const divergencePoints: Array<{ year: number; scenarios: string[]; magnitude: number }> = [];
+    const divergencePoints: Array<{
+      year: number;
+      scenarios: string[];
+      magnitude: number;
+    }> = [];
 
     // Find years where scenarios converge or diverge significantly
-    const allYears = [...new Set(activeScenarioData.flatMap(s => s.data.map(d => d.year)))].sort();
-    
+    const allYears = [
+      ...new Set(activeScenarioData.flatMap(s => s.data.map(d => d.year))),
+    ].sort();
+
     allYears.forEach(year => {
       const valuesAtYear = activeScenarioData
         .map(scenario => ({
           id: scenario.id,
-          value: scenario.data.find(d => d.year === year)?.value || 0
+          value: scenario.data.find(d => d.year === year)?.value || 0,
         }))
         .filter(v => v.value > 0);
 
       if (valuesAtYear.length >= 2) {
         const values = valuesAtYear.map(v => v.value);
         const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-        const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+        const variance =
+          values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+          values.length;
         const coefficientOfVariation = Math.sqrt(variance) / mean;
 
         if (coefficientOfVariation < 0.1) {
           convergencePoints.push({
             year,
-            scenarios: valuesAtYear.map(v => v.id)
+            scenarios: valuesAtYear.map(v => v.id),
           });
         } else if (coefficientOfVariation > 0.3) {
           divergencePoints.push({
             year,
             scenarios: valuesAtYear.map(v => v.id),
-            magnitude: coefficientOfVariation
+            magnitude: coefficientOfVariation,
           });
         }
       }
     });
 
-    const overallTrend = divergencePoints.length > convergencePoints.length ? 'diverging' : 
-                        convergencePoints.length > divergencePoints.length ? 'converging' : 'stable';
+    const overallTrend =
+      divergencePoints.length > convergencePoints.length
+        ? 'diverging'
+        : convergencePoints.length > divergencePoints.length
+          ? 'converging'
+          : 'stable';
 
     return { convergencePoints, divergencePoints, overallTrend };
   };
 
   const renderScenarioComparisonChart = () => {
-    const activeScenarioData = scenarios.filter(s => activeScenarios.includes(s.id));
-    const chartColors = isHighContrastEnabled ? getChartColors(activeScenarioData.length) : activeScenarioData.map(s => s.color);
+    const activeScenarioData = scenarios.filter(s =>
+      activeScenarios.includes(s.id)
+    );
+    const chartColors = isHighContrastEnabled
+      ? getChartColors(activeScenarioData.length)
+      : activeScenarioData.map(s => s.color);
 
     return (
       <VictoryChart
@@ -171,28 +203,36 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
       >
         <VictoryAxis
           dependentAxis
-          tickFormat={(t) => `$${(t / 1000).toFixed(0)}K`}
+          tickFormat={t => `$${(t / 1000).toFixed(0)}K`}
           style={{
-            tickLabels: { 
-              fontSize: 10, 
-              fill: isHighContrastEnabled ? highContrastTheme.colors.chartText : theme.colors.text 
+            tickLabels: {
+              fontSize: 10,
+              fill: isHighContrastEnabled
+                ? highContrastTheme.colors.chartText
+                : theme.colors.text,
             },
-            grid: { 
-              stroke: isHighContrastEnabled ? highContrastTheme.colors.chartGrid : theme.colors.border, 
-              strokeWidth: 0.5 
+            grid: {
+              stroke: isHighContrastEnabled
+                ? highContrastTheme.colors.chartGrid
+                : theme.colors.border,
+              strokeWidth: 0.5,
             },
           }}
         />
         <VictoryAxis
-          tickFormat={(t) => t.toString()}
+          tickFormat={t => t.toString()}
           style={{
-            tickLabels: { 
-              fontSize: 10, 
-              fill: isHighContrastEnabled ? highContrastTheme.colors.chartText : theme.colors.text 
+            tickLabels: {
+              fontSize: 10,
+              fill: isHighContrastEnabled
+                ? highContrastTheme.colors.chartText
+                : theme.colors.text,
             },
-            grid: { 
-              stroke: isHighContrastEnabled ? highContrastTheme.colors.chartGrid : theme.colors.border, 
-              strokeWidth: 0.5 
+            grid: {
+              stroke: isHighContrastEnabled
+                ? highContrastTheme.colors.chartGrid
+                : theme.colors.border,
+              strokeWidth: 0.5,
             },
           }}
         />
@@ -206,15 +246,17 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
             scenario,
           }));
 
-          const lineOpacity = showProbabilityWeighting ? scenario.probability : 1.0;
+          const lineOpacity = showProbabilityWeighting
+            ? scenario.probability
+            : 1.0;
           const strokeWidth = selectedScenario === scenario.id ? 4 : 2;
 
           return (
             <VictoryLine
               key={scenario.id}
               data={lineData}
-              x="x"
-              y="y"
+              x='x'
+              y='y'
               style={{
                 data: {
                   stroke: chartColors[index],
@@ -224,62 +266,82 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
               }}
               animate={{
                 duration: 1000,
-                onLoad: { duration: 500 }
+                onLoad: { duration: 500 },
               }}
-              events={[{
-                target: "data",
-                eventHandlers: {
-                  onPress: () => {
-                    return [{
-                      target: "data",
-                      mutation: (props) => {
-                        onDataPointPress?.(props.datum, scenario);
-                        onDataPointTap();
-                        return null;
-                      }
-                    }];
-                  }
-                }
-              }]}
+              events={[
+                {
+                  target: 'data',
+                  eventHandlers: {
+                    onPress: () => {
+                      return [
+                        {
+                          target: 'data',
+                          mutation: props => {
+                            onDataPointPress?.(props.datum, scenario);
+                            onDataPointTap();
+                            return null;
+                          },
+                        },
+                      ];
+                    },
+                  },
+                },
+              ]}
             />
           );
         })}
 
         {/* Convergence/Divergence indicators */}
-        {showConvergenceDivergence && (() => {
-          const analysis = calculateConvergenceDivergence();
-          return (
-            <VictoryScatter
-              data={[
-                ...analysis.convergencePoints.map(point => ({
-                  x: point.year,
-                  y: Math.max(...activeScenarioData.flatMap(s => s.data.filter(d => d.year === point.year).map(d => d.value))),
-                  type: 'convergence',
-                })),
-                ...analysis.divergencePoints.map(point => ({
-                  x: point.year,
-                  y: Math.max(...activeScenarioData.flatMap(s => s.data.filter(d => d.year === point.year).map(d => d.value))),
-                  type: 'divergence',
-                  magnitude: point.magnitude,
-                })),
-              ]}
-              x="x"
-              y="y"
-              size={6}
-              style={{
-                data: {
-                  fill: ({ datum }) => datum.type === 'convergence' ? theme.colors.success : theme.colors.warning,
-                },
-              }}
-              labelComponent={<VictoryTooltip />}
-            />
-          );
-        })()}
+        {showConvergenceDivergence &&
+          (() => {
+            const analysis = calculateConvergenceDivergence();
+            return (
+              <VictoryScatter
+                data={[
+                  ...analysis.convergencePoints.map(point => ({
+                    x: point.year,
+                    y: Math.max(
+                      ...activeScenarioData.flatMap(s =>
+                        s.data
+                          .filter(d => d.year === point.year)
+                          .map(d => d.value)
+                      )
+                    ),
+                    type: 'convergence',
+                  })),
+                  ...analysis.divergencePoints.map(point => ({
+                    x: point.year,
+                    y: Math.max(
+                      ...activeScenarioData.flatMap(s =>
+                        s.data
+                          .filter(d => d.year === point.year)
+                          .map(d => d.value)
+                      )
+                    ),
+                    type: 'divergence',
+                    magnitude: point.magnitude,
+                  })),
+                ]}
+                x='x'
+                y='y'
+                size={6}
+                style={{
+                  data: {
+                    fill: ({ datum }) =>
+                      datum.type === 'convergence'
+                        ? theme.colors.success
+                        : theme.colors.warning,
+                  },
+                }}
+                labelComponent={<VictoryTooltip />}
+              />
+            );
+          })()}
 
         <VictoryLegend
           x={20}
           y={20}
-          orientation="horizontal"
+          orientation='horizontal'
           gutter={20}
           style={{
             border: { stroke: theme.colors.border, fill: theme.colors.surface },
@@ -288,7 +350,7 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
           }}
           data={activeScenarioData.map((scenario, index) => ({
             name: `${scenario.name} (${(scenario.probability * 100).toFixed(0)}%)`,
-            symbol: { fill: chartColors[index], type: 'line' }
+            symbol: { fill: chartColors[index], type: 'line' },
           }))}
         />
       </VictoryChart>
@@ -314,14 +376,14 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
       >
         <VictoryAxis
           dependentAxis
-          label="Expected Return (%)"
+          label='Expected Return (%)'
           style={{
             axisLabel: { fontSize: 12, padding: 40, fill: theme.colors.text },
             tickLabels: { fontSize: 10, fill: theme.colors.text },
           }}
         />
         <VictoryAxis
-          label="Risk (Volatility %)"
+          label='Risk (Volatility %)'
           style={{
             axisLabel: { fontSize: 12, padding: 40, fill: theme.colors.text },
             tickLabels: { fontSize: 10, fill: theme.colors.text },
@@ -330,9 +392,9 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
 
         <VictoryScatter
           data={scatterData}
-          x="x"
-          y="y"
-          size="size"
+          x='x'
+          y='y'
+          size='size'
           style={{
             data: {
               fill: ({ datum }) => datum.color,
@@ -340,21 +402,25 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
             },
           }}
           labelComponent={<VictoryTooltip />}
-          events={[{
-            target: "data",
-            eventHandlers: {
-              onPress: () => {
-                return [{
-                  target: "data",
-                  mutation: (props) => {
-                    onScenarioPress?.(props.datum);
-                    onDataPointTap();
-                    return null;
-                  }
-                }];
-              }
-            }
-          }]}
+          events={[
+            {
+              target: 'data',
+              eventHandlers: {
+                onPress: () => {
+                  return [
+                    {
+                      target: 'data',
+                      mutation: props => {
+                        onScenarioPress?.(props.datum);
+                        onDataPointTap();
+                        return null;
+                      },
+                    },
+                  ];
+                },
+              },
+            },
+          ]}
         />
       </VictoryChart>
     );
@@ -366,32 +432,52 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
           Scenario Probabilities
         </Text>
-        
+
         {scenarios.map(scenario => (
           <View key={scenario.id} style={styles.probabilityItem}>
             <View style={styles.probabilityHeader}>
-              <View style={[styles.colorIndicator, { backgroundColor: scenario.color }]} />
+              <View
+                style={[
+                  styles.colorIndicator,
+                  { backgroundColor: scenario.color },
+                ]}
+              />
               <Text style={[styles.scenarioName, { color: theme.colors.text }]}>
                 {scenario.name}
               </Text>
-              <Text style={[styles.probabilityValue, { color: theme.colors.primary }]}>
+              <Text
+                style={[
+                  styles.probabilityValue,
+                  { color: theme.colors.primary },
+                ]}
+              >
                 {(scenario.probability * 100).toFixed(0)}%
               </Text>
             </View>
-            
-            <View style={[styles.probabilityBar, { backgroundColor: theme.colors.surface }]}>
+
+            <View
+              style={[
+                styles.probabilityBar,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
               <View
                 style={[
                   styles.probabilityFill,
                   {
                     width: `${scenario.probability * 100}%`,
                     backgroundColor: scenario.color,
-                  }
+                  },
                 ]}
               />
             </View>
-            
-            <Text style={[styles.scenarioDescription, { color: theme.colors.textSecondary }]}>
+
+            <Text
+              style={[
+                styles.scenarioDescription,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               {scenario.metadata?.description || 'No description available'}
             </Text>
           </View>
@@ -402,44 +488,68 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
 
   const renderConvergenceAnalysis = () => {
     const analysis = calculateConvergenceDivergence();
-    
+
     return (
       <View style={styles.convergenceAnalysis}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
           Convergence/Divergence Analysis
         </Text>
-        
+
         <View style={styles.analysisOverview}>
           <Text style={[styles.overallTrend, { color: theme.colors.text }]}>
-            Overall Trend: <Text style={{ color: 
-              analysis.overallTrend === 'converging' ? theme.colors.success :
-              analysis.overallTrend === 'diverging' ? theme.colors.warning :
-              theme.colors.text
-            }}>
-              {analysis.overallTrend.charAt(0).toUpperCase() + analysis.overallTrend.slice(1)}
+            Overall Trend:{' '}
+            <Text
+              style={{
+                color:
+                  analysis.overallTrend === 'converging'
+                    ? theme.colors.success
+                    : analysis.overallTrend === 'diverging'
+                      ? theme.colors.warning
+                      : theme.colors.text,
+              }}
+            >
+              {analysis.overallTrend.charAt(0).toUpperCase() +
+                analysis.overallTrend.slice(1)}
             </Text>
           </Text>
         </View>
-        
+
         <View style={styles.analysisDetails}>
           <View style={styles.analysisSection}>
-            <Text style={[styles.analysisSubtitle, { color: theme.colors.success }]}>
+            <Text
+              style={[styles.analysisSubtitle, { color: theme.colors.success }]}
+            >
               Convergence Points: {analysis.convergencePoints.length}
             </Text>
             {analysis.convergencePoints.slice(0, 3).map((point, index) => (
-              <Text key={index} style={[styles.analysisItem, { color: theme.colors.textSecondary }]}>
+              <Text
+                key={index}
+                style={[
+                  styles.analysisItem,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Year {point.year}: {point.scenarios.length} scenarios align
               </Text>
             ))}
           </View>
-          
+
           <View style={styles.analysisSection}>
-            <Text style={[styles.analysisSubtitle, { color: theme.colors.warning }]}>
+            <Text
+              style={[styles.analysisSubtitle, { color: theme.colors.warning }]}
+            >
               Divergence Points: {analysis.divergencePoints.length}
             </Text>
             {analysis.divergencePoints.slice(0, 3).map((point, index) => (
-              <Text key={index} style={[styles.analysisItem, { color: theme.colors.textSecondary }]}>
-                Year {point.year}: High variance ({(point.magnitude * 100).toFixed(0)}%)
+              <Text
+                key={index}
+                style={[
+                  styles.analysisItem,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Year {point.year}: High variance (
+                {(point.magnitude * 100).toFixed(0)}%)
               </Text>
             ))}
           </View>
@@ -461,19 +571,31 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
           style={[
             styles.viewModeButton,
             viewMode === mode.key && styles.activeViewModeButton,
-            { backgroundColor: viewMode === mode.key ? theme.colors.primary : theme.colors.surface }
+            {
+              backgroundColor:
+                viewMode === mode.key
+                  ? theme.colors.primary
+                  : theme.colors.surface,
+            },
           ]}
           onPress={() => setViewMode(mode.key as any)}
         >
           <Icon
             name={mode.icon}
             size={16}
-            color={viewMode === mode.key ? theme.colors.onPrimary : theme.colors.text}
+            color={
+              viewMode === mode.key ? theme.colors.onPrimary : theme.colors.text
+            }
           />
           <Text
             style={[
               styles.viewModeButtonText,
-              { color: viewMode === mode.key ? theme.colors.onPrimary : theme.colors.text }
+              {
+                color:
+                  viewMode === mode.key
+                    ? theme.colors.onPrimary
+                    : theme.colors.text,
+              },
             ]}
           >
             {mode.label}
@@ -484,24 +606,35 @@ export const VisualScenarioComparison: React.FC<VisualScenarioComparisonProps> =
   );
 
   const renderScenarioToggles = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scenarioToggles}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.scenarioToggles}
+    >
       {scenarios.map(scenario => (
         <TouchableOpacity
           key={scenario.id}
           style={[
             styles.scenarioToggle,
-            activeScenarios.includes(scenario.id) && styles.activeScenarioToggle,
-            { 
-              backgroundColor: activeScenarios.includes(scenario.id) ? scenario.color : theme.colors.surface,
+            activeScenarios.includes(scenario.id) &&
+              styles.activeScenarioToggle,
+            {
+              backgroundColor: activeScenarios.includes(scenario.id)
+                ? scenario.color
+                : theme.colors.surface,
               borderColor: scenario.color,
-            }
+            },
           ]}
           onPress={() => toggleScenario(scenario.id)}
         >
           <Text
             style={[
               styles.scenarioToggleText,
-              { color: activeScenarios.includes(scenario.id) ? '#FFFFFF' : theme.colors.text }
+              {
+                color: activeScenarios.includes(scenario.id)
+                  ? '#FFFFFF'
+                  : theme.colors.text,
+              },
             ]}
           >
             {scenario.name}

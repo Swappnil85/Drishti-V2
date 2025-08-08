@@ -75,8 +75,12 @@ export interface ConflictResolutionStats {
 export class AdvancedConflictResolutionService {
   private static instance: AdvancedConflictResolutionService;
   private errorHandler: ErrorHandlingService;
-  private conflictListeners: ((conflicts: EnhancedSyncConflict[]) => void)[] = [];
-  private resolutionListeners: ((conflict: EnhancedSyncConflict, resolution: string) => void)[] = [];
+  private conflictListeners: ((conflicts: EnhancedSyncConflict[]) => void)[] =
+    [];
+  private resolutionListeners: ((
+    conflict: EnhancedSyncConflict,
+    resolution: string
+  ) => void)[] = [];
   private userPatterns: Map<string, UserResolutionPattern> = new Map();
   private isInitialized = false;
 
@@ -86,7 +90,8 @@ export class AdvancedConflictResolutionService {
 
   public static getInstance(): AdvancedConflictResolutionService {
     if (!AdvancedConflictResolutionService.instance) {
-      AdvancedConflictResolutionService.instance = new AdvancedConflictResolutionService();
+      AdvancedConflictResolutionService.instance =
+        new AdvancedConflictResolutionService();
     }
     return AdvancedConflictResolutionService.instance;
   }
@@ -100,14 +105,17 @@ export class AdvancedConflictResolutionService {
     try {
       // Load user patterns
       await this.loadUserPatterns();
-      
+
       // Setup sync manager integration
       this.setupSyncManagerIntegration();
-      
+
       this.isInitialized = true;
       console.log('AdvancedConflictResolutionService initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize AdvancedConflictResolutionService:', error);
+      console.error(
+        'Failed to initialize AdvancedConflictResolutionService:',
+        error
+      );
       this.errorHandler.handleError(error as Error, {
         context: 'AdvancedConflictResolutionService.initialize',
         severity: 'high',
@@ -126,7 +134,9 @@ export class AdvancedConflictResolutionService {
   /**
    * Enhance basic sync conflicts with advanced analysis
    */
-  public async enhanceConflicts(basicConflicts: SyncConflict[]): Promise<EnhancedSyncConflict[]> {
+  public async enhanceConflicts(
+    basicConflicts: SyncConflict[]
+  ): Promise<EnhancedSyncConflict[]> {
     const enhancedConflicts: EnhancedSyncConflict[] = [];
 
     for (const conflict of basicConflicts) {
@@ -146,23 +156,34 @@ export class AdvancedConflictResolutionService {
   /**
    * Enhance a single conflict with advanced analysis
    */
-  private async enhanceConflict(conflict: SyncConflict): Promise<EnhancedSyncConflict> {
+  private async enhanceConflict(
+    conflict: SyncConflict
+  ): Promise<EnhancedSyncConflict> {
     // Generate detailed diff analysis
-    const diffs = this.generateDiffs(conflict.client_data, conflict.server_data);
-    
+    const diffs = this.generateDiffs(
+      conflict.client_data,
+      conflict.server_data
+    );
+
     // Determine conflict severity and category
     const severity = this.assessConflictSeverity(diffs, conflict);
     const category = this.categorizeConflict(conflict);
-    
+
     // Generate smart merge suggestion
-    const smartMergeSuggestion = this.generateSmartMergeSuggestion(conflict, diffs);
-    
+    const smartMergeSuggestion = this.generateSmartMergeSuggestion(
+      conflict,
+      diffs
+    );
+
     // Check if auto-resolvable
     const autoResolvable = this.isAutoResolvable(diffs, severity);
-    
+
     // Get suggested resolution based on patterns and analysis
-    const suggestedResolution = await this.getSuggestedResolution(conflict, diffs);
-    
+    const suggestedResolution = await this.getSuggestedResolution(
+      conflict,
+      diffs
+    );
+
     // Get user pattern if available
     const userPattern = await this.getUserPattern(conflict);
 
@@ -192,15 +213,18 @@ export class AdvancedConflictResolutionService {
    */
   private generateDiffs(clientData: any, serverData: any): ConflictDiff[] {
     const diffs: ConflictDiff[] = [];
-    const allFields = new Set([...Object.keys(clientData || {}), ...Object.keys(serverData || {})]);
+    const allFields = new Set([
+      ...Object.keys(clientData || {}),
+      ...Object.keys(serverData || {}),
+    ]);
 
     for (const field of allFields) {
       const clientValue = clientData?.[field];
       const serverValue = serverData?.[field];
-      
+
       let diffType: ConflictDiff['diffType'];
       let conflictSeverity: ConflictDiff['conflictSeverity'];
-      
+
       if (clientValue === undefined && serverValue !== undefined) {
         diffType = 'added';
         conflictSeverity = 'low';
@@ -209,14 +233,23 @@ export class AdvancedConflictResolutionService {
         conflictSeverity = 'medium';
       } else if (clientValue !== serverValue) {
         diffType = 'modified';
-        conflictSeverity = this.assessFieldSeverity(field, clientValue, serverValue);
+        conflictSeverity = this.assessFieldSeverity(
+          field,
+          clientValue,
+          serverValue
+        );
       } else {
         diffType = 'unchanged';
         conflictSeverity = 'low';
         continue; // Skip unchanged fields
       }
 
-      const suggestedResolution = this.suggestFieldResolution(field, clientValue, serverValue, diffType);
+      const suggestedResolution = this.suggestFieldResolution(
+        field,
+        clientValue,
+        serverValue,
+        diffType
+      );
 
       diffs.push({
         field,
@@ -235,7 +268,11 @@ export class AdvancedConflictResolutionService {
   /**
    * Assess the severity of a field conflict
    */
-  private assessFieldSeverity(field: string, clientValue: any, serverValue: any): ConflictDiff['conflictSeverity'] {
+  private assessFieldSeverity(
+    field: string,
+    clientValue: any,
+    serverValue: any
+  ): ConflictDiff['conflictSeverity'] {
     // Critical fields that should never be auto-resolved
     const criticalFields = ['id', 'user_id', 'account_number', 'balance'];
     if (criticalFields.includes(field)) {
@@ -257,8 +294,9 @@ export class AdvancedConflictResolutionService {
     // Check value differences
     if (typeof clientValue === 'number' && typeof serverValue === 'number') {
       const difference = Math.abs(clientValue - serverValue);
-      const percentage = difference / Math.max(Math.abs(clientValue), Math.abs(serverValue));
-      
+      const percentage =
+        difference / Math.max(Math.abs(clientValue), Math.abs(serverValue));
+
       if (percentage > 0.5) return 'high';
       if (percentage > 0.1) return 'medium';
     }
@@ -304,7 +342,9 @@ export class AdvancedConflictResolutionService {
   /**
    * Get user resolution pattern for conflict type
    */
-  private async getUserPattern(conflict: SyncConflict): Promise<UserResolutionPattern | undefined> {
+  private async getUserPattern(
+    conflict: SyncConflict
+  ): Promise<UserResolutionPattern | undefined> {
     const patternKey = `${conflict.table}_${conflict.conflict_type}`;
     return this.userPatterns.get(patternKey);
   }
@@ -313,7 +353,9 @@ export class AdvancedConflictResolutionService {
    * Generate conflict title
    */
   private generateConflictTitle(conflict: SyncConflict): string {
-    const tableDisplayName = conflict.table.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const tableDisplayName = conflict.table
+      .replace('_', ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
 
     switch (conflict.conflict_type) {
       case 'update_conflict':
@@ -330,9 +372,14 @@ export class AdvancedConflictResolutionService {
   /**
    * Generate conflict description
    */
-  private generateConflictDescription(conflict: SyncConflict, diffs: ConflictDiff[]): string {
+  private generateConflictDescription(
+    conflict: SyncConflict,
+    diffs: ConflictDiff[]
+  ): string {
     const diffCount = diffs.length;
-    const criticalDiffs = diffs.filter(d => d.conflictSeverity === 'critical').length;
+    const criticalDiffs = diffs.filter(
+      d => d.conflictSeverity === 'critical'
+    ).length;
 
     let description = `This ${conflict.table} record has ${diffCount} conflicting field${diffCount > 1 ? 's' : ''}.`;
 
@@ -346,7 +393,9 @@ export class AdvancedConflictResolutionService {
   /**
    * Create basic enhanced conflict as fallback
    */
-  private createBasicEnhancedConflict(conflict: SyncConflict): EnhancedSyncConflict {
+  private createBasicEnhancedConflict(
+    conflict: SyncConflict
+  ): EnhancedSyncConflict {
     return {
       ...conflict,
       id: `basic_${conflict.operation_id}`,
@@ -381,7 +430,10 @@ export class AdvancedConflictResolutionService {
         resolvedBy,
         mergedData,
         confidence: resolvedBy === 'auto' ? 0.8 : 1.0,
-        notes: resolvedBy === 'auto' ? 'Automatically resolved based on patterns' : undefined,
+        notes:
+          resolvedBy === 'auto'
+            ? 'Automatically resolved based on patterns'
+            : undefined,
       };
 
       conflict.resolutionHistory.push(resolutionRecord);
@@ -391,12 +443,18 @@ export class AdvancedConflictResolutionService {
       await this.updateUserPattern(conflict, resolution);
 
       // Resolve using existing sync manager
-      await syncManager.resolveConflict(conflict.operation_id, resolution, mergedData);
+      await syncManager.resolveConflict(
+        conflict.operation_id,
+        resolution,
+        mergedData
+      );
 
       // Notify listeners
       this.notifyResolutionListeners(conflict, resolution);
 
-      console.log(`Enhanced conflict ${conflict.id} resolved with ${resolution} strategy`);
+      console.log(
+        `Enhanced conflict ${conflict.id} resolved with ${resolution} strategy`
+      );
     } catch (error) {
       console.error('Failed to resolve enhanced conflict:', error);
       throw error;
@@ -429,7 +487,10 @@ export class AdvancedConflictResolutionService {
     for (const conflict of conflictsToResolve) {
       try {
         // Skip if conflict type not included
-        if (options.conflictTypes && !options.conflictTypes.includes(conflict.conflict_type)) {
+        if (
+          options.conflictTypes &&
+          !options.conflictTypes.includes(conflict.conflict_type)
+        ) {
           results.skipped++;
           continue;
         }
@@ -450,7 +511,9 @@ export class AdvancedConflictResolutionService {
             mergedData = conflict.smartMergeSuggestion;
             break;
           case 'user_pattern':
-            resolution = conflict.userPattern?.preferredResolution || conflict.suggestedResolution;
+            resolution =
+              conflict.userPattern?.preferredResolution ||
+              conflict.suggestedResolution;
             if (resolution === 'merge') {
               mergedData = conflict.smartMergeSuggestion;
             }
@@ -461,7 +524,9 @@ export class AdvancedConflictResolutionService {
         results.resolved++;
       } catch (error) {
         results.failed++;
-        results.errors.push(`Failed to resolve conflict ${conflict.id}: ${error.message}`);
+        results.errors.push(
+          `Failed to resolve conflict ${conflict.id}: ${error.message}`
+        );
       }
     }
 
@@ -471,7 +536,9 @@ export class AdvancedConflictResolutionService {
   /**
    * Auto-resolve conflicts based on patterns and rules
    */
-  public async autoResolveConflicts(conflicts: EnhancedSyncConflict[]): Promise<{
+  public async autoResolveConflicts(
+    conflicts: EnhancedSyncConflict[]
+  ): Promise<{
     resolved: EnhancedSyncConflict[];
     remaining: EnhancedSyncConflict[];
   }> {
@@ -482,12 +549,16 @@ export class AdvancedConflictResolutionService {
       if (conflict.autoResolvable && conflict.severity !== 'critical') {
         try {
           const resolution = conflict.suggestedResolution;
-          const mergedData = resolution === 'merge' ? conflict.smartMergeSuggestion : undefined;
+          const mergedData =
+            resolution === 'merge' ? conflict.smartMergeSuggestion : undefined;
 
           await this.resolveConflict(conflict, resolution, mergedData, 'auto');
           resolved.push(conflict);
         } catch (error) {
-          console.error(`Failed to auto-resolve conflict ${conflict.id}:`, error);
+          console.error(
+            `Failed to auto-resolve conflict ${conflict.id}:`,
+            error
+          );
           remaining.push(conflict);
         }
       } else {
@@ -546,8 +617,12 @@ export class AdvancedConflictResolutionService {
   public async getConflictStats(): Promise<ConflictResolutionStats> {
     try {
       const allConflicts = await this.getAllStoredConflicts();
-      const resolvedConflicts = allConflicts.filter(c => c.resolutionHistory.length > 0);
-      const pendingConflicts = allConflicts.filter(c => c.resolutionHistory.length === 0);
+      const resolvedConflicts = allConflicts.filter(
+        c => c.resolutionHistory.length > 0
+      );
+      const pendingConflicts = allConflicts.filter(
+        c => c.resolutionHistory.length === 0
+      );
       const autoResolvedConflicts = resolvedConflicts.filter(c =>
         c.resolutionHistory.some(h => h.resolvedBy === 'auto')
       );
@@ -556,9 +631,11 @@ export class AdvancedConflictResolutionService {
       const resolutionTimes = resolvedConflicts
         .map(c => c.resolutionHistory[0]?.timestamp - c.createdAt)
         .filter(time => time > 0);
-      const averageResolutionTime = resolutionTimes.length > 0
-        ? resolutionTimes.reduce((sum, time) => sum + time, 0) / resolutionTimes.length
-        : 0;
+      const averageResolutionTime =
+        resolutionTimes.length > 0
+          ? resolutionTimes.reduce((sum, time) => sum + time, 0) /
+            resolutionTimes.length
+          : 0;
 
       // Count conflict types
       const conflictTypeCounts = new Map<string, number>();
@@ -576,9 +653,13 @@ export class AdvancedConflictResolutionService {
         resolvedConflicts: resolvedConflicts.length,
         pendingConflicts: pendingConflicts.length,
         autoResolvedConflicts: autoResolvedConflicts.length,
-        userResolvedConflicts: resolvedConflicts.length - autoResolvedConflicts.length,
+        userResolvedConflicts:
+          resolvedConflicts.length - autoResolvedConflicts.length,
         averageResolutionTime,
-        resolutionSuccessRate: allConflicts.length > 0 ? resolvedConflicts.length / allConflicts.length : 0,
+        resolutionSuccessRate:
+          allConflicts.length > 0
+            ? resolvedConflicts.length / allConflicts.length
+            : 0,
         commonConflictTypes,
         userPatterns: Array.from(this.userPatterns.values()),
       };
@@ -604,9 +685,14 @@ export class AdvancedConflictResolutionService {
   /**
    * Store enhanced conflicts
    */
-  public async storeConflicts(conflicts: EnhancedSyncConflict[]): Promise<void> {
+  public async storeConflicts(
+    conflicts: EnhancedSyncConflict[]
+  ): Promise<void> {
     try {
-      await AsyncStorage.setItem('enhanced_conflicts', JSON.stringify(conflicts));
+      await AsyncStorage.setItem(
+        'enhanced_conflicts',
+        JSON.stringify(conflicts)
+      );
     } catch (error) {
       console.error('Failed to store enhanced conflicts:', error);
     }
@@ -636,7 +722,10 @@ export class AdvancedConflictResolutionService {
   private async saveUserPatterns(): Promise<void> {
     try {
       const patterns = Array.from(this.userPatterns.values());
-      await AsyncStorage.setItem('user_resolution_patterns', JSON.stringify(patterns));
+      await AsyncStorage.setItem(
+        'user_resolution_patterns',
+        JSON.stringify(patterns)
+      );
     } catch (error) {
       console.error('Failed to save user patterns:', error);
     }
@@ -645,7 +734,9 @@ export class AdvancedConflictResolutionService {
   /**
    * Add conflict listener
    */
-  public addConflictListener(listener: (conflicts: EnhancedSyncConflict[]) => void): () => void {
+  public addConflictListener(
+    listener: (conflicts: EnhancedSyncConflict[]) => void
+  ): () => void {
     this.conflictListeners.push(listener);
 
     return () => {
@@ -688,7 +779,10 @@ export class AdvancedConflictResolutionService {
   /**
    * Notify resolution listeners
    */
-  private notifyResolutionListeners(conflict: EnhancedSyncConflict, resolution: string): void {
+  private notifyResolutionListeners(
+    conflict: EnhancedSyncConflict,
+    resolution: string
+  ): void {
     this.resolutionListeners.forEach(listener => {
       try {
         listener(conflict, resolution);
@@ -704,14 +798,16 @@ export class AdvancedConflictResolutionService {
   public async clearOldConflicts(daysOld: number = 30): Promise<number> {
     try {
       const allConflicts = await this.getAllStoredConflicts();
-      const cutoffTime = Date.now() - (daysOld * 24 * 60 * 60 * 1000);
+      const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
 
       const activeConflicts = allConflicts.filter(conflict => {
         // Keep unresolved conflicts
         if (conflict.resolutionHistory.length === 0) return true;
 
         // Keep recently resolved conflicts
-        const lastResolution = Math.max(...conflict.resolutionHistory.map(h => h.timestamp));
+        const lastResolution = Math.max(
+          ...conflict.resolutionHistory.map(h => h.timestamp)
+        );
         return lastResolution > cutoffTime;
       });
 
@@ -744,49 +840,42 @@ export class AdvancedConflictResolutionService {
   }
 
   /**
-   * Cleanup resources
-   */
-  public cleanup(): void {
-    this.conflictListeners = [];
-    this.resolutionListeners = [];
-    this.userPatterns.clear();
-    this.isInitialized = false;
-  }
-}
-
-// Export singleton instance
-export const advancedConflictResolutionService = AdvancedConflictResolutionService.getInstance();
-
-  /**
    * Get merge strategy for a field
    */
-  private getMergeStrategy(field: string, clientValue: any, serverValue: any): string {
+  private getMergeStrategy(
+    field: string,
+    clientValue: any,
+    serverValue: any
+  ): string {
     if (typeof clientValue === 'string' && typeof serverValue === 'string') {
       return 'string_merge';
     }
-    
+
     if (typeof clientValue === 'number' && typeof serverValue === 'number') {
       return 'numeric_average';
     }
-    
+
     if (Array.isArray(clientValue) && Array.isArray(serverValue)) {
       return 'array_union';
     }
-    
+
     if (typeof clientValue === 'object' && typeof serverValue === 'object') {
       return 'object_merge';
     }
-    
+
     return 'manual_selection';
   }
 
   /**
    * Assess overall conflict severity
    */
-  private assessConflictSeverity(diffs: ConflictDiff[], conflict: SyncConflict): EnhancedSyncConflict['severity'] {
+  private assessConflictSeverity(
+    diffs: ConflictDiff[],
+    conflict: SyncConflict
+  ): EnhancedSyncConflict['severity'] {
     const criticalDiffs = diffs.filter(d => d.conflictSeverity === 'critical');
     const highDiffs = diffs.filter(d => d.conflictSeverity === 'high');
-    
+
     if (criticalDiffs.length > 0) return 'critical';
     if (highDiffs.length > 2) return 'high';
     if (highDiffs.length > 0) return 'medium';
@@ -796,31 +885,39 @@ export const advancedConflictResolutionService = AdvancedConflictResolutionServi
   /**
    * Categorize conflict type
    */
-  private categorizeConflict(conflict: SyncConflict): EnhancedSyncConflict['category'] {
+  private categorizeConflict(
+    conflict: SyncConflict
+  ): EnhancedSyncConflict['category'] {
     // Analyze the conflict to determine category
     if (conflict.conflict_type === 'delete_conflict') {
       return 'business_rule';
     }
-    
+
     // Check for schema-related conflicts
-    if (conflict.table.includes('_schema') || conflict.table.includes('_meta')) {
+    if (
+      conflict.table.includes('_schema') ||
+      conflict.table.includes('_meta')
+    ) {
       return 'schema';
     }
-    
+
     // Check for permission-related conflicts
     if (conflict.client_data?.user_id !== conflict.server_data?.user_id) {
       return 'permission';
     }
-    
+
     return 'data';
   }
 
   /**
    * Generate smart merge suggestion
    */
-  private generateSmartMergeSuggestion(conflict: SyncConflict, diffs: ConflictDiff[]): any {
+  private generateSmartMergeSuggestion(
+    conflict: SyncConflict,
+    diffs: ConflictDiff[]
+  ): any {
     const merged = { ...conflict.server_data };
-    
+
     for (const diff of diffs) {
       switch (diff.suggestedResolution) {
         case 'client':
@@ -834,7 +931,7 @@ export const advancedConflictResolutionService = AdvancedConflictResolutionServi
           break;
       }
     }
-    
+
     return merged;
   }
 
@@ -859,14 +956,17 @@ export const advancedConflictResolutionService = AdvancedConflictResolutionServi
   /**
    * Check if conflict is auto-resolvable
    */
-  private isAutoResolvable(diffs: ConflictDiff[], severity: EnhancedSyncConflict['severity']): boolean {
+  private isAutoResolvable(
+    diffs: ConflictDiff[],
+    severity: EnhancedSyncConflict['severity']
+  ): boolean {
     // Never auto-resolve critical conflicts
     if (severity === 'critical') return false;
-    
+
     // Don't auto-resolve if there are too many high-severity diffs
     const highSeverityDiffs = diffs.filter(d => d.conflictSeverity === 'high');
     if (highSeverityDiffs.length > 1) return false;
-    
+
     // Auto-resolve if all diffs have clear suggestions
     return diffs.every(d => d.suggestedResolution !== undefined);
   }
@@ -883,19 +983,43 @@ export const advancedConflictResolutionService = AdvancedConflictResolutionServi
     if (userPattern && userPattern.confidence > 0.7) {
       return userPattern.preferredResolution;
     }
-    
+
     // Analyze diffs for suggestion
-    const clientSuggestions = diffs.filter(d => d.suggestedResolution === 'client').length;
-    const serverSuggestions = diffs.filter(d => d.suggestedResolution === 'server').length;
-    const mergeSuggestions = diffs.filter(d => d.suggestedResolution === 'merge').length;
-    
-    if (clientSuggestions > serverSuggestions && clientSuggestions > mergeSuggestions) {
+    const clientSuggestions = diffs.filter(
+      d => d.suggestedResolution === 'client'
+    ).length;
+    const serverSuggestions = diffs.filter(
+      d => d.suggestedResolution === 'server'
+    ).length;
+    const mergeSuggestions = diffs.filter(
+      d => d.suggestedResolution === 'merge'
+    ).length;
+
+    if (
+      clientSuggestions > serverSuggestions &&
+      clientSuggestions > mergeSuggestions
+    ) {
       return 'client';
     }
-    
+
     if (serverSuggestions > mergeSuggestions) {
       return 'server';
     }
-    
+
     return 'merge';
   }
+
+  /**
+   * Cleanup resources
+   */
+  public cleanup(): void {
+    this.conflictListeners = [];
+    this.resolutionListeners = [];
+    this.userPatterns.clear();
+    this.isInitialized = false;
+  }
+}
+
+// Export singleton instance
+export const advancedConflictResolutionService =
+  AdvancedConflictResolutionService.getInstance();

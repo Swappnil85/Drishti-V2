@@ -10,7 +10,146 @@ import {
   Switch,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
-import { Flex, Icon, Button, Badge, Progress, Divider } from 'native-base';
+
+// Web-compatible components
+const Badge = ({ children, colorScheme, variant, size, style }: any) => (
+  <View
+    style={[
+      {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        backgroundColor:
+          colorScheme === 'blue'
+            ? '#3b82f6'
+            : colorScheme === 'green'
+              ? '#10b981'
+              : colorScheme === 'yellow'
+                ? '#f59e0b'
+                : colorScheme === 'red'
+                  ? '#ef4444'
+                  : colorScheme === 'orange'
+                    ? '#f97316'
+                    : '#6b7280',
+      },
+      style,
+    ]}
+  >
+    <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>
+      {children}
+    </Text>
+  </View>
+);
+
+const Button = ({
+  children,
+  onPress,
+  disabled,
+  variant,
+  size,
+  leftIcon,
+  colorScheme,
+  style,
+}: any) => (
+  <TouchableOpacity
+    onPress={onPress}
+    disabled={disabled}
+    style={[
+      {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 6,
+        backgroundColor:
+          variant === 'outline'
+            ? 'transparent'
+            : colorScheme === 'red'
+              ? '#ef4444'
+              : colorScheme === 'green'
+                ? '#10b981'
+                : colorScheme === 'blue'
+                  ? '#3b82f6'
+                  : '#3b82f6',
+        borderWidth: variant === 'outline' ? 1 : 0,
+        borderColor:
+          colorScheme === 'red'
+            ? '#ef4444'
+            : colorScheme === 'green'
+              ? '#10b981'
+              : colorScheme === 'blue'
+                ? '#3b82f6'
+                : '#3b82f6',
+        opacity: disabled ? 0.5 : 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+      },
+      style,
+    ]}
+  >
+    {leftIcon}
+    <Text
+      style={{
+        color:
+          variant === 'outline'
+            ? colorScheme === 'red'
+              ? '#ef4444'
+              : '#3b82f6'
+            : 'white',
+        fontSize: 14,
+        fontWeight: '500',
+      }}
+    >
+      {children}
+    </Text>
+  </TouchableOpacity>
+);
+
+const Icon = ({ name, size, color, style }: any) => {
+  const iconMap: { [key: string]: string } = {
+    close: '✕',
+    check: '✓',
+    warning: '⚠️',
+    merge: '🔀',
+    download: '⬇️',
+    upload: '⬆️',
+    'auto-fix': '🔧',
+    settings: '⚙️',
+    info: 'ℹ️',
+    'chevron-down': '▼',
+    'chevron-up': '▲',
+  };
+
+  return (
+    <Text style={[{ color, fontSize: size === 'sm' ? 16 : 20 }, style]}>
+      {iconMap[name] || '•'}
+    </Text>
+  );
+};
+
+const Progress = ({ value, colorScheme, style }: any) => (
+  <View
+    style={[{ height: 8, backgroundColor: '#e5e5e5', borderRadius: 4 }, style]}
+  >
+    <View
+      style={{
+        height: '100%',
+        width: `${value}%`,
+        backgroundColor: colorScheme === 'green' ? '#10b981' : '#3b82f6',
+        borderRadius: 4,
+      }}
+    />
+  </View>
+);
+
+const Divider = ({ style }: any) => (
+  <View
+    style={[
+      { height: 1, backgroundColor: '#e5e5e5', marginVertical: 8 },
+      style,
+    ]}
+  />
+);
+
 import {
   EnhancedSyncConflict,
   ConflictDiff,
@@ -212,7 +351,7 @@ export default function AdvancedConflictResolutionModal({
 
         {/* Conflict Info */}
         <View style={styles.conflictInfo}>
-          <Flex direction='row' align='center' justify='space-between' mb={2}>
+          <View style={styles.rowBetween}>
             <Text
               style={[
                 styles.conflictTitle,
@@ -234,7 +373,7 @@ export default function AdvancedConflictResolutionModal({
             >
               {currentConflict.severity.toUpperCase()}
             </Badge>
-          </Flex>
+          </View>
 
           <Text
             style={[
@@ -306,12 +445,7 @@ export default function AdvancedConflictResolutionModal({
             <View style={styles.diffContainer}>
               {currentConflict.diffs.map((diff, index) => (
                 <View key={index} style={styles.diffItem}>
-                  <Flex
-                    direction='row'
-                    align='center'
-                    justify='space-between'
-                    mb={2}
-                  >
+                  <View style={styles.rowBetween}>
                     <Text
                       style={[
                         styles.diffField,
@@ -334,7 +468,7 @@ export default function AdvancedConflictResolutionModal({
                     >
                       {diff.diffType}
                     </Badge>
-                  </Flex>
+                  </View>
 
                   <View style={styles.diffValues}>
                     <View style={styles.diffValue}>
@@ -478,7 +612,7 @@ export default function AdvancedConflictResolutionModal({
                 ]}
                 onPress={() => setSelectedResolution('client')}
               >
-                <Flex direction='row' align='center' justify='space-between'>
+                <View style={styles.rowBetween}>
                   <View>
                     <Text
                       style={[
@@ -504,7 +638,7 @@ export default function AdvancedConflictResolutionModal({
                         styles.radioButtonSelected,
                     ]}
                   />
-                </Flex>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -514,7 +648,7 @@ export default function AdvancedConflictResolutionModal({
                 ]}
                 onPress={() => setSelectedResolution('server')}
               >
-                <Flex direction='row' align='center' justify='space-between'>
+                <View style={styles.rowBetween}>
                   <View>
                     <Text
                       style={[
@@ -540,7 +674,7 @@ export default function AdvancedConflictResolutionModal({
                         styles.radioButtonSelected,
                     ]}
                   />
-                </Flex>
+                </View>
               </TouchableOpacity>
 
               {currentConflict.smartMergeSuggestion && (
@@ -551,7 +685,7 @@ export default function AdvancedConflictResolutionModal({
                   ]}
                   onPress={() => setSelectedResolution('merge')}
                 >
-                  <Flex direction='row' align='center' justify='space-between'>
+                  <View style={styles.rowBetween}>
                     <View>
                       <Text
                         style={[
@@ -577,7 +711,7 @@ export default function AdvancedConflictResolutionModal({
                           styles.radioButtonSelected,
                       ]}
                     />
-                  </Flex>
+                  </View>
                 </TouchableOpacity>
               )}
             </View>
@@ -667,7 +801,7 @@ export default function AdvancedConflictResolutionModal({
               </View>
 
               <View style={styles.bulkOption}>
-                <Flex direction='row' align='center' justify='space-between'>
+                <View style={styles.rowBetween}>
                   <Text
                     style={[
                       styles.bulkOptionLabel,
@@ -682,11 +816,11 @@ export default function AdvancedConflictResolutionModal({
                       setBulkOptions({ ...bulkOptions, applyToSimilar: value })
                     }
                   />
-                </Flex>
+                </View>
               </View>
 
               <View style={styles.bulkOption}>
-                <Flex direction='row' align='center' justify='space-between'>
+                <View style={styles.rowBetween}>
                   <Text
                     style={[
                       styles.bulkOptionLabel,
@@ -704,7 +838,7 @@ export default function AdvancedConflictResolutionModal({
                       })
                     }
                   />
-                </Flex>
+                </View>
               </View>
 
               <Button
@@ -743,6 +877,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
