@@ -1,4 +1,4 @@
-export default {
+export default ({ config }) => ({
   expo: {
     name: 'Drishti',
     slug: 'drishti',
@@ -13,5 +13,11 @@ export default {
       favicon: './assets/icon.png',
     },
     plugins: ['expo-font', 'expo-sqlite'],
+    extra: {
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000',
+    },
   },
-};
+  experiments: {
+    tsconfigPaths: true,
+  },
+});

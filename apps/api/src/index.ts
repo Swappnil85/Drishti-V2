@@ -39,6 +39,8 @@ import { retentionScheduler } from './services/queue/RetentionScheduler';
 // Load environment variables
 dotenv.config();
 
+const IS_PREVIEW = String(process.env.PREVIEW_MODE).toLowerCase() === 'true';
+
 const fastify = Fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
@@ -235,7 +237,7 @@ fastify.get(
 
 // Hello world endpoint with database connection verification
 fastify.get('/', async (_request: FastifyRequest, _reply: FastifyReply) => {
-  const dbConnected = await testConnection();
+  const dbConnected = IS_PREVIEW ? false : await testConnection();
   return {
     message: 'Drishti API is running!',
     database: dbConnected ? 'connected' : 'disconnected',
@@ -247,33 +249,40 @@ fastify.get('/', async (_request: FastifyRequest, _reply: FastifyReply) => {
 // Start server
 const start = async () => {
   try {
-    // Test database connection before starting server
-    console.log('🔍 Testing database connection...');
-    // Initialize database connection
-    await initializeDatabase();
-    console.log('✅ Database connection established');
+    // In preview mode, skip DB init/migrations for faster startup
+    if (!IS_PREVIEW) {
+      // Test database connection before starting server
+      console.log('🔍 Testing database connection...');
+      // Initialize database connection
+      await initializeDatabase();
+      console.log('✅ Database connection established');
 
-    // Run database migrations
-    console.log('🔄 Running database migrations...');
-    const migrationResult = await runMigrations();
+      // Run database migrations
+      console.log('🔄 Running database migrations...');
+      const migrationResult = await runMigrations();
 
-    if (migrationResult.success) {
-      if (migrationResult.migrationsRun.length > 0) {
-        console.log(
-          `✅ Successfully ran ${migrationResult.migrationsRun.length} migrations:`
-        );
-        migrationResult.migrationsRun.forEach(migration => {
-          console.log(`   - ${migration}`);
-        });
+      if (migrationResult.success) {
+        if (migrationResult.migrationsRun.length > 0) {
+          console.log(
+            `✅ Successfully ran ${migrationResult.migrationsRun.length} migrations:`
+          );
+          migrationResult.migrationsRun.forEach(migration => {
+            console.log(`   - ${migration}`);
+          });
+        } else {
+          console.log('✅ Database is up to date');
+        }
       } else {
-        console.log('✅ Database is up to date');
+        console.error('❌ Migration failed:', migrationResult.errors);
+        throw new Error('Database migration failed');
       }
     } else {
-      console.error('❌ Migration failed:', migrationResult.errors);
-      throw new Error('Database migration failed');
+      console.log(
+        '⏩ PREVIEW_MODE enabled: skipping database init and migrations'
+      );
     }
 
-    const dbConnected = await testConnection();
+    const dbConnected = IS_PREVIEW ? false : await testConnection();
 
     if (dbConnected) {
       console.log('✅ Database connection successful');

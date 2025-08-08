@@ -60,8 +60,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run API tests
-        run: npm test --workspace=apps/api
+      - name: Run API tests with coverage
+        run: npm test --workspace=apps/api -- --coverage
         env:
           CI: true
           NODE_ENV: test
