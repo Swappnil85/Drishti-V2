@@ -79,16 +79,26 @@ export class PrivacyService {
 
     if (format === 'csv') {
       // For CSV, only allow single type for simplicity
-      const singleType = (types && types.length === 1 ? types[0] : undefined) ?? 'accounts';
+      const singleType =
+        (types && types.length === 1 ? types[0] : undefined) ?? 'accounts';
       const dataset = (data as any)[singleType] ?? [];
       const csv = this.toCSV(dataset);
-      return { format, type: singleType, exportedAt: new Date().toISOString(), csv };
+      return {
+        format,
+        type: singleType,
+        exportedAt: new Date().toISOString(),
+        csv,
+      };
     }
 
     if (format === 'pdf') {
       const { exportPdfService } = await import('./ExportPdfService');
       const pdf = await exportPdfService.generateUserDataPdf(userId, data);
-      return { format, exportedAt: new Date().toISOString(), pdf: pdf.toString('base64') };
+      return {
+        format,
+        exportedAt: new Date().toISOString(),
+        pdf: pdf.toString('base64'),
+      };
     }
 
     if (format === 'zip') {
@@ -101,16 +111,30 @@ export class PrivacyService {
         scenarios: Array.isArray(data.scenarios) ? data.scenarios.length : 0,
         sessions: Array.isArray(data.sessions) ? data.sessions.length : 0,
       };
-      const manifest = exportArchiveService.buildManifest(userId, ['json', 'csv'], counts);
+      const manifest = exportArchiveService.buildManifest(
+        userId,
+        ['json', 'csv'],
+        counts
+      );
       const files: Array<{ name: string; content: string | Buffer }> = [];
-      files.push({ name: 'manifest.json', content: JSON.stringify(manifest, null, 2) });
-      files.push({ name: 'export.json', content: JSON.stringify(data, null, 2) });
+      files.push({
+        name: 'manifest.json',
+        content: JSON.stringify(manifest, null, 2),
+      });
+      files.push({
+        name: 'export.json',
+        content: JSON.stringify(data, null, 2),
+      });
       const singleType = 'accounts';
       const dataset = (data as any)[singleType] ?? [];
       files.push({ name: `${singleType}.csv`, content: this.toCSV(dataset) });
 
       const zip = await exportArchiveService.buildZip(files);
-      return { format, exportedAt: new Date().toISOString(), zip: zip.toString('base64') };
+      return {
+        format,
+        exportedAt: new Date().toISOString(),
+        zip: zip.toString('base64'),
+      };
     }
 
     // default fallback
@@ -224,6 +248,7 @@ export class PrivacyService {
       [userId, JSON.stringify(consent)]
     );
     return { success: true };
+  }
 
   // Consent history for auditability
   async getConsentHistory(userId: string, limit = 50) {
@@ -237,14 +262,23 @@ export class PrivacyService {
     return res.rows || [];
   }
 
-  async recordConsentAudit(userId: string, consent: Record<string, any>, policyVersion: string, context?: { ip?: string; ua?: string }) {
+  async recordConsentAudit(
+    userId: string,
+    consent: Record<string, any>,
+    policyVersion: string,
+    context?: { ip?: string; ua?: string }
+  ) {
     await query(
       `INSERT INTO consent_audit (user_id, consent, policy_version, user_agent, ip_address, created_at)
        VALUES ($1, $2::jsonb, $3, $4, $5, NOW())`,
-      [userId, JSON.stringify(consent), policyVersion, context?.ua || null, context?.ip || null]
+      [
+        userId,
+        JSON.stringify(consent),
+        policyVersion,
+        context?.ua || null,
+        context?.ip || null,
+      ]
     );
-  }
-
   }
 
   private toCSV(rows: any[]): string {

@@ -76,9 +76,9 @@ export function createPinnedAxios(baseURL: string): AxiosInstance {
       headers: responseHeaders,
       config,
       request: null as any,
-    };
+    } as any;
   } as any;
 
-  return instance;
+  return instance as any;
 }
 
