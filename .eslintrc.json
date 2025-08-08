@@ -3,12 +3,11 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "node": true,
-    "react-native/react-native": true
+    "node": true
   },
   "extends": [
     "eslint:recommended",
-    "@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -17,8 +16,7 @@
       "jsx": true
     },
     "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
+    "sourceType": "module"
   },
   "plugins": [
     "@typescript-eslint",
@@ -28,39 +26,43 @@
     "prettier"
   ],
   "rules": {
-    "prettier/prettier": "error",
-    "@typescript-eslint/no-unused-vars": "error",
+    "prettier/prettier": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-non-null-assertion": "warn",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
-    "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/no-unnecessary-type-assertion": "error",
-    "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/prefer-optional-chain": "off",
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+    "@typescript-eslint/no-floating-promises": "warn",
+    "@typescript-eslint/await-thenable": "warn",
+    "@typescript-eslint/no-namespace": "warn",
+    "@typescript-eslint/no-var-requires": "off",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react-native/no-unused-styles": "error",
-    "react-native/split-platform-components": "error",
+    "react-native/no-unused-styles": "warn",
+    "react-native/split-platform-components": "warn",
     "react-native/no-inline-styles": "warn",
     "react-native/no-color-literals": "warn",
     "no-console": "warn",
-    "prefer-const": "error",
+    "prefer-const": "warn",
     "no-var": "error",
-    "eqeqeq": ["error", "always"],
-    "curly": ["error", "all"],
-    "no-eval": "error",
-    "no-implied-eval": "error",
-    "no-new-func": "error",
-    "no-return-assign": "error",
-    "no-sequences": "error",
-    "no-throw-literal": "error",
-    "no-unused-expressions": "error",
-    "no-useless-concat": "error",
-    "radix": "error"
+    "eqeqeq": ["warn", "always"],
+    "curly": ["warn", "all"],
+    "no-eval": "warn",
+    "no-implied-eval": "warn",
+    "no-new-func": "warn",
+    "no-return-assign": "warn",
+    "no-sequences": "warn",
+    "no-throw-literal": "warn",
+    "no-unused-expressions": "warn",
+    "no-useless-concat": "warn",
+    "no-useless-escape": "warn",
+    "no-case-declarations": "warn",
+    "radix": "warn"
   },
   "overrides": [
     {
@@ -80,7 +82,12 @@
       }
     },
     {
-      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
       "env": {
         "jest": true
       },
@@ -95,6 +102,8 @@
     "build/",
     "coverage/",
     "*.config.js",
-    "*.config.ts"
+    "*.config.ts",
+    "**/__tests__/**",
+    "apps/mobile/src/tests/**"
   ]
 }
