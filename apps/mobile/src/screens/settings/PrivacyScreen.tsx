@@ -91,6 +91,18 @@ const PrivacyScreen: React.FC<Props> = () => {
             </TouchableOpacity>
           )}
 
+          {termsUrl && (
+            <TouchableOpacity
+              onPress={() => {
+                const anyWin = globalThis as any;
+                if (anyWin?.open) anyWin.open(termsUrl, '_blank');
+                else Linking.openURL(termsUrl);
+              }}
+            >
+              <Text style={styles.link}>View Terms of Service</Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Consent</Text>
             <View style={styles.row}>
