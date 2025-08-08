@@ -2,11 +2,23 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { privacyService } from '../services/privacy/PrivacyService';
 import { jwtService } from '../auth/jwt';
 
+const IS_PREVIEW = String(process.env.PREVIEW_MODE).toLowerCase() === 'true';
+
 interface AuthedRequest extends FastifyRequest {
   user?: { userId: string; email: string; role?: string };
 }
 
 async function requireAuth(request: AuthedRequest, reply: FastifyReply) {
+  // In preview mode, bypass JWT and use a dev user for demo
+  if (IS_PREVIEW) {
+    (request as AuthedRequest).user = {
+      userId: 'dev-user-123',
+      email: 'dev@drishti.app',
+      role: 'user',
+    };
+    return;
+  }
+
   try {
     const authHeader = request.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
