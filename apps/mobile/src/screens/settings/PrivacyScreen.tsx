@@ -13,6 +13,7 @@ import {
   Switch,
   Alert,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { SettingsStackScreenProps } from '../../types/navigation';
 import { apiService } from '../../services/api/ApiService';
@@ -85,13 +86,7 @@ const PrivacyScreen: React.FC<Props> = () => {
         <View style={styles.content}>
           <Text style={styles.title}>Privacy</Text>
           {policyUrl && (
-            <TouchableOpacity
-              onPress={() => {
-                import('expo-linking').then(({ default: Linking }) => {
-                  Linking.openURL(policyUrl);
-                });
-              }}
-            >
+            <TouchableOpacity onPress={() => Linking.openURL(policyUrl)}>
               <Text style={styles.link}>View Privacy Policy</Text>
             </TouchableOpacity>
           )}

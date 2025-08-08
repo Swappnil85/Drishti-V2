@@ -49,14 +49,22 @@ const fastify = Fastify({
 
 // Register plugins
 async function registerPlugins() {
-  // Performance and compression
-  await fastify.register(compress, {
-    global: true,
-    encodings: ['gzip', 'deflate'],
-  });
+  // Performance and compression (skip in preview mode to avoid plugin version issues)
+  if (!IS_PREVIEW) {
+    await fastify.register(compress, {
+      global: true,
+      encodings: ['gzip', 'deflate'],
+    });
+  } else {
+    fastify.log.info('Skipping @fastify/compress in PREVIEW_MODE');
+  }
 
-  // WebSocket support
-  await fastify.register(websocket);
+  // WebSocket support (skip in PREVIEW_MODE due to plugin version expectations)
+  if (!IS_PREVIEW) {
+    await fastify.register(websocket);
+  } else {
+    fastify.log.info('Skipping @fastify/websocket in PREVIEW_MODE');
+  }
 
   // Security
   await fastify.register(helmet, {
@@ -156,7 +164,9 @@ async function registerPlugins() {
     async function (fastify) {
       await fastify.register(authRoutes, { prefix: '/auth' });
       await fastify.register(financialRoutes, { prefix: '/financial' });
-      await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      if (!IS_PREVIEW) {
+        await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      }
       await fastify.register(syncRoutes, { prefix: '/sync' });
     },
     { prefix: '/v1' }
@@ -167,7 +177,9 @@ async function registerPlugins() {
     async function (fastify) {
       await fastify.register(authRoutes, { prefix: '/auth' });
       await fastify.register(financialRoutes, { prefix: '/financial' });
-      await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      if (!IS_PREVIEW) {
+        await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+      }
       await fastify.register(syncRoutes, { prefix: '/sync' });
       await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
       await fastify.register(privacyRoutes, { prefix: '' });
@@ -181,7 +193,9 @@ async function registerPlugins() {
   // Default routes (current version)
   await fastify.register(authRoutes, { prefix: '/auth' });
   await fastify.register(financialRoutes, { prefix: '/financial' });
-  await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+  if (!IS_PREVIEW) {
+    await fastify.register(calculationsRoutes, { prefix: '/calculations' });
+  }
   await fastify.register(syncRoutes, { prefix: '/sync' });
   await fastify.register(monitoringRoutes, { prefix: '/monitoring' });
   await fastify.register(privacyRoutes, { prefix: '' });

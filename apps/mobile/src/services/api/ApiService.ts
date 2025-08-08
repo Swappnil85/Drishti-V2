@@ -36,9 +36,10 @@ export class ApiService {
       const host = u.hostname;
       const scheme = u.protocol.replace(':', '');
 
-      // Enforce HTTPS
+      // Enforce HTTPS (allow http for localhost/127.0.0.1 during dev preview)
       const { pinningConfig } = require('../security/PinningConfig');
-      if (pinningConfig.enforceHttps && scheme !== 'https') {
+      const isLocalDevHost = host === 'localhost' || host === '127.0.0.1';
+      if (pinningConfig.enforceHttps && scheme !== 'https' && !isLocalDevHost) {
         throw new Error(`Insecure scheme: ${scheme}. HTTPS is required.`);
       }
 
