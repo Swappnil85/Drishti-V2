@@ -16,8 +16,8 @@ This project uses a **monorepo structure** with the following components:
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+- Node.js >= 20.0.0 (use `nvm use` to match .nvmrc)
+- npm >= 10.0.0
 - PostgreSQL (for API backend)
 - Expo CLI (for mobile development)
 
