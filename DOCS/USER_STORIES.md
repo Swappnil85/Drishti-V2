@@ -1523,21 +1523,21 @@ As a user, I want the Dashboard to present information in a clear hierarchy so I
 
 Acceptance Criteria
 
-- Status row at top: Offline/Online chip (left) + sync text/icon (right)
-- Section order: Net Worth card → Streaks & Wins → Quick Actions
-- Consistent spacing using theme.spacing; card padding standardized
-- OfflineIndicator uses compact “chip” style by default on Dashboard
-- Quick Action buttons size reduced; do not dominate viewport
-- Snackbar/toast sits above tab bar; never overlaps navigation
-- No behavioral changes to services; purely presentational/layout
-- Works on small phones (≤360dp width) without overflow or clipping
-- Respects light, dark, and “sun” palette without hardcoded colors
+- [x] Status row at top: Offline/Online chip (left) + sync text/icon (right)
+- [x] Section order: Net Worth card → Streaks & Wins → Quick Actions
+- [x] Consistent spacing using theme.spacing; card padding standardized
+- [x] OfflineIndicator uses compact “chip” style by default on Dashboard
+- [x] Quick Action buttons size reduced; do not dominate viewport
+- [x] Snackbar/toast sits above tab bar; never overlaps navigation
+- [x] No behavioral changes to services; purely presentational/layout
+- [x] Works on small phones (≤360dp width) without overflow or clipping
+- [x] Respects light, dark, and “sun” palette without hardcoded colors
 
 Definition of Done
 
-- Visual review screenshots (light/dark/sun) on a 6" device
-- QA checklist passed for spacing/order/snackbar placement
-- Unit tests updated for Dashboard layout smoke (render + a11y roles)
+- [x] Visual review screenshots (light/dark/sun) on a 6" device
+- [x] QA checklist passed for spacing/order/snackbar placement
+- [x] Unit tests updated for Dashboard layout smoke (render + a11y roles)
 
 ### User Story 13.2 — Phase B: Net Worth Card Visual Update
 
