@@ -287,7 +287,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                     color:
                       selectedPeriod === period.key
                         ? theme.colors.onPrimary
-                        : theme.colors.textSecondary,
+                        : theme.colors.text.secondary,
                   },
                 ]}
               >
@@ -313,11 +313,15 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
           align='center'
           style={styles.breakdownHeader}
         >
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.text.primary }]}
+          >
             Account Breakdown
           </Text>
           <TouchableOpacity onPress={onViewDetails}>
-            <Text style={[styles.viewAllText, { color: theme.colors.primary }]}>
+            <Text
+              style={[styles.viewAllText, { color: theme.colors.primary[500] }]}
+            >
               View All
             </Text>
           </TouchableOpacity>
@@ -342,7 +346,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                   <Text
                     style={[
                       styles.accountTypeName,
-                      { color: theme.colors.text },
+                      { color: theme.colors.text.primary },
                     ]}
                   >
                     {formatAccountTypeName(accountType.accountType)}
@@ -350,7 +354,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                   <Text
                     style={[
                       styles.accountCount,
-                      { color: theme.colors.textSecondary },
+                      { color: theme.colors.text.secondary },
                     ]}
                   >
                     {accountType.accountCount} account
@@ -361,14 +365,17 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
               <Flex direction='column' align='flex-end'>
                 <Text
-                  style={[styles.breakdownAmount, { color: theme.colors.text }]}
+                  style={[
+                    styles.breakdownAmount,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {formatCurrency(accountType.totalBalance)}
                 </Text>
                 <Text
                   style={[
                     styles.breakdownPercentage,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.text.secondary },
                   ]}
                 >
                   {accountType.percentage.toFixed(1)}%
@@ -395,7 +402,9 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
           align='center'
           style={styles.milestonesHeader}
         >
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.text.primary }]}
+          >
             Net Worth Milestones
           </Text>
           <Badge variant='filled' color='primary' size='sm'>
@@ -408,14 +417,17 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
             <Flex direction='row' justify='space-between' align='center'>
               <View>
                 <Text
-                  style={[styles.milestoneLabel, { color: theme.colors.text }]}
+                  style={[
+                    styles.milestoneLabel,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   Next: {nextMilestone.label}
                 </Text>
                 <Text
                   style={[
                     styles.milestoneAmount,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.text.secondary },
                   ]}
                 >
                   {formatCurrency(nextMilestone.amount)}
@@ -425,7 +437,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                 <Text
                   style={[
                     styles.progressText,
-                    { color: theme.colors.textSecondary },
+                    { color: theme.colors.text.secondary },
                   ]}
                 >
                   {Math.round(nextMilestone.progress * 100)}%
@@ -433,14 +445,14 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                 <View
                   style={[
                     styles.progressBar,
-                    { backgroundColor: theme.colors.border },
+                    { backgroundColor: theme.colors.border.light },
                   ]}
                 >
                   <View
                     style={[
                       styles.progressFill,
                       {
-                        backgroundColor: theme.colors.primary,
+                        backgroundColor: theme.colors.primary[500],
                         width: `${nextMilestone.progress * 100}%`,
                       },
                     ]}
@@ -504,7 +516,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
       <Card variant='outlined' padding='lg'>
         <Flex direction='column' align='center' gap='base'>
           <Text
-            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+            style={[styles.loadingText, { color: theme.colors.text.secondary }]}
           >
             Loading net worth data...
           </Text>

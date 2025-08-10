@@ -5026,3 +5026,16 @@ Summary
 Notes
 
 - Unit tests for formatting and error fallback are queued for next commit batch to improve coverage.
+
+### User Story 13.3 — Phase C: Polish & Theme Alignment
+
+Status: IN PROGRESS
+Date Started: 2025-08-10
+Owner: Augment Agent
+
+Scope
+
+- Typography scale on Dashboard components
+- Standardize card variants and borders/shadows
+- Replace remaining legacy token usages in Dashboard components
+- Ensure contrast AA in all palettes
