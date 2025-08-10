@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -14,7 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card, Button, Icon, Flex, Badge } from '../ui';
+import { Card, Button, Icon, Flex, Badge, Text } from '../ui';
 import Sparkline from '../charts/Sparkline';
 import { useNetWorthTrends } from '../../hooks/useNetWorthTrends';
 import {
@@ -272,7 +271,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
               style={[
                 styles.periodButton,
                 selectedPeriod === period.key && {
-                  backgroundColor: theme.colors.primary,
+                  backgroundColor: theme.colors.primary[500],
                 },
               ]}
               onPress={() => {
@@ -286,7 +285,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                   {
                     color:
                       selectedPeriod === period.key
-                        ? theme.colors.onPrimary
+                        ? theme.colors.text.inverse
                         : theme.colors.text.secondary,
                   },
                 ]}
@@ -313,15 +312,11 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
           align='center'
           style={styles.breakdownHeader}
         >
-          <Text
-            style={[styles.sectionTitle, { color: theme.colors.text.primary }]}
-          >
+          <Text variant='h3' color='text.primary'>
             Account Breakdown
           </Text>
           <TouchableOpacity onPress={onViewDetails}>
-            <Text
-              style={[styles.viewAllText, { color: theme.colors.primary[500] }]}
-            >
+            <Text variant='body2' color='primary.500' weight='semiBold'>
               View All
             </Text>
           </TouchableOpacity>
@@ -402,9 +397,7 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
           align='center'
           style={styles.milestonesHeader}
         >
-          <Text
-            style={[styles.sectionTitle, { color: theme.colors.text.primary }]}
-          >
+          <Text variant='h3' color='text.primary'>
             Net Worth Milestones
           </Text>
           <Badge variant='filled' color='primary' size='sm'>
@@ -579,6 +572,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
+    // legacy — kept for minimal risk; migrated to Text variant='h3'
     fontSize: 16,
     fontWeight: '600',
   },
