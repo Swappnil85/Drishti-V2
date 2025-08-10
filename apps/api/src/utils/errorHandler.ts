@@ -1,6 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ZodError } from 'zod';
-import { securityMonitor, SecurityEventType, SecuritySeverity } from '../services/monitoring/SecurityMonitor';
+import {
+  securityMonitor,
+  SecurityEventType,
+  SecuritySeverity,
+} from '../services/monitoring/SecurityMonitor';
 
 /**
  * Standardized Error Handling System
@@ -16,39 +20,39 @@ export enum ErrorCode {
   TOKEN_INVALID = 'TOKEN_INVALID',
   ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
   EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED',
-  
+
   // Validation Errors (4xx)
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
   MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
   INVALID_FORMAT = 'INVALID_FORMAT',
-  
+
   // Resource Errors (4xx)
   NOT_FOUND = 'NOT_FOUND',
   ALREADY_EXISTS = 'ALREADY_EXISTS',
   CONFLICT = 'CONFLICT',
   GONE = 'GONE',
-  
+
   // Rate Limiting & Security (4xx)
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   TOO_MANY_REQUESTS = 'TOO_MANY_REQUESTS',
   SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
-  
+
   // Server Errors (5xx)
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
   DATABASE_ERROR = 'DATABASE_ERROR',
   EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
   CONFIGURATION_ERROR = 'CONFIGURATION_ERROR',
-  
+
   // Business Logic Errors (4xx)
   INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS',
   INVALID_OPERATION = 'INVALID_OPERATION',
   BUSINESS_RULE_VIOLATION = 'BUSINESS_RULE_VIOLATION',
-  
+
   // Sync & Data Errors (4xx/5xx)
   SYNC_CONFLICT = 'SYNC_CONFLICT',
   DATA_CORRUPTION = 'DATA_CORRUPTION',
-  VERSION_MISMATCH = 'VERSION_MISMATCH'
+  VERSION_MISMATCH = 'VERSION_MISMATCH',
 }
 
 export interface ErrorDetails {
@@ -124,21 +128,37 @@ export const ErrorFactory = {
   validationError: (message = 'Validation failed', details?: ErrorDetails[]) =>
     new AppError(message, ErrorCode.VALIDATION_ERROR, 400, details),
 
-  invalidInput: (message = 'Invalid input provided', field?: string, value?: any) =>
-    new AppError(message, ErrorCode.INVALID_INPUT, 400, { field, value }),
+  invalidInput: (
+    message = 'Invalid input provided',
+    field?: string,
+    value?: any
+  ) => new AppError(message, ErrorCode.INVALID_INPUT, 400, { field, value }),
 
   missingField: (field: string) =>
-    new AppError(`Missing required field: ${field}`, ErrorCode.MISSING_REQUIRED_FIELD, 400, { field }),
+    new AppError(
+      `Missing required field: ${field}`,
+      ErrorCode.MISSING_REQUIRED_FIELD,
+      400,
+      { field }
+    ),
 
   invalidFormat: (field: string, expectedFormat: string) =>
-    new AppError(`Invalid format for ${field}`, ErrorCode.INVALID_FORMAT, 400, { field, constraint: expectedFormat }),
+    new AppError(`Invalid format for ${field}`, ErrorCode.INVALID_FORMAT, 400, {
+      field,
+      constraint: expectedFormat,
+    }),
 
   // Resource Errors
   notFound: (resource = 'Resource', id?: string) =>
-    new AppError(`${resource} not found`, ErrorCode.NOT_FOUND, 404, { context: { id } }),
+    new AppError(`${resource} not found`, ErrorCode.NOT_FOUND, 404, {
+      context: { id },
+    }),
 
   alreadyExists: (resource = 'Resource', field?: string, value?: any) =>
-    new AppError(`${resource} already exists`, ErrorCode.ALREADY_EXISTS, 409, { field, value }),
+    new AppError(`${resource} already exists`, ErrorCode.ALREADY_EXISTS, 409, {
+      field,
+      value,
+    }),
 
   conflict: (message = 'Resource conflict') =>
     new AppError(message, ErrorCode.CONFLICT, 409),
@@ -148,7 +168,9 @@ export const ErrorFactory = {
 
   // Rate Limiting
   rateLimitExceeded: (retryAfter?: number) =>
-    new AppError('Rate limit exceeded', ErrorCode.RATE_LIMIT_EXCEEDED, 429, { context: { retryAfter } }),
+    new AppError('Rate limit exceeded', ErrorCode.RATE_LIMIT_EXCEEDED, 429, {
+      context: { retryAfter },
+    }),
 
   tooManyRequests: (message = 'Too many requests') =>
     new AppError(message, ErrorCode.TOO_MANY_REQUESTS, 429),
@@ -157,182 +179,222 @@ export const ErrorFactory = {
     new AppError(message, ErrorCode.SUSPICIOUS_ACTIVITY, 429),
 
   // Server Errors
-  internalError: (message = 'Internal server error', context?: Record<string, any>) =>
-    new AppError(message, ErrorCode.INTERNAL_SERVER_ERROR, 500, { context }, false),
+  internalError: (
+    message = 'Internal server error',
+    context?: Record<string, any>
+  ) =>
+    new AppError(
+      message,
+      ErrorCode.INTERNAL_SERVER_ERROR,
+      500,
+      { context },
+      false
+    ),
 
-  databaseError: (message = 'Database operation failed', context?: Record<string, any>) =>
-    new AppError(message, ErrorCode.DATABASE_ERROR, 500, { context }, false),
+  databaseError: (
+    message = 'Database operation failed',
+    context?: Record<string, any>
+  ) => new AppError(message, ErrorCode.DATABASE_ERROR, 500, { context }, false),
 
-  externalServiceError: (service: string, message = 'External service unavailable') =>
-    new AppError(message, ErrorCode.EXTERNAL_SERVICE_ERROR, 502, { context: { service } }, false),
+  externalServiceError: (
+    service: string,
+    message = 'External service unavailable'
+  ) =>
+    new AppError(
+      message,
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      502,
+      { context: { service } },
+      false
+    ),
 
   configurationError: (message = 'Configuration error') =>
     new AppError(message, ErrorCode.CONFIGURATION_ERROR, 500, undefined, false),
 
   // Business Logic Errors
   insufficientFunds: (available: number, required: number) =>
-    new AppError('Insufficient funds', ErrorCode.INSUFFICIENT_FUNDS, 400, { context: { available, required } }),
+    new AppError('Insufficient funds', ErrorCode.INSUFFICIENT_FUNDS, 400, {
+      context: { available, required },
+    }),
 
   invalidOperation: (operation: string, reason?: string) =>
-    new AppError(`Invalid operation: ${operation}`, ErrorCode.INVALID_OPERATION, 400, { context: { operation, reason } }),
+    new AppError(
+      `Invalid operation: ${operation}`,
+      ErrorCode.INVALID_OPERATION,
+      400,
+      { context: { operation, reason } }
+    ),
 
   businessRuleViolation: (rule: string, message?: string) =>
-    new AppError(message || `Business rule violation: ${rule}`, ErrorCode.BUSINESS_RULE_VIOLATION, 400, { context: { rule } }),
+    new AppError(
+      message || `Business rule violation: ${rule}`,
+      ErrorCode.BUSINESS_RULE_VIOLATION,
+      400,
+      { context: { rule } }
+    ),
 
   // Sync Errors
   syncConflict: (entity: string, id: string) =>
-    new AppError('Sync conflict detected', ErrorCode.SYNC_CONFLICT, 409, { context: { entity, id } }),
+    new AppError('Sync conflict detected', ErrorCode.SYNC_CONFLICT, 409, {
+      context: { entity, id },
+    }),
 
   dataCorruption: (message = 'Data corruption detected') =>
     new AppError(message, ErrorCode.DATA_CORRUPTION, 500, undefined, false),
 
   versionMismatch: (expected: string, received: string) =>
-    new AppError('Version mismatch', ErrorCode.VERSION_MISMATCH, 400, { context: { expected, received } })
+    new AppError('Version mismatch', ErrorCode.VERSION_MISMATCH, 400, {
+      context: { expected, received },
+    }),
 };
 
 /**
  * Global error handler for Fastify
  */
 export function setupErrorHandler(fastify: any) {
-  fastify.setErrorHandler(async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
-    const requestId = request.id || generateRequestId();
-    const timestamp = new Date().toISOString();
+  fastify.setErrorHandler(
+    async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+      const requestId = request.id || generateRequestId();
+      const timestamp = new Date().toISOString();
 
-    // Handle different types of errors
-    if (error instanceof AppError) {
-      // Application errors - these are expected and handled gracefully
-      const response: StandardError = {
-        success: false,
-        error: error.message,
-        code: error.code,
-        statusCode: error.statusCode,
-        details: error.details,
-        timestamp,
-        requestId,
-        path: request.url,
-        method: request.method
-      };
+      // Handle different types of errors
+      if (error instanceof AppError) {
+        // Application errors - these are expected and handled gracefully
+        const response: StandardError = {
+          success: false,
+          error: error.message,
+          code: error.code,
+          statusCode: error.statusCode,
+          details: error.details,
+          timestamp,
+          requestId,
+          path: request.url,
+          method: request.method,
+        };
 
-      // Log security-related errors
-      if (isSecurityError(error.code)) {
-        securityMonitor.recordEvent(
-          getSecurityEventType(error.code),
-          getSecuritySeverity(error.statusCode),
-          {
-            error: error.message,
-            code: error.code,
-            path: request.url,
-            method: request.method,
-            details: error.details
-          },
-          {
-            userId: (request as any).user?.id,
-            ipAddress: request.ip,
-            userAgent: request.headers['user-agent'] as string
-          }
-        );
+        // Log security-related errors
+        if (isSecurityError(error.code)) {
+          securityMonitor.recordEvent(
+            getSecurityEventType(error.code),
+            getSecuritySeverity(error.statusCode),
+            {
+              error: error.message,
+              code: error.code,
+              path: request.url,
+              method: request.method,
+              details: error.details,
+            },
+            {
+              userId: (request as any).user?.id,
+              ipAddress: request.ip,
+              userAgent: request.headers['user-agent'] as string,
+            }
+          );
+        }
+
+        return reply.code(error.statusCode).send(response);
       }
 
-      return reply.code(error.statusCode).send(response);
-    }
+      if (error instanceof ZodError) {
+        // Zod validation errors
+        const details = error.errors.map(err => ({
+          field: err.path.join('.'),
+          value: err.code,
+          constraint: err.message,
+        }));
 
-    if (error instanceof ZodError) {
-      // Zod validation errors
-      const details = error.errors.map(err => ({
-        field: err.path.join('.'),
-        value: err.code,
-        constraint: err.message
-      }));
+        const response: StandardError = {
+          success: false,
+          error: 'Validation failed',
+          code: ErrorCode.VALIDATION_ERROR,
+          statusCode: 400,
+          details,
+          timestamp,
+          requestId,
+          path: request.url,
+          method: request.method,
+        };
 
-      const response: StandardError = {
-        success: false,
-        error: 'Validation failed',
-        code: ErrorCode.VALIDATION_ERROR,
-        statusCode: 400,
-        details,
-        timestamp,
-        requestId,
-        path: request.url,
-        method: request.method
-      };
+        return reply.code(400).send(response);
+      }
 
-      return reply.code(400).send(response);
-    }
+      // Handle Fastify validation errors
+      if (error.name === 'FastifyError' && (error as any).statusCode) {
+        const statusCode = (error as any).statusCode;
+        const response: StandardError = {
+          success: false,
+          error: error.message,
+          code: getErrorCodeFromStatus(statusCode),
+          statusCode,
+          timestamp,
+          requestId,
+          path: request.url,
+          method: request.method,
+        };
 
-    // Handle Fastify validation errors
-    if (error.name === 'FastifyError' && (error as any).statusCode) {
-      const statusCode = (error as any).statusCode;
-      const response: StandardError = {
-        success: false,
+        return reply.code(statusCode).send(response);
+      }
+
+      // Unexpected errors - log and return generic error
+      console.error('Unexpected error:', {
         error: error.message,
-        code: getErrorCodeFromStatus(statusCode),
-        statusCode,
-        timestamp,
+        stack: error.stack,
         requestId,
-        path: request.url,
-        method: request.method
-      };
-
-      return reply.code(statusCode).send(response);
-    }
-
-    // Unexpected errors - log and return generic error
-    console.error('Unexpected error:', {
-      error: error.message,
-      stack: error.stack,
-      requestId,
-      path: request.url,
-      method: request.method,
-      userId: (request as any).user?.id,
-      ip: request.ip
-    });
-
-    // Record security event for unexpected errors
-    securityMonitor.recordEvent(
-      SecurityEventType.SYSTEM_ERROR,
-      SecuritySeverity.HIGH,
-      {
-        error: error.message,
         path: request.url,
         method: request.method,
-        stack: error.stack?.substring(0, 500) // Limit stack trace length
-      },
-      {
         userId: (request as any).user?.id,
-        ipAddress: request.ip,
-        userAgent: request.headers['user-agent'] as string
-      }
-    );
+        ip: request.ip,
+      });
 
-    const response: StandardError = {
-      success: false,
-      error: 'Internal server error',
-      code: ErrorCode.INTERNAL_SERVER_ERROR,
-      statusCode: 500,
-      timestamp,
-      requestId,
-      path: request.url,
-      method: request.method
-    };
+      // Record security event for unexpected errors
+      securityMonitor.recordEvent(
+        SecurityEventType.SYSTEM_ERROR,
+        SecuritySeverity.HIGH,
+        {
+          error: error.message,
+          path: request.url,
+          method: request.method,
+          stack: error.stack?.substring(0, 500), // Limit stack trace length
+        },
+        {
+          userId: (request as any).user?.id,
+          ipAddress: request.ip,
+          userAgent: request.headers['user-agent'] as string,
+        }
+      );
 
-    return reply.code(500).send(response);
-  });
+      const response: StandardError = {
+        success: false,
+        error: 'Internal server error',
+        code: ErrorCode.INTERNAL_SERVER_ERROR,
+        statusCode: 500,
+        timestamp,
+        requestId,
+        path: request.url,
+        method: request.method,
+      };
+
+      return reply.code(500).send(response);
+    }
+  );
 
   // Handle 404 errors
-  fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
-    const response: StandardError = {
-      success: false,
-      error: 'Route not found',
-      code: ErrorCode.NOT_FOUND,
-      statusCode: 404,
-      timestamp: new Date().toISOString(),
-      requestId: request.id || generateRequestId(),
-      path: request.url,
-      method: request.method
-    };
+  fastify.setNotFoundHandler(
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const response: StandardError = {
+        success: false,
+        error: 'Route not found',
+        code: ErrorCode.NOT_FOUND,
+        statusCode: 404,
+        timestamp: new Date().toISOString(),
+        requestId: request.id || generateRequestId(),
+        path: request.url,
+        method: request.method,
+      };
 
-    return reply.code(404).send(response);
-  });
+      return reply.code(404).send(response);
+    }
+  );
 }
 
 /**
@@ -352,7 +414,7 @@ function isSecurityError(code: ErrorCode): boolean {
     ErrorCode.ACCOUNT_LOCKED,
     ErrorCode.RATE_LIMIT_EXCEEDED,
     ErrorCode.TOO_MANY_REQUESTS,
-    ErrorCode.SUSPICIOUS_ACTIVITY
+    ErrorCode.SUSPICIOUS_ACTIVITY,
   ];
   return securityCodes.includes(code);
 }
@@ -386,23 +448,33 @@ function getSecuritySeverity(statusCode: number): SecuritySeverity {
 
 function getErrorCodeFromStatus(statusCode: number): ErrorCode {
   switch (statusCode) {
-    case 400: return ErrorCode.INVALID_INPUT;
-    case 401: return ErrorCode.UNAUTHORIZED;
-    case 403: return ErrorCode.FORBIDDEN;
-    case 404: return ErrorCode.NOT_FOUND;
-    case 409: return ErrorCode.CONFLICT;
-    case 429: return ErrorCode.RATE_LIMIT_EXCEEDED;
-    case 500: return ErrorCode.INTERNAL_SERVER_ERROR;
-    default: return ErrorCode.INTERNAL_SERVER_ERROR;
+    case 400:
+      return ErrorCode.INVALID_INPUT;
+    case 401:
+      return ErrorCode.UNAUTHORIZED;
+    case 403:
+      return ErrorCode.FORBIDDEN;
+    case 404:
+      return ErrorCode.NOT_FOUND;
+    case 409:
+      return ErrorCode.CONFLICT;
+    case 429:
+      return ErrorCode.RATE_LIMIT_EXCEEDED;
+    case 500:
+      return ErrorCode.INTERNAL_SERVER_ERROR;
+    default:
+      return ErrorCode.INTERNAL_SERVER_ERROR;
   }
 }
 
 /**
  * Async error wrapper for route handlers
  */
-export function asyncHandler(fn: Function) {
+export function asyncHandler<
+  T extends (request: FastifyRequest, reply: FastifyReply) => any,
+>(fn: T) {
   return (request: FastifyRequest, reply: FastifyReply) => {
-    return Promise.resolve(fn(request, reply)).catch((error) => {
+    return Promise.resolve(fn(request, reply)).catch(error => {
       throw error; // Let the global error handler deal with it
     });
   };

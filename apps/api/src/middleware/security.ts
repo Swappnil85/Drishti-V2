@@ -24,12 +24,13 @@ interface SecurityConfig {
 }
 
 class SecurityMiddleware {
-  private requestCounts: Map<string, { count: number; resetTime: number }> = new Map();
+  private requestCounts: Map<string, { count: number; resetTime: number }> =
+    new Map();
   private suspiciousActivity: Map<string, number> = new Map();
   private blockedIPs: Set<string> = new Set();
   private whitelistedIPs: Set<string> = new Set();
   private requestSignatures: Map<string, string> = new Map();
-  
+
   private readonly config: SecurityConfig = {
     enableDDoSProtection: true,
     enableAnomalyDetection: true,
@@ -43,11 +44,13 @@ class SecurityMiddleware {
    */
   createRateLimiter(config: RateLimitConfig) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
-      const key = config.keyGenerator ? config.keyGenerator(request) : this.getClientKey(request);
+      const key = config.keyGenerator
+        ? config.keyGenerator(request)
+        : this.getClientKey(request);
       const now = Date.now();
-      
+
       let bucket = this.requestCounts.get(key);
-      
+
       if (!bucket || now > bucket.resetTime) {
         bucket = {
           count: 0,
@@ -62,7 +65,7 @@ class SecurityMiddleware {
       if (bucket.count > config.maxRequests) {
         // Mark as suspicious activity
         this.recordSuspiciousActivity(request.ip);
-        
+
         return reply.code(429).send({
           error: 'Too Many Requests',
           message: `Rate limit exceeded. Try again in ${Math.ceil((bucket.resetTime - now) / 1000)} seconds.`,
@@ -72,8 +75,14 @@ class SecurityMiddleware {
 
       // Add rate limit headers
       reply.header('X-RateLimit-Limit', config.maxRequests);
-      reply.header('X-RateLimit-Remaining', Math.max(0, config.maxRequests - bucket.count));
-      reply.header('X-RateLimit-Reset', new Date(bucket.resetTime).toISOString());
+      reply.header(
+        'X-RateLimit-Remaining',
+        Math.max(0, config.maxRequests - bucket.count)
+      );
+      reply.header(
+        'X-RateLimit-Reset',
+        new Date(bucket.resetTime).toISOString()
+      );
     };
   }
 
@@ -84,7 +93,7 @@ class SecurityMiddleware {
     if (!this.config.enableDDoSProtection) return;
 
     const clientIP = request.ip;
-    
+
     // Check if IP is blocked
     if (this.blockedIPs.has(clientIP)) {
       return reply.code(403).send({
@@ -100,11 +109,11 @@ class SecurityMiddleware {
 
     // Analyze request patterns
     const suspiciousScore = this.calculateSuspiciousScore(request);
-    
+
     if (suspiciousScore > 80) {
       this.blockedIPs.add(clientIP);
       advancedAuthService.markIPSuspicious(clientIP);
-      
+
       return reply.code(403).send({
         error: 'Forbidden',
         message: 'Suspicious activity detected',
@@ -122,11 +131,12 @@ class SecurityMiddleware {
   async validateRequestSignature(request: FastifyRequest, reply: FastifyReply) {
     const signature = request.headers['x-request-signature'] as string;
     const timestamp = request.headers['x-request-timestamp'] as string;
-    
+
     if (!signature || !timestamp) {
       return reply.code(400).send({
         error: 'Bad Request',
-        message: 'Request signature and timestamp required for sensitive operations',
+        message:
+          'Request signature and timestamp required for sensitive operations',
       });
     }
 
@@ -144,7 +154,7 @@ class SecurityMiddleware {
 
     // Validate signature (simplified - in production use proper HMAC)
     const expectedSignature = this.generateRequestSignature(request, timestamp);
-    
+
     if (signature !== expectedSignature) {
       this.recordSuspiciousActivity(request.ip);
       return reply.code(401).send({
@@ -161,15 +171,17 @@ class SecurityMiddleware {
     if (!this.config.enableAnomalyDetection) return;
 
     const anomalies = this.detectAnomalies(request);
-    
+
     if (anomalies.length > 0) {
       console.warn(`Anomalies detected for ${request.ip}:`, anomalies);
-      
+
       // Increase suspicious activity score
       this.recordSuspiciousActivity(request.ip, anomalies.length * 10);
-      
+
       // For high-severity anomalies, require additional verification
-      const highSeverityAnomalies = anomalies.filter(a => a.severity === 'high');
+      const highSeverityAnomalies = anomalies.filter(
+        a => a.severity === 'high'
+      );
       if (highSeverityAnomalies.length > 0) {
         return reply.code(403).send({
           error: 'Forbidden',
@@ -187,7 +199,7 @@ class SecurityMiddleware {
     if (!this.config.enableGeographicRestrictions) return;
 
     const country = this.getCountryFromIP(request.ip);
-    
+
     if (this.config.blockedCountries?.includes(country)) {
       return reply.code(403).send({
         error: 'Forbidden',
@@ -195,7 +207,10 @@ class SecurityMiddleware {
       });
     }
 
-    if (this.config.allowedCountries && !this.config.allowedCountries.includes(country)) {
+    if (
+      this.config.allowedCountries &&
+      !this.config.allowedCountries.includes(country)
+    ) {
       return reply.code(403).send({
         error: 'Forbidden',
         message: 'Access restricted to specific regions',
@@ -212,15 +227,24 @@ class SecurityMiddleware {
     reply.header('X-Frame-Options', 'DENY');
     reply.header('X-XSS-Protection', '1; mode=block');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-    reply.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-    
+    reply.header(
+      'Permissions-Policy',
+      'geolocation=(), microphone=(), camera=()'
+    );
+
     // HSTS for HTTPS
     if (request.protocol === 'https') {
-      reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+      reply.header(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload'
+      );
     }
 
     // CSP for API responses
-    reply.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none';");
+    reply.header(
+      'Content-Security-Policy',
+      "default-src 'none'; frame-ancestors 'none';"
+    );
   }
 
   /**
@@ -228,71 +252,80 @@ class SecurityMiddleware {
    */
   private calculateSuspiciousScore(request: FastifyRequest): number {
     let score = 0;
-    
+
     // Check user agent
     const userAgent = request.headers['user-agent'] || '';
     if (!userAgent || userAgent.length < 10) score += 20;
     if (userAgent.includes('bot') || userAgent.includes('crawler')) score += 30;
-    
+
     // Check request frequency
     const recentRequests = this.getRecentRequestCount(request.ip);
     if (recentRequests > 100) score += 40;
     if (recentRequests > 200) score += 60;
-    
+
     // Check for suspicious patterns
     const path = request.url;
     if (path.includes('..') || path.includes('<script>')) score += 50;
     if (path.length > 1000) score += 30;
-    
+
     // Check headers
     const headers = request.headers;
     if (!headers.accept || !headers['accept-language']) score += 15;
-    
+
     return Math.min(score, 100);
   }
 
   /**
    * Detect request anomalies
    */
-  private detectAnomalies(request: FastifyRequest): Array<{ type: string; severity: 'low' | 'medium' | 'high' }> {
-    const anomalies: Array<{ type: string; severity: 'low' | 'medium' | 'high' }> = [];
-    
+  private detectAnomalies(
+    request: FastifyRequest
+  ): Array<{ type: string; severity: 'low' | 'medium' | 'high' }> {
+    const anomalies: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high';
+    }> = [];
+
     // Unusual request size
     const contentLength = parseInt(request.headers['content-length'] || '0');
-    if (contentLength > 10 * 1024 * 1024) { // 10MB
+    if (contentLength > 10 * 1024 * 1024) {
+      // 10MB
       anomalies.push({ type: 'large_request_body', severity: 'medium' });
     }
-    
+
     // Unusual request frequency
     const recentRequests = this.getRecentRequestCount(request.ip);
     if (recentRequests > 1000) {
       anomalies.push({ type: 'high_frequency_requests', severity: 'high' });
     }
-    
+
     // Missing common headers
     if (!request.headers['user-agent']) {
       anomalies.push({ type: 'missing_user_agent', severity: 'medium' });
     }
-    
+
     // Suspicious paths
     const path = request.url;
     if (path.includes('admin') && !request.headers.authorization) {
       anomalies.push({ type: 'unauthorized_admin_access', severity: 'high' });
     }
-    
+
     return anomalies;
   }
 
   /**
    * Generate request signature
    */
-  private generateRequestSignature(request: FastifyRequest, timestamp: string): string {
+  private generateRequestSignature(
+    request: FastifyRequest,
+    timestamp: string
+  ): string {
     const method = request.method;
     const path = request.url;
     const body = JSON.stringify(request.body || {});
-    
+
     const payload = `${method}|${path}|${body}|${timestamp}`;
-    
+
     // In production, use proper HMAC with secret key
     return Buffer.from(payload).toString('base64');
   }
@@ -312,7 +345,7 @@ class SecurityMiddleware {
   private recordSuspiciousActivity(ip: string, score: number = 10): void {
     const current = this.suspiciousActivity.get(ip) || 0;
     this.suspiciousActivity.set(ip, current + score);
-    
+
     // Auto-block if score too high
     if (current + score > 100) {
       this.blockedIPs.add(ip);
@@ -332,7 +365,11 @@ class SecurityMiddleware {
    */
   private getCountryFromIP(ip: string): string {
     // Simplified country detection
-    if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip === '127.0.0.1') {
+    if (
+      ip.startsWith('192.168.') ||
+      ip.startsWith('10.') ||
+      ip === '127.0.0.1'
+    ) {
       return 'US'; // Local/private IPs default to US
     }
     return 'US'; // Default for demo
@@ -372,13 +409,13 @@ class SecurityMiddleware {
   registerMiddleware(fastify: FastifyInstance) {
     // Global security headers
     fastify.addHook('onRequest', this.securityHeaders.bind(this));
-    
+
     // DDoS protection
     fastify.addHook('onRequest', this.ddosProtection.bind(this));
-    
+
     // Anomaly detection
     fastify.addHook('onRequest', this.anomalyDetection.bind(this));
-    
+
     // Geographic restrictions
     fastify.addHook('onRequest', this.geographicRestrictions.bind(this));
   }

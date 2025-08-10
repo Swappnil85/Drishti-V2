@@ -15,11 +15,27 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, Button, Icon, Flex, Badge } from '../ui';
-import { netWorthService, NetWorthTrend, MonthlyNetWorthChange } from '../../services/financial/NetWorthService';
 import { useFormHaptic } from '../../hooks/useHaptic';
+import { useNetWorthTrends } from '../../hooks/useNetWorthTrends';
+
+export interface NetWorthTrendPoint {
+  date: Date;
+  netWorth: number;
+  change: number;
+  changePercentage: number;
+}
+export interface MonthlyNetWorthChange {
+  month: string;
+  year: number;
+  startNetWorth: number;
+  endNetWorth: number;
+  change: number;
+  changePercentage: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
 
 interface NetWorthTrendsChartProps {
-  onDataPointPress?: (trend: NetWorthTrend) => void;
+  onDataPointPress?: (trend: NetWorthTrendPoint) => void;
   height?: number;
 }
 
@@ -33,44 +49,69 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
   const { user } = useAuth();
   const haptic = useFormHaptic();
 
-  const [trends, setTrends] = useState<NetWorthTrend[]>([]);
-  const [monthlyChanges, setMonthlyChanges] = useState<MonthlyNetWorthChange[]>([]);
+  const [trends, setTrends] = useState<NetWorthTrendPoint[]>([]);
+  const [monthlyChanges, setMonthlyChanges] = useState<MonthlyNetWorthChange[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<'3M' | '6M' | '1Y' | '2Y'>('6M');
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    '3M' | '6M' | '1Y' | '2Y'
+  >('6M');
   const [viewMode, setViewMode] = useState<'chart' | 'monthly'>('chart');
 
+  const {
+    data: serverTrends,
+    loading: trendsLoading,
+    refresh: refreshTrends,
+  } = useNetWorthTrends(user?.id, 12);
+
   useEffect(() => {
-    if (user?.id) {
-      loadTrendsData();
+    if (!serverTrends?.length) return;
+
+    const now = new Date();
+    const points: NetWorthTrendPoint[] = serverTrends.map((pt, idx) => {
+      const d = new Date(
+        now.getFullYear(),
+        now.getMonth() - (serverTrends.length - 1 - idx),
+        1
+      );
+      return { date: d, netWorth: pt.value, change: 0, changePercentage: 0 };
+    });
+
+    for (let i = 0; i < points.length; i++) {
+      const prev = i > 0 ? points[i - 1].netWorth : points[i].netWorth;
+      const curr = points[i].netWorth;
+      const ch = curr - prev;
+      const chPct = prev !== 0 ? (ch / Math.abs(prev)) * 100 : 0;
+      points[i].change = ch;
+      points[i].changePercentage = chPct;
     }
-  }, [user?.id, selectedPeriod]);
 
-  const loadTrendsData = async () => {
-    if (!user?.id) return;
+    setTrends(points);
 
-    try {
-      setLoading(true);
-      
-      const periodDays = {
-        '3M': 90,
-        '6M': 180,
-        '1Y': 365,
-        '2Y': 730,
-      };
-
-      const [trendsData, monthlyData] = await Promise.all([
-        netWorthService.getNetWorthTrends(user.id, periodDays[selectedPeriod]),
-        netWorthService.getMonthlyNetWorthChanges(user.id, 12),
-      ]);
-
-      setTrends(trendsData);
-      setMonthlyChanges(monthlyData);
-    } catch (error) {
-      console.error('Error loading trends data:', error);
-    } finally {
-      setLoading(false);
+    const monthly: MonthlyNetWorthChange[] = [];
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      const prev = i > 0 ? points[i - 1] : p;
+      const trend: 'increasing' | 'decreasing' | 'stable' =
+        p.change > 0 ? 'increasing' : p.change < 0 ? 'decreasing' : 'stable';
+      monthly.push({
+        month: p.date.toLocaleDateString('en-US', { month: 'long' }),
+        year: p.date.getFullYear(),
+        startNetWorth: prev.netWorth,
+        endNetWorth: p.netWorth,
+        change: p.change,
+        changePercentage: p.changePercentage,
+        trend,
+      });
     }
-  };
+    setMonthlyChanges(monthly);
+    setLoading(false);
+  }, [serverTrends]);
+
+  useEffect(() => {
+    setLoading(trendsLoading);
+  }, [trendsLoading]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -92,9 +133,9 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -106,9 +147,12 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
   const getTrendColor = (trend: 'increasing' | 'decreasing' | 'stable') => {
     switch (trend) {
-      case 'increasing': return theme.colors.success;
-      case 'decreasing': return theme.colors.error;
-      default: return theme.colors.textSecondary;
+      case 'increasing':
+        return theme.colors.success;
+      case 'decreasing':
+        return theme.colors.error;
+      default:
+        return theme.colors.textSecondary;
     }
   };
 
@@ -121,7 +165,7 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
     ];
 
     return (
-      <Flex direction="row" gap="xs" style={styles.periodSelector}>
+      <Flex direction='row' gap='xs' style={styles.periodSelector}>
         {periods.map(period => (
           <TouchableOpacity
             key={period.key}
@@ -140,9 +184,10 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
               style={[
                 styles.periodButtonText,
                 {
-                  color: selectedPeriod === period.key
-                    ? theme.colors.onPrimary
-                    : theme.colors.textSecondary,
+                  color:
+                    selectedPeriod === period.key
+                      ? theme.colors.onPrimary
+                      : theme.colors.textSecondary,
                 },
               ]}
             >
@@ -156,7 +201,7 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
   const renderViewModeSelector = () => {
     return (
-      <Flex direction="row" gap="xs" style={styles.viewModeSelector}>
+      <Flex direction='row' gap='xs' style={styles.viewModeSelector}>
         <TouchableOpacity
           style={[
             styles.viewModeButton,
@@ -170,17 +215,18 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
           }}
         >
           <Icon
-            name="trending-up"
-            size="sm"
+            name='trending-up'
+            size='sm'
             color={viewMode === 'chart' ? 'onPrimary' : 'textSecondary'}
           />
           <Text
             style={[
               styles.viewModeText,
               {
-                color: viewMode === 'chart'
-                  ? theme.colors.onPrimary
-                  : theme.colors.textSecondary,
+                color:
+                  viewMode === 'chart'
+                    ? theme.colors.onPrimary
+                    : theme.colors.textSecondary,
               },
             ]}
           >
@@ -201,17 +247,18 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
           }}
         >
           <Icon
-            name="calendar"
-            size="sm"
+            name='calendar'
+            size='sm'
             color={viewMode === 'monthly' ? 'onPrimary' : 'textSecondary'}
           />
           <Text
             style={[
               styles.viewModeText,
               {
-                color: viewMode === 'monthly'
-                  ? theme.colors.onPrimary
-                  : theme.colors.textSecondary,
+                color:
+                  viewMode === 'monthly'
+                    ? theme.colors.onPrimary
+                    : theme.colors.textSecondary,
               },
             ]}
           >
@@ -236,13 +283,19 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
         <View style={styles.chartArea}>
           {/* Y-axis labels */}
           <View style={styles.yAxisLabels}>
-            <Text style={[styles.axisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[styles.axisLabel, { color: theme.colors.textSecondary }]}
+            >
               {formatShortCurrency(maxValue)}
             </Text>
-            <Text style={[styles.axisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[styles.axisLabel, { color: theme.colors.textSecondary }]}
+            >
               {formatShortCurrency((maxValue + minValue) / 2)}
             </Text>
-            <Text style={[styles.axisLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[styles.axisLabel, { color: theme.colors.textSecondary }]}
+            >
               {formatShortCurrency(minValue)}
             </Text>
           </View>
@@ -251,8 +304,11 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
           <View style={styles.chartLine}>
             {trends.map((trend, index) => {
               const x = index * pointWidth;
-              const y = range > 0 ? ((maxValue - trend.netWorth) / range) * (height - 40) : height / 2;
-              
+              const y =
+                range > 0
+                  ? ((maxValue - trend.netWorth) / range) * (height - 40)
+                  : height / 2;
+
               return (
                 <TouchableOpacity
                   key={index}
@@ -261,7 +317,10 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
                     {
                       left: x - 4,
                       top: y - 4,
-                      backgroundColor: trend.change >= 0 ? theme.colors.success : theme.colors.error,
+                      backgroundColor:
+                        trend.change >= 0
+                          ? theme.colors.success
+                          : theme.colors.error,
                     },
                   ]}
                   onPress={() => {
@@ -276,14 +335,19 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
         {/* X-axis labels */}
         <View style={styles.xAxisLabels}>
-          {trends.filter((_, index) => index % Math.ceil(trends.length / 4) === 0).map((trend, index) => (
-            <Text
-              key={index}
-              style={[styles.axisLabel, { color: theme.colors.textSecondary }]}
-            >
-              {formatDate(trend.date)}
-            </Text>
-          ))}
+          {trends
+            .filter((_, index) => index % Math.ceil(trends.length / 4) === 0)
+            .map((trend, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.axisLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {formatDate(trend.date)}
+              </Text>
+            ))}
         </View>
       </View>
     );
@@ -291,33 +355,58 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
   const renderMonthlyView = () => {
     return (
-      <ScrollView style={styles.monthlyContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.monthlyContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {monthlyChanges.map((change, index) => (
           <View key={index} style={styles.monthlyItem}>
-            <Flex direction="row" justify="space-between" align="center">
+            <Flex direction='row' justify='space-between' align='center'>
               <View>
                 <Text style={[styles.monthLabel, { color: theme.colors.text }]}>
                   {change.month} {change.year}
                 </Text>
-                <Flex direction="row" align="center" gap="xs">
+                <Flex direction='row' align='center' gap='xs'>
                   <Icon
-                    name={change.trend === 'increasing' ? 'trending-up' : 
-                          change.trend === 'decreasing' ? 'trending-down' : 'remove'}
-                    size="sm"
+                    name={
+                      change.trend === 'increasing'
+                        ? 'trending-up'
+                        : change.trend === 'decreasing'
+                          ? 'trending-down'
+                          : 'remove'
+                    }
+                    size='sm'
                     color={getTrendColor(change.trend)}
                   />
-                  <Text style={[styles.trendLabel, { color: getTrendColor(change.trend) }]}>
+                  <Text
+                    style={[
+                      styles.trendLabel,
+                      { color: getTrendColor(change.trend) },
+                    ]}
+                  >
                     {change.trend}
                   </Text>
                 </Flex>
               </View>
 
               <View style={styles.monthlyValues}>
-                <Text style={[styles.monthlyChange, { color: getChangeColor(change.change) }]}>
-                  {change.change >= 0 ? '+' : ''}{formatCurrency(change.change)}
+                <Text
+                  style={[
+                    styles.monthlyChange,
+                    { color: getChangeColor(change.change) },
+                  ]}
+                >
+                  {change.change >= 0 ? '+' : ''}
+                  {formatCurrency(change.change)}
                 </Text>
-                <Text style={[styles.monthlyPercentage, { color: theme.colors.textSecondary }]}>
-                  {change.changePercentage >= 0 ? '+' : ''}{change.changePercentage.toFixed(1)}%
+                <Text
+                  style={[
+                    styles.monthlyPercentage,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {change.changePercentage >= 0 ? '+' : ''}
+                  {change.changePercentage.toFixed(1)}%
                 </Text>
               </View>
             </Flex>
@@ -333,33 +422,61 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
     const latestTrend = trends[trends.length - 1];
     const oldestTrend = trends[0];
     const totalChange = latestTrend.netWorth - oldestTrend.netWorth;
-    const totalChangePercentage = oldestTrend.netWorth !== 0 
-      ? (totalChange / Math.abs(oldestTrend.netWorth)) * 100 
-      : 0;
+    const totalChangePercentage =
+      oldestTrend.netWorth !== 0
+        ? (totalChange / Math.abs(oldestTrend.netWorth)) * 100
+        : 0;
 
     return (
-      <Card variant="outlined" padding="base" style={styles.summaryCard}>
-        <Flex direction="row" justify="space-around">
+      <Card variant='outlined' padding='base' style={styles.summaryCard}>
+        <Flex direction='row' justify='space-around'>
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.summaryLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Period Change
             </Text>
-            <Text style={[styles.summaryValue, { color: getChangeColor(totalChange) }]}>
-              {totalChange >= 0 ? '+' : ''}{formatCurrency(totalChange)}
+            <Text
+              style={[
+                styles.summaryValue,
+                { color: getChangeColor(totalChange) },
+              ]}
+            >
+              {totalChange >= 0 ? '+' : ''}
+              {formatCurrency(totalChange)}
             </Text>
           </View>
 
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.summaryLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Percentage
             </Text>
-            <Text style={[styles.summaryValue, { color: getChangeColor(totalChange) }]}>
-              {totalChangePercentage >= 0 ? '+' : ''}{totalChangePercentage.toFixed(1)}%
+            <Text
+              style={[
+                styles.summaryValue,
+                { color: getChangeColor(totalChange) },
+              ]}
+            >
+              {totalChangePercentage >= 0 ? '+' : ''}
+              {totalChangePercentage.toFixed(1)}%
             </Text>
           </View>
 
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.summaryLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Data Points
             </Text>
             <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
@@ -373,9 +490,11 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
   if (loading) {
     return (
-      <Card variant="outlined" padding="lg">
-        <Flex direction="column" align="center" gap="base">
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+      <Card variant='outlined' padding='lg'>
+        <Flex direction='column' align='center' gap='base'>
+          <Text
+            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+          >
             Loading trends data...
           </Text>
         </Flex>
@@ -385,8 +504,13 @@ const NetWorthTrendsChart: React.FC<NetWorthTrendsChartProps> = ({
 
   return (
     <View style={styles.container}>
-      <Card variant="outlined" padding="lg">
-        <Flex direction="row" justify="space-between" align="center" style={styles.header}>
+      <Card variant='outlined' padding='lg'>
+        <Flex
+          direction='row'
+          justify='space-between'
+          align='center'
+          style={styles.header}
+        >
           <Text style={[styles.title, { color: theme.colors.text }]}>
             Net Worth Trends
           </Text>

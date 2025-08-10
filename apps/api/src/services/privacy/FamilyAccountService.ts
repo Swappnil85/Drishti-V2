@@ -24,8 +24,11 @@ export interface FamilyAccount {
 }
 
 export class FamilyAccountService {
-  async createFamilyAccount(ownerId: string, name: string): Promise<FamilyAccount> {
-    return await transaction(async (client) => {
+  async createFamilyAccount(
+    ownerId: string,
+    name: string
+  ): Promise<FamilyAccount> {
+    return await transaction(async client => {
       // Create family account
       const familyResult = await client.query(
         `INSERT INTO family_accounts (id, name, owner_id, created_at) 
@@ -33,9 +36,9 @@ export class FamilyAccountService {
          RETURNING *`,
         [name, ownerId]
       );
-      
+
       const family = familyResult.rows[0];
-      
+
       // Add owner as first member
       await client.query(
         `INSERT INTO family_members (id, family_id, user_id, role, permissions, added_at, added_by)
@@ -47,17 +50,17 @@ export class FamilyAccountService {
             viewData: true,
             editData: true,
             exportData: true,
-            deleteData: true
-          })
+            deleteData: true,
+          }),
         ]
       );
-      
+
       return {
         id: family.id,
         name: family.name,
         ownerId: family.owner_id,
         createdAt: family.created_at,
-        members: []
+        members: [],
       };
     });
   }
@@ -69,14 +72,29 @@ export class FamilyAccountService {
     role: 'member' | 'child' = 'member'
   ): Promise<FamilyMember> {
     // Verify addedBy has permission to add members
-    const hasPermission = await this.userHasPermission(addedBy, familyId, 'editData');
+    const hasPermission = await this.userHasPermission(
+      addedBy,
+      familyId,
+      'editData'
+    );
     if (!hasPermission) {
       throw new Error('Insufficient permissions to add family member');
     }
 
-    const defaultPermissions = role === 'child' 
-      ? { viewData: true, editData: false, exportData: false, deleteData: false }
-      : { viewData: true, editData: true, exportData: true, deleteData: false };
+    const defaultPermissions =
+      role === 'child'
+        ? {
+            viewData: true,
+            editData: false,
+            exportData: false,
+            deleteData: false,
+          }
+        : {
+            viewData: true,
+            editData: true,
+            exportData: true,
+            deleteData: false,
+          };
 
     const result = await query(
       `INSERT INTO family_members (id, family_id, user_id, role, permissions, added_at, added_by)
@@ -93,7 +111,7 @@ export class FamilyAccountService {
       role: member.role,
       permissions: member.permissions,
       addedAt: member.added_at,
-      addedBy: member.added_by
+      addedBy: member.added_by,
     };
   }
 
@@ -110,7 +128,7 @@ export class FamilyAccountService {
       role: row.role,
       permissions: row.permissions,
       addedAt: row.added_at,
-      addedBy: row.added_by
+      addedBy: row.added_by,
     }));
   }
 
@@ -120,13 +138,17 @@ export class FamilyAccountService {
     memberIds?: string[]
   ): Promise<any> {
     // Verify requester has export permission
-    const hasPermission = await this.userHasPermission(requestedBy, familyId, 'exportData');
+    const hasPermission = await this.userHasPermission(
+      requestedBy,
+      familyId,
+      'exportData'
+    );
     if (!hasPermission) {
       throw new Error('Insufficient permissions to export family data');
     }
 
     const members = await this.getFamilyMembers(familyId);
-    const targetMembers = memberIds 
+    const targetMembers = memberIds
       ? members.filter(m => memberIds.includes(m.userId))
       : members;
 
@@ -134,7 +156,7 @@ export class FamilyAccountService {
       familyId,
       exportedAt: new Date().toISOString(),
       exportedBy: requestedBy,
-      members: {}
+      members: {},
     };
 
     // Export data for each member
@@ -160,13 +182,16 @@ export class FamilyAccountService {
           memberInfo: member,
           userData: userData.rows[0],
           accounts: accounts.rows,
-          goals: goals.rows
+          goals: goals.rows,
         };
       } catch (error) {
-        console.error(`Failed to export data for member ${member.userId}:`, error);
+        console.error(
+          `Failed to export data for member ${member.userId}:`,
+          error
+        );
         familyData.members[member.userId] = {
           memberInfo: member,
-          error: 'Failed to export data'
+          error: 'Failed to export data',
         };
       }
     }
@@ -180,14 +205,18 @@ export class FamilyAccountService {
     requestedBy: string
   ): Promise<{ success: boolean; receiptHash: string }> {
     // Verify requester has delete permission or is deleting their own data
-    const hasPermission = await this.userHasPermission(requestedBy, familyId, 'deleteData');
+    const hasPermission = await this.userHasPermission(
+      requestedBy,
+      familyId,
+      'deleteData'
+    );
     const isSelfDelete = requestedBy === memberUserId;
-    
+
     if (!hasPermission && !isSelfDelete) {
       throw new Error('Insufficient permissions to delete member data');
     }
 
-    return await transaction(async (client) => {
+    return await transaction(async client => {
       // Remove from family
       await client.query(
         `DELETE FROM family_members WHERE family_id = $1 AND user_id = $2`,
@@ -219,7 +248,7 @@ export class FamilyAccountService {
         familyId,
         memberUserId,
         deletedBy: requestedBy,
-        deletedAt: new Date().toISOString()
+        deletedAt: new Date().toISOString(),
       });
 
       return { success: true, receiptHash };
@@ -238,7 +267,7 @@ export class FamilyAccountService {
     );
 
     if (result.rows.length === 0) return false;
-    
+
     const permissions = result.rows[0].permissions;
     return permissions[permission] === true;
   }

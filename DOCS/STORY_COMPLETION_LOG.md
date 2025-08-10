@@ -1,7 +1,7 @@
 # Drishti Project: Comprehensive Story Completion & Strategic Progress Log
 
-**Last Updated**: December 2024
-**Project Status**: Epic 12 Story 1 COMPLETE - Offline Functionality Implementation
+**Last Updated**: August 2025
+**Project Status**: Frontend V2 Integration in progress – Dashboard hooks and Net Worth API
 **Document Purpose**: Combined tactical user story tracking and strategic project oversight
 
 ## Executive Summary
@@ -4968,3 +4968,38 @@ Epic 11 represents a **perfect technical achievement** that establishes Drishti 
 **Status**: EPIC 12 STORY 1 COMPLETE - Offline Functionality Implementation
 **Maintained By**: Principal Engineer Team
 **Classification**: INTERNAL USE - Project Progress Tracking
+
+---
+
+## Epic 13: Frontend V2 — Dashboard UI v1 (Mobile)
+
+### User Story 13.1 — Phase A: Structure & Hierarchy (Dashboard layout)
+
+Status: IN PROGRESS
+Date Started: 2025-08-10
+Owner: Augment Agent (Senior Full Stack + DevOps)
+
+Summary
+
+- Align Dashboard layout with RFC: status chip, net worth card, streaks & wins, quick actions, snackbar above tabs.
+- Purely presentational changes, no service logic changes.
+
+Acceptance Criteria
+
+- Status row with chip + sync at top; section order; standardized spacing
+- Compact OfflineIndicator on dashboard; reduced button prominence
+- Snackbar does not overlap tab bar; small phone support; theme-safe
+
+Artifacts
+
+- Reference: DOCS/Frontend_V2_Integration_RFC.md
+- Screenshot to be attached after implementation (light/dark/sun)
+
+Next Action
+
+- Implement Phase A layout adjustments and open PR.
+
+Status Update (Phase A)
+
+- Implemented: Status row (chip + sync), section order, spacing normalization, compact OfflineIndicator in Dashboard, reduced quick action button size, scroll content bottom padding to avoid overlap.
+- Pending: Final QA screenshots and snackbar positioning verification.

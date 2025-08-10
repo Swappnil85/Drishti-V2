@@ -44,6 +44,8 @@ import {
 } from '../../hooks/useEnhancedSync';
 import { useAdvancedConflictResolution } from '../../hooks/useAdvancedConflictResolution';
 import type { AccountType } from '@drishti/shared/types/financial';
+import { apiService } from '../../services/api/ApiService';
+import { authService } from '../../services/auth/AuthService';
 
 type Props = AccountsStackScreenProps<'AccountsList'>;
 
@@ -124,6 +126,7 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
     filterAndSortAccounts();
   }, [accounts, searchTerm, sortBy, sortDirection, filterBy]);
 
+  // After local DB loads, attempt to refresh from server using ApiService and Auth token
   const loadAccounts = async () => {
     if (!user?.id) return;
 
@@ -135,6 +138,53 @@ const AccountsListScreen: React.FC<Props> = ({ navigation }) => {
 
       setAccounts(userAccounts);
       calculateSummary(userAccounts);
+
+      // Server refresh (non-blocking): fetch and reconcile
+      const token = await authService.getAccessToken();
+      if (token) {
+        apiService
+          .get<any[]>(`/financial/accounts`, {
+            Authorization: `Bearer ${token}`,
+          })
+          .then(async serverList => {
+            if (!Array.isArray(serverList)) return;
+            // Reconcile by id: upsert missing/changed into local DB
+            const existingById = new Map(userAccounts.map(a => [a.id, a]));
+            const toUpsert = serverList.filter(apiAcc => {
+              const local = existingById.get(apiAcc.id);
+              return !local || local.updatedAt < new Date(apiAcc.updated_at);
+            });
+            if (toUpsert.length > 0) {
+              await database.write(async () => {
+                for (const apiAcc of toUpsert) {
+                  const collection =
+                    database.get<FinancialAccount>('financial_accounts');
+                  const local = existingById.get(apiAcc.id);
+                  if (local) {
+                    await local.update(acc => {
+                      const mapped = FinancialAccount.fromAPI(apiAcc);
+                      Object.assign(acc, mapped);
+                    });
+                  } else {
+                    await collection.create(acc => {
+                      const mapped = FinancialAccount.fromAPI(apiAcc);
+                      Object.assign(acc, mapped);
+                    });
+                  }
+                }
+              });
+              // reload local state
+              const refreshed = (await accountsCollection
+                .query(Q.where('user_id', user.id), Q.where('is_active', true))
+                .fetch()) as FinancialAccount[];
+              setAccounts(refreshed);
+              calculateSummary(refreshed);
+            }
+          })
+          .catch(() => {
+            // ignore server refresh errors; local-first still displayed
+          });
+      }
     } catch (error) {
       console.error('Error loading accounts:', error);
       Alert.alert('Error', 'Failed to load accounts. Please try again.');

@@ -36,7 +36,10 @@ export default function OfflineIndicator({
   onPress,
   style,
 }: OfflineIndicatorProps) {
-  const { theme } = useTheme();
+  // Phase A: prefer compact chip by default when used in Dashboard
+  // (Callers can still pass compact={false} to expand.)
+
+  const theme = useTheme();
   const [offlineStatus, setOfflineStatus] = useState<OfflineStatus>({
     isOnline: true,
     hasOfflineCapability: true,
@@ -142,7 +145,7 @@ export default function OfflineIndicator({
     if (!offlineStatus.isOnline) {
       return theme.colors.warning[500]; // Orange for offline
     } else if (offlineStatus.pendingOperations > 0) {
-      return theme.colors.info[500]; // Blue for pending operations
+      return theme.colors.primary[500]; // Blue for pending operations
     } else {
       return theme.colors.success[500]; // Green for online and synced
     }
@@ -198,7 +201,7 @@ export default function OfflineIndicator({
         style={[
           styles.container,
           compact && styles.compact,
-          { backgroundColor: theme.colors.gray[100] },
+          { backgroundColor: theme.colors.neutral[100] },
           style,
         ]}
         onPress={handlePress}
@@ -217,7 +220,7 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsText,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   {offlineAnalytics.operationsPerformed} ops •{' '}
@@ -257,25 +260,32 @@ export default function OfflineIndicator({
         <View
           style={[
             styles.modalContainer,
-            { backgroundColor: theme.colors.background },
+            { backgroundColor: theme.colors.background.primary },
           ]}
         >
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+            <Text
+              style={[styles.modalTitle, { color: theme.colors.text.primary }]}
+            >
               Offline Status
             </Text>
             <TouchableOpacity
               onPress={() => setShowDetailsModal(false)}
               style={styles.closeButton}
             >
-              <Icon name='close' size='md' color={theme.colors.gray[600]} />
+              <Icon name='close' size='md' color={theme.colors.neutral[600]} />
             </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.modalContent}>
             {/* Connection Status */}
             <Card variant='outlined' padding='base' style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: theme.colors.text.primary },
+                ]}
+              >
                 Connection Status
               </Text>
               <Flex
@@ -290,7 +300,10 @@ export default function OfflineIndicator({
                   color={getStatusColor()}
                 />
                 <Text
-                  style={[styles.statusValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.statusValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {getStatusText()}
                 </Text>
@@ -299,7 +312,12 @@ export default function OfflineIndicator({
 
             {/* Offline Features */}
             <Card variant='outlined' padding='base' style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: theme.colors.text.primary },
+                ]}
+              >
                 Offline Features
               </Text>
               {Object.entries(offlineStatus.offlineFeatures).map(
@@ -312,7 +330,10 @@ export default function OfflineIndicator({
                     style={styles.featureRow}
                   >
                     <Text
-                      style={[styles.featureText, { color: theme.colors.text }]}
+                      style={[
+                        styles.featureText,
+                        { color: theme.colors.text.primary },
+                      ]}
                     >
                       {feature
                         .replace(/([A-Z])/g, ' $1')
@@ -334,34 +355,56 @@ export default function OfflineIndicator({
 
             {/* Queue Status */}
             <Card variant='outlined' padding='base' style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: theme.colors.text.primary },
+                ]}
+              >
                 Operation Queue
               </Text>
               <Flex direction='row' justify='between' style={styles.queueRow}>
                 <Text
-                  style={[styles.queueLabel, { color: theme.colors.gray[600] }]}
+                  style={[
+                    styles.queueLabel,
+                    { color: theme.colors.neutral[600] },
+                  ]}
                 >
                   Total
                 </Text>
-                <Text style={[styles.queueValue, { color: theme.colors.text }]}>
+                <Text
+                  style={[
+                    styles.queueValue,
+                    { color: theme.colors.text.primary },
+                  ]}
+                >
                   {queueStatus.total}
                 </Text>
               </Flex>
               <Flex direction='row' justify='between' style={styles.queueRow}>
                 <Text
-                  style={[styles.queueLabel, { color: theme.colors.gray[600] }]}
+                  style={[
+                    styles.queueLabel,
+                    { color: theme.colors.neutral[600] },
+                  ]}
                 >
                   Pending
                 </Text>
                 <Text
-                  style={[styles.queueValue, { color: theme.colors.info[500] }]}
+                  style={[
+                    styles.queueValue,
+                    { color: theme.colors.primary[500] },
+                  ]}
                 >
                   {queueStatus.pending}
                 </Text>
               </Flex>
               <Flex direction='row' justify='between' style={styles.queueRow}>
                 <Text
-                  style={[styles.queueLabel, { color: theme.colors.gray[600] }]}
+                  style={[
+                    styles.queueLabel,
+                    { color: theme.colors.neutral[600] },
+                  ]}
                 >
                   Failed
                 </Text>
@@ -378,7 +421,12 @@ export default function OfflineIndicator({
 
             {/* Analytics */}
             <Card variant='outlined' padding='base' style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: theme.colors.text.primary },
+                ]}
+              >
                 Offline Analytics
               </Text>
               <Flex
@@ -389,13 +437,16 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsLabel,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   Total Offline Time
                 </Text>
                 <Text
-                  style={[styles.analyticsValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.analyticsValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {formatTime(offlineAnalytics.totalOfflineTime)}
                 </Text>
@@ -408,13 +459,16 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsLabel,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   Operations Performed
                 </Text>
                 <Text
-                  style={[styles.analyticsValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.analyticsValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {offlineAnalytics.operationsPerformed}
                 </Text>
@@ -427,13 +481,16 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsLabel,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   Data Created
                 </Text>
                 <Text
-                  style={[styles.analyticsValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.analyticsValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {offlineAnalytics.dataCreated}
                 </Text>
@@ -446,13 +503,16 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsLabel,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   Calculations Run
                 </Text>
                 <Text
-                  style={[styles.analyticsValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.analyticsValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {offlineAnalytics.calculationsRun}
                 </Text>
@@ -465,13 +525,16 @@ export default function OfflineIndicator({
                 <Text
                   style={[
                     styles.analyticsLabel,
-                    { color: theme.colors.gray[600] },
+                    { color: theme.colors.neutral[600] },
                   ]}
                 >
                   Offline Data Size
                 </Text>
                 <Text
-                  style={[styles.analyticsValue, { color: theme.colors.text }]}
+                  style={[
+                    styles.analyticsValue,
+                    { color: theme.colors.text.primary },
+                  ]}
                 >
                   {formatDataSize(offlineStatus.offlineDataSize)}
                 </Text>

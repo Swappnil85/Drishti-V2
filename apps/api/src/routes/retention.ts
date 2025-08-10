@@ -9,15 +9,20 @@ async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function retentionRoutes(fastify: FastifyInstance) {
-  fastify.post('/privacy/retention/run', { preHandler: requireAdmin as any }, async (_request, reply) => {
-    try {
-      const result = await retentionService.runScheduledDeletions();
-      return reply.send({ success: true, ...result });
-    } catch (error) {
-      return reply.code(500).send({ success: false, error: 'Failed to run retention job' });
+  fastify.post(
+    '/privacy/retention/run',
+    { preHandler: requireAdmin as any },
+    async (_request, reply) => {
+      try {
+        const result = await retentionService.runScheduledDeletions();
+        return reply.send({ success: true, ...result });
+      } catch (error) {
+        return reply
+          .code(500)
+          .send({ success: false, error: 'Failed to run retention job' });
+      }
     }
-  });
+  );
 }
 
 export default retentionRoutes;
-

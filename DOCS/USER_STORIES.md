@@ -1512,3 +1512,82 @@ Epic 11 transforms the Drishti FIRE planning application into an enterprise-grad
 **Epic 11 Status**: 🏆 **COMPLETE - Perfect Implementation Ready for Production**
 
 This epic transforms Drishti into an enterprise-grade API platform with advanced security, monitoring, and optimization features that exceed industry standards and provide a solid foundation for future growth and innovation.
+
+## Epic 13: Frontend V2 — Dashboard UI v1 (Mobile)
+
+Context: Align Dashboard with Frontend_V2_Integration_RFC.md. Deliver a clear, scannable home with status chip, Net Worth card + 12m chart, Streaks & Wins, Quick Actions, and a non‑obtrusive snackbar.
+
+### User Story 13.1 — Phase A: Structure & Hierarchy (Dashboard layout)
+
+As a user, I want the Dashboard to present information in a clear hierarchy so I can scan status, net worth, and next actions quickly.
+
+Acceptance Criteria
+
+- Status row at top: Offline/Online chip (left) + sync text/icon (right)
+- Section order: Net Worth card → Streaks & Wins → Quick Actions
+- Consistent spacing using theme.spacing; card padding standardized
+- OfflineIndicator uses compact “chip” style by default on Dashboard
+- Quick Action buttons size reduced; do not dominate viewport
+- Snackbar/toast sits above tab bar; never overlaps navigation
+- No behavioral changes to services; purely presentational/layout
+- Works on small phones (≤360dp width) without overflow or clipping
+- Respects light, dark, and “sun” palette without hardcoded colors
+
+Definition of Done
+
+- Visual review screenshots (light/dark/sun) on a 6" device
+- QA checklist passed for spacing/order/snackbar placement
+- Unit tests updated for Dashboard layout smoke (render + a11y roles)
+
+### User Story 13.2 — Phase B: Net Worth Card Visual Update
+
+As a user, I want a clean Net Worth card with a mini trend so I immediately understand my current position and momentum.
+
+Acceptance Criteria
+
+- Prominent Net Worth value; currency formatted and accessible
+- Delta vs last month shown with color (up/down) and +/- sign
+- Two info chips: Assets and Liabilities with icons
+- 12‑month sparkline/mini line chart; thin target/goal line
+- Loading skeleton state and an inline slim error banner with Retry
+- Uses theme tokens only (no raw hex); supports all palettes
+- Performance: initial render < 16ms on mid device (no heavy reflows)
+
+Definition of Done
+
+- Snapshot tests for value and delta formatting
+- Unit test for error fallback (shows inline alert + retry handler)
+
+### User Story 13.3 — Phase C: Polish & Theme Alignment
+
+As a user, I want consistent typography, card styling, and tokens so the app feels cohesive and readable.
+
+Acceptance Criteria
+
+- Typography scale applied (titles, body, caption); remove novelty fonts
+- Card variant standardized (elevated or outlined) across Dashboard
+- Shadows/borders via theme.shadows and neutral palette
+- Replace legacy theme keys (e.g., colors.text → colors.text.primary)
+- Verify light/dark/sun palettes meet contrast (AA where applicable)
+
+Definition of Done
+
+- Visual regression screenshots across palettes
+- Unit tests for theme rendering snapshots (3 palettes)
+
+### User Story 13.4 — Phase D: Accessibility & Ergonomics
+
+As an accessibility‑minded user, I need clear labels, adequate tap targets, and respect for dynamic type.
+
+Acceptance Criteria
+
+- Tap targets ≥ 44x44 for chips, tiles, and quick actions
+- Accessibility labels/hints on status chip, Retry, and quick actions
+- Snackbar is announced to screen readers and doesn’t block tabs
+- Dynamic type sizing supported up to iOS Large/Android Large
+- Contrast checks for all key text on all palettes
+
+Definition of Done
+
+- a11y audit checklist passes; TalkBack/VoiceOver spot checks
+- Tests: important elements have accessible roles/labels

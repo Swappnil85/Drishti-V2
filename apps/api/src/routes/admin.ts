@@ -75,12 +75,10 @@ export async function adminRoutes(fastify: FastifyInstance) {
         };
         return reply.send({ success: true, report });
       } catch (error) {
-        return reply
-          .code(500)
-          .send({
-            success: false,
-            error: 'Failed to generate retention report',
-          });
+        return reply.code(500).send({
+          success: false,
+          error: 'Failed to generate retention report',
+        });
       }
     }
   );

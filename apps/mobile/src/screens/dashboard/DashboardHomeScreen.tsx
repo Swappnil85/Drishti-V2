@@ -3,11 +3,69 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useHapticContext } from '../../contexts/HapticContext';
-import { Text, Card, Button, Container } from '../../components/ui';
+import { Text, Card, Button, Container, Icon } from '../../components/ui';
+import OfflineIndicator from '../../components/sync/OfflineIndicator';
+import NetWorthDashboard from '../../components/financial/NetWorthDashboard';
+import HomeStreaksWins from '../../components/dashboard/HomeStreaksWins';
+import { useNetWorthTrends } from '../../hooks/useNetWorthTrends';
+import { useEnhancedSync } from '../../hooks/useEnhancedSync';
 
 export default function DashboardHomeScreen() {
   const { colors } = useTheme();
   const { trigger: triggerHaptic } = useHapticContext();
+  const trendsHook = useNetWorthTrends(undefined, 12);
+  const { networkQualityDescription, pendingChanges, isSyncing } =
+    useEnhancedSync();
+
+  const monthlyChanges = React.useMemo(() => {
+    const arr = trendsHook.data;
+    if (!arr || arr.length === 0)
+      return [] as Array<{
+        month: string;
+        year: number;
+        change: number;
+        startNetWorth: number;
+        endNetWorth: number;
+        changePercentage: number;
+        trend: 'increasing' | 'decreasing' | 'stable';
+      }>;
+    const now = new Date();
+    const points = arr.map((pt, idx) => {
+      const d = new Date(
+        now.getFullYear(),
+        now.getMonth() - (arr.length - 1 - idx),
+        1
+      );
+      return { date: d, value: pt.value };
+    });
+    const result: Array<{
+      month: string;
+      year: number;
+      change: number;
+      startNetWorth: number;
+      endNetWorth: number;
+      changePercentage: number;
+      trend: 'increasing' | 'decreasing' | 'stable';
+    }> = [];
+    for (let i = 0; i < points.length; i++) {
+      const prev = i > 0 ? points[i - 1].value : points[i].value;
+      const curr = points[i].value;
+      const change = curr - prev;
+      const changePercentage = prev !== 0 ? (change / Math.abs(prev)) * 100 : 0;
+      const trend =
+        change > 0 ? 'increasing' : change < 0 ? 'decreasing' : 'stable';
+      result.push({
+        month: points[i].date.toLocaleDateString('en-US', { month: 'long' }),
+        year: points[i].date.getFullYear(),
+        startNetWorth: prev,
+        endNetWorth: curr,
+        change,
+        changePercentage,
+        trend,
+      });
+    }
+    return result;
+  }, [trendsHook.data]);
 
   const handleQuickAction = (action: string) => {
     triggerHaptic('light');
@@ -21,111 +79,53 @@ export default function DashboardHomeScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
       >
         <Container style={styles.content}>
-          {/* Welcome Section */}
-          <View style={styles.welcomeSection}>
-            <Text
-              variant="h2"
-              style={[styles.welcomeTitle, { color: colors.text.primary }]}
+          {/* Status Row */}
+          <View style={styles.statusRow}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <OfflineIndicator showText showAnalytics={false} compact />
+            </View>
+            <View
+              style={styles.syncMeta}
+              accessibilityLabel='Sync status'
+              accessibilityRole='text'
             >
-              Welcome to Drishti
-            </Text>
-            <Text
-              variant="body1"
-              style={[
-                styles.welcomeSubtitle,
-                { color: colors.text.secondary },
-              ]}
-            >
-              Your personal finance companion
-            </Text>
+              <Icon
+                name={isSyncing ? 'refresh' : 'checkmark-circle-outline'}
+                size='md'
+                color={isSyncing ? 'warning.500' : 'success.500'}
+                style={{ marginRight: 6 }}
+              />
+              <Text style={[styles.syncText, { color: colors.text.secondary }]}>
+                {isSyncing
+                  ? 'Syncing…'
+                  : pendingChanges > 0
+                    ? `${pendingChanges} pending`
+                    : networkQualityDescription}
+              </Text>
+            </View>
           </View>
 
-          {/* Stats Overview */}
-          <View style={styles.statsSection}>
-            <Text
-              variant="h3"
-              style={[styles.sectionTitle, { color: colors.text.primary }]}
-            >
-              Overview
-            </Text>
+          {/* Net Worth Summary & Trends (compact) */}
+          <View style={styles.netWorthSection}>
+            <NetWorthDashboard
+              compact
+              onViewTrends={() => {}}
+              onViewDetails={() => {}}
+            />
+          </View>
 
-            <View style={styles.statsGrid}>
-              <Card
-                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
-              >
-                <Text
-                  variant="caption"
-                  style={[styles.statLabel, { color: colors.text.secondary }]}
-                >
-                  Total Balance
-                </Text>
-                <Text
-                  variant="h4"
-                  style={[styles.statValue, { color: colors.primary[500] }]}
-                >
-                  $12,450.00
-                </Text>
-              </Card>
-
-              <Card
-                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
-              >
-                <Text
-                  variant="caption"
-                  style={[styles.statLabel, { color: colors.text.secondary }]}
-                >
-                  Monthly Spending
-                </Text>
-                <Text
-                  variant="h4"
-                  style={[styles.statValue, { color: colors.secondary[500] }]}
-                >
-                  $2,340.00
-                </Text>
-              </Card>
-
-              <Card
-                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
-              >
-                <Text
-                  variant="caption"
-                  style={[styles.statLabel, { color: colors.text.secondary }]}
-                >
-                  Savings Goal
-                </Text>
-                <Text
-                  variant="h4"
-                  style={[styles.statValue, { color: colors.warning[500] }]}
-                >
-                  75%
-                </Text>
-              </Card>
-
-              <Card
-                style={[styles.statCard, { backgroundColor: colors.background.secondary }]}
-              >
-                <Text
-                  variant="caption"
-                  style={[styles.statLabel, { color: colors.text.secondary }]}
-                >
-                  Investments
-                </Text>
-                <Text
-                  variant="h4"
-                  style={[styles.statValue, { color: colors.success[500] }]}
-                >
-                  $8,750.00
-                </Text>
-              </Card>
-            </View>
+          {/* Streaks & Wins */}
+          <View style={styles.streaksSection}>
+            <HomeStreaksWins monthlyChanges={monthlyChanges} />
           </View>
 
           {/* Quick Actions */}
           <View style={styles.actionsSection}>
             <Text
-              variant="h3"
+              variant='h3'
               style={[styles.sectionTitle, { color: colors.text.primary }]}
             >
               Quick Actions
@@ -133,105 +133,32 @@ export default function DashboardHomeScreen() {
 
             <View style={styles.actionsGrid}>
               <Button
-                variant="primary"
-                onPress={() => handleQuickAction('add-transaction')}
+                variant='primary'
+                size='sm'
+                onPress={() => handleQuickAction('add-account')}
                 style={styles.actionButton}
               >
-                Add Transaction
+                Add Account
               </Button>
 
               <Button
-                variant="outlined"
-                onPress={() => handleQuickAction('view-accounts')}
+                variant='outline'
+                size='sm'
+                onPress={() => handleQuickAction('new-scenario')}
                 style={styles.actionButton}
               >
-                View Accounts
+                New Scenario
               </Button>
 
               <Button
-                variant="outlined"
-                onPress={() => handleQuickAction('set-goal')}
+                variant='outline'
+                size='sm'
+                onPress={() => handleQuickAction('adjust-plan')}
                 style={styles.actionButton}
               >
-                Set New Goal
-              </Button>
-
-              <Button
-                variant="outlined"
-                onPress={() => handleQuickAction('view-reports')}
-                style={styles.actionButton}
-              >
-                View Reports
+                Adjust Plan
               </Button>
             </View>
-          </View>
-
-          {/* Recent Activity */}
-          <View style={styles.activitySection}>
-            <Text
-              variant="h3"
-              style={[styles.sectionTitle, { color: colors.text.primary }]}
-            >
-              Recent Activity
-            </Text>
-
-            <Card
-              style={[styles.activityCard, { backgroundColor: colors.background.secondary }]}
-            >
-              <View style={styles.activityItem}>
-                <Text
-                  variant="body1"
-                  style={[styles.activityText, { color: colors.text.primary }]}
-                >
-                  Grocery Shopping
-                </Text>
-                <Text
-                  variant="caption"
-                  style={[
-                    styles.activityTime,
-                    { color: colors.text.secondary },
-                  ]}
-                >
-                  2 hours ago
-                </Text>
-              </View>
-
-              <View style={styles.activityItem}>
-                <Text
-                  variant="body1"
-                  style={[styles.activityText, { color: colors.text.primary }]}
-                >
-                  Salary Deposit
-                </Text>
-                <Text
-                  variant="caption"
-                  style={[
-                    styles.activityTime,
-                    { color: colors.text.secondary },
-                  ]}
-                >
-                  1 day ago
-                </Text>
-              </View>
-
-              <View style={styles.activityItem}>
-                <Text
-                  variant="body1"
-                  style={[styles.activityText, { color: colors.text.primary }]}
-                >
-                  Investment Purchase
-                </Text>
-                <Text
-                  variant="caption"
-                  style={[
-                    styles.activityTime,
-                    { color: colors.text.secondary },
-                  ]}
-                >
-                  3 days ago
-                </Text>
-              </View>
-            </Card>
           </View>
         </Container>
       </ScrollView>
@@ -249,68 +176,35 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  welcomeSection: {
-    marginBottom: 32,
+  statusRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  welcomeTitle: {
-    marginBottom: 8,
-    textAlign: 'center',
+  syncMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  welcomeSubtitle: {
-    textAlign: 'center',
+  syncText: {
+    fontSize: 12,
   },
-  statsSection: {
-    marginBottom: 32,
+  netWorthSection: {
+    marginBottom: 24,
   },
   sectionTitle: {
     marginBottom: 16,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 16,
-    alignItems: 'center',
-  },
-  statLabel: {
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  statValue: {
-    textAlign: 'center',
   },
   actionsSection: {
     marginBottom: 32,
   },
   actionsGrid: {
-    gap: 12,
+    gap: 8,
   },
   actionButton: {
-    marginBottom: 8,
-  },
-  activitySection: {
-    marginBottom: 32,
-  },
-  activityCard: {
-    padding: 16,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  activityText: {
-    flex: 1,
-  },
-  activityTime: {
-    marginLeft: 8,
+    marginBottom: 6,
   },
 });

@@ -15,8 +15,13 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, Button, Icon, Flex, Badge } from '../ui';
-import { netWorthService, NetWorthData, NetWorthComparison, NetWorthMilestone } from '../../services/financial/NetWorthService';
+import {
+  netWorthService,
+  NetWorthComparison,
+  NetWorthMilestone,
+} from '../../services/financial/NetWorthService';
 import { useFormHaptic } from '../../hooks/useHaptic';
+import { useNetWorthSummary } from '../../hooks/useNetWorthSummary';
 
 interface NetWorthDashboardProps {
   onViewDetails?: () => void;
@@ -35,37 +40,37 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
   const { user } = useAuth();
   const haptic = useFormHaptic();
 
-  const [netWorthData, setNetWorthData] = useState<NetWorthData | null>(null);
+  const {
+    data: netWorthData,
+    loading,
+    error,
+    refresh,
+  } = useNetWorthSummary(user?.id);
   const [comparisons, setComparisons] = useState<NetWorthComparison[]>([]);
   const [milestones, setMilestones] = useState<NetWorthMilestone[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    'month' | 'quarter' | 'year'
+  >('month');
 
   useEffect(() => {
     if (user?.id) {
-      loadNetWorthData();
+      loadSideData();
     }
   }, [user?.id]);
 
-  const loadNetWorthData = async () => {
+  const loadSideData = async () => {
     if (!user?.id) return;
 
     try {
-      setLoading(true);
-      
-      const [netWorth, netWorthComparisons, netWorthMilestones] = await Promise.all([
-        netWorthService.calculateNetWorth(user.id),
+      const [netWorthComparisons, netWorthMilestones] = await Promise.all([
         netWorthService.getNetWorthComparisons(user.id),
         netWorthService.getNetWorthMilestones(user.id),
       ]);
 
-      setNetWorthData(netWorth);
       setComparisons(netWorthComparisons);
       setMilestones(netWorthMilestones);
     } catch (error) {
-      console.error('Error loading net worth data:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading comparison/milestone data:', error);
     }
   };
 
@@ -103,26 +108,42 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     const selectedComparison = getSelectedComparison();
 
     return (
-      <Card variant="filled" padding="lg" style={styles.headerCard}>
-        <Flex direction="column" align="center" gap="sm">
-          <Text style={[styles.netWorthLabel, { color: theme.colors.onPrimary }]}>
+      <Card variant='filled' padding='lg' style={styles.headerCard}>
+        <Flex direction='column' align='center' gap='sm'>
+          <Text
+            style={[styles.netWorthLabel, { color: theme.colors.onPrimary }]}
+          >
             Total Net Worth
           </Text>
-          <Text style={[styles.netWorthAmount, { color: theme.colors.onPrimary }]}>
+          <Text
+            style={[styles.netWorthAmount, { color: theme.colors.onPrimary }]}
+          >
             {formatCurrency(netWorthData.totalNetWorth)}
           </Text>
-          
+
           {selectedComparison && (
-            <Flex direction="row" align="center" gap="xs">
+            <Flex direction='row' align='center' gap='xs'>
               <Icon
-                name={selectedComparison.change >= 0 ? 'trending-up' : 'trending-down'}
-                size="sm"
+                name={
+                  selectedComparison.change >= 0
+                    ? 'trending-up'
+                    : 'trending-down'
+                }
+                size='sm'
                 color={selectedComparison.change >= 0 ? 'success' : 'error'}
               />
-              <Text style={[styles.changeText, { color: getChangeColor(selectedComparison.change) }]}>
-                {formatCurrency(Math.abs(selectedComparison.change))} ({formatPercentage(selectedComparison.changePercentage)})
+              <Text
+                style={[
+                  styles.changeText,
+                  { color: getChangeColor(selectedComparison.change) },
+                ]}
+              >
+                {formatCurrency(Math.abs(selectedComparison.change))} (
+                {formatPercentage(selectedComparison.changePercentage)})
               </Text>
-              <Text style={[styles.periodText, { color: theme.colors.onPrimary }]}>
+              <Text
+                style={[styles.periodText, { color: theme.colors.onPrimary }]}
+              >
                 {selectedComparison.periodLabel}
               </Text>
             </Flex>
@@ -133,15 +154,16 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
   };
 
   const renderPeriodSelector = () => {
-    const periods: Array<{ key: 'month' | 'quarter' | 'year'; label: string }> = [
-      { key: 'month', label: 'Month' },
-      { key: 'quarter', label: 'Quarter' },
-      { key: 'year', label: 'Year' },
-    ];
+    const periods: Array<{ key: 'month' | 'quarter' | 'year'; label: string }> =
+      [
+        { key: 'month', label: 'Month' },
+        { key: 'quarter', label: 'Quarter' },
+        { key: 'year', label: 'Year' },
+      ];
 
     return (
-      <Card variant="outlined" padding="sm" style={styles.periodSelector}>
-        <Flex direction="row" gap="xs">
+      <Card variant='outlined' padding='sm' style={styles.periodSelector}>
+        <Flex direction='row' gap='xs'>
           {periods.map(period => (
             <TouchableOpacity
               key={period.key}
@@ -160,9 +182,10 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                 style={[
                   styles.periodButtonText,
                   {
-                    color: selectedPeriod === period.key
-                      ? theme.colors.onPrimary
-                      : theme.colors.textSecondary,
+                    color:
+                      selectedPeriod === period.key
+                        ? theme.colors.onPrimary
+                        : theme.colors.textSecondary,
                   },
                 ]}
               >
@@ -181,8 +204,13 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     const topAccountTypes = netWorthData.accountBreakdown.slice(0, 4);
 
     return (
-      <Card variant="outlined" padding="lg" style={styles.breakdownCard}>
-        <Flex direction="row" justify="space-between" align="center" style={styles.breakdownHeader}>
+      <Card variant='outlined' padding='lg' style={styles.breakdownCard}>
+        <Flex
+          direction='row'
+          justify='space-between'
+          align='center'
+          style={styles.breakdownHeader}
+        >
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Account Breakdown
           </Text>
@@ -195,29 +223,52 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
         {topAccountTypes.map((accountType, index) => (
           <View key={accountType.accountType} style={styles.breakdownItem}>
-            <Flex direction="row" justify="space-between" align="center">
-              <Flex direction="row" align="center" gap="sm">
+            <Flex direction='row' justify='space-between' align='center'>
+              <Flex direction='row' align='center' gap='sm'>
                 <View
                   style={[
                     styles.breakdownIndicator,
-                    { backgroundColor: getAccountTypeColor(accountType.accountType, index) },
+                    {
+                      backgroundColor: getAccountTypeColor(
+                        accountType.accountType,
+                        index
+                      ),
+                    },
                   ]}
                 />
                 <View>
-                  <Text style={[styles.accountTypeName, { color: theme.colors.text }]}>
+                  <Text
+                    style={[
+                      styles.accountTypeName,
+                      { color: theme.colors.text },
+                    ]}
+                  >
                     {formatAccountTypeName(accountType.accountType)}
                   </Text>
-                  <Text style={[styles.accountCount, { color: theme.colors.textSecondary }]}>
-                    {accountType.accountCount} account{accountType.accountCount !== 1 ? 's' : ''}
+                  <Text
+                    style={[
+                      styles.accountCount,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    {accountType.accountCount} account
+                    {accountType.accountCount !== 1 ? 's' : ''}
                   </Text>
                 </View>
               </Flex>
 
-              <Flex direction="column" align="flex-end">
-                <Text style={[styles.breakdownAmount, { color: theme.colors.text }]}>
+              <Flex direction='column' align='flex-end'>
+                <Text
+                  style={[styles.breakdownAmount, { color: theme.colors.text }]}
+                >
                   {formatCurrency(accountType.totalBalance)}
                 </Text>
-                <Text style={[styles.breakdownPercentage, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.breakdownPercentage,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {accountType.percentage.toFixed(1)}%
                 </Text>
               </Flex>
@@ -235,32 +286,54 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     const achievedCount = milestones.filter(m => m.achieved).length;
 
     return (
-      <Card variant="outlined" padding="lg" style={styles.milestonesCard}>
-        <Flex direction="row" justify="space-between" align="center" style={styles.milestonesHeader}>
+      <Card variant='outlined' padding='lg' style={styles.milestonesCard}>
+        <Flex
+          direction='row'
+          justify='space-between'
+          align='center'
+          style={styles.milestonesHeader}
+        >
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Net Worth Milestones
           </Text>
-          <Badge variant="filled" color="primary" size="sm">
+          <Badge variant='filled' color='primary' size='sm'>
             {achievedCount}/{milestones.length}
           </Badge>
         </Flex>
 
         {nextMilestone && (
           <View style={styles.nextMilestone}>
-            <Flex direction="row" justify="space-between" align="center">
+            <Flex direction='row' justify='space-between' align='center'>
               <View>
-                <Text style={[styles.milestoneLabel, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.milestoneLabel, { color: theme.colors.text }]}
+                >
                   Next: {nextMilestone.label}
                 </Text>
-                <Text style={[styles.milestoneAmount, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.milestoneAmount,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {formatCurrency(nextMilestone.amount)}
                 </Text>
               </View>
               <View style={styles.progressContainer}>
-                <Text style={[styles.progressText, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.progressText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {Math.round(nextMilestone.progress * 100)}%
                 </Text>
-                <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    { backgroundColor: theme.colors.border },
+                  ]}
+                >
                   <View
                     style={[
                       styles.progressFill,
@@ -283,20 +356,20 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     if (compact) return null;
 
     return (
-      <Card variant="outlined" padding="lg" style={styles.actionsCard}>
-        <Flex direction="row" gap="sm">
+      <Card variant='outlined' padding='lg' style={styles.actionsCard}>
+        <Flex direction='row' gap='sm'>
           <Button
-            variant="outline"
+            variant='outline'
             onPress={onViewTrends}
-            leftIcon={<Icon name="trending-up" size="sm" />}
+            leftIcon={<Icon name='trending-up' size='sm' />}
             style={styles.actionButton}
           >
             View Trends
           </Button>
           <Button
-            variant="outline"
+            variant='outline'
             onPress={onViewDetails}
-            leftIcon={<Icon name="pie-chart" size="sm" />}
+            leftIcon={<Icon name='pie-chart' size='sm' />}
             style={styles.actionButton}
           >
             Detailed View
@@ -326,9 +399,11 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
   if (loading) {
     return (
-      <Card variant="outlined" padding="lg">
-        <Flex direction="column" align="center" gap="base">
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+      <Card variant='outlined' padding='lg'>
+        <Flex direction='column' align='center' gap='base'>
+          <Text
+            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+          >
             Loading net worth data...
           </Text>
         </Flex>
@@ -338,13 +413,13 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
   if (!netWorthData) {
     return (
-      <Card variant="outlined" padding="lg">
-        <Flex direction="column" align="center" gap="base">
-          <Icon name="alert-circle-outline" size="lg" color="error" />
+      <Card variant='outlined' padding='lg'>
+        <Flex direction='column' align='center' gap='base'>
+          <Icon name='alert-circle-outline' size='lg' color='error' />
           <Text style={[styles.errorText, { color: theme.colors.text }]}>
-            Unable to load net worth data
+            {error ? `Error: ${error}` : 'Unable to load net worth data'}
           </Text>
-          <Button variant="outline" onPress={loadNetWorthData}>
+          <Button variant='outline' onPress={refresh}>
             Retry
           </Button>
         </Flex>

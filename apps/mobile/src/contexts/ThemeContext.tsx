@@ -33,6 +33,20 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
+// Safe default theme to prevent crashes if hook is used before provider mounts
+export const DEFAULT_THEME: ThemeContextType = {
+  colors: COLORS,
+  typography: TYPOGRAPHY,
+  spacing: SPACING,
+  borderRadius: BORDER_RADIUS,
+  shadows: SHADOWS,
+  sizes: SIZES,
+  isDark: false,
+  toggleTheme: () => {},
+  togglePalette: () => {},
+  palette: 'default',
+};
+
 // Dark theme colors (override light theme colors)
 const DARK_COLORS = {
   ...COLORS,
@@ -117,8 +131,40 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   };
 
+  // Sun palette toggle
+  const [palette, setPalette] = useState<'default' | 'sun'>('default');
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem('DRISHTI_THEME_PALETTE');
+        if (saved === 'sun') setPalette('sun');
+      } catch {}
+    })();
+  }, []);
+  const togglePalette = async () => {
+    const next = palette === 'default' ? 'sun' : 'default';
+    setPalette(next);
+    try {
+      await AsyncStorage.setItem('DRISHTI_THEME_PALETTE', next);
+    } catch {}
+  };
+
+  const appliedColors = React.useMemo(() => {
+    const base = isDark ? DARK_COLORS : COLORS;
+    if (palette === 'sun') {
+      return {
+        ...base,
+        background: { ...base.background, primary: COLORS.sun.background },
+        text: { ...base.text, primary: COLORS.sun.onPrimary },
+        border: { ...base.border, light: COLORS.sun.border },
+        primary: { ...base.primary, 500: COLORS.sun.primary },
+      } as typeof COLORS;
+    }
+    return base;
+  }, [isDark, palette]);
+
   // Get current colors based on theme
-  const colors = isDark ? DARK_COLORS : COLORS;
+  const colors = appliedColors;
 
   const value: ThemeContextType = {
     colors,
@@ -129,6 +175,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     sizes: SIZES,
     isDark,
     toggleTheme,
+    togglePalette,
+    palette,
   };
 
   // Don't render children until theme is loaded
@@ -142,14 +190,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 };
 
 // Theme Hook
-export const useTheme = (): ThemeContextType => {
+export const useTheme = (): ThemeContextType & { theme: ThemeContextType } => {
   const context = useContext(ThemeContext);
 
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
+  // Graceful fallback: if context is undefined/null (e.g., early render on web or a test),
+  // return a safe default theme instead of throwing/crashing.
+  const value = (context ?? DEFAULT_THEME) as ThemeContextType;
 
-  return context;
+  // Backward-compat: also expose `{ theme }` so both `const theme = useTheme()` and
+  // `const { theme } = useTheme()` work without crashing older screens/components.
+  return { ...(value as any), theme: value } as any;
 };
 
 // Theme utilities

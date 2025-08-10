@@ -4,13 +4,10 @@ module.exports = {
   roots: ['<rootDir>/src'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@expo|expo|@nozbe/watermelondb|react-native-vector-icons)/)'
+    'node_modules/(?!(react-native|@react-native|@expo|expo|expo-modules-core|react-native-web|@nozbe/watermelondb|react-native-vector-icons)/)',
   ],
   collectCoverage: true,
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx,js,jsx}',
-    '!src/**/__tests__/**',
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/__tests__/**'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
@@ -22,4 +19,3 @@ module.exports = {
     },
   },
 };
-

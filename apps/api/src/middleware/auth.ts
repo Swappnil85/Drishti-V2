@@ -26,17 +26,17 @@ export async function authenticateUser(
 ): Promise<void> {
   try {
     const authHeader = request.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return reply.code(401).send({
         success: false,
         error: 'Authorization header is required',
-        code: 'MISSING_TOKEN'
+        code: 'MISSING_TOKEN',
       });
     }
 
     const token = authHeader.substring(7);
-    
+
     // Verify JWT token
     const payload = jwtService.verifyAccessToken(token);
 
@@ -50,7 +50,7 @@ export async function authenticateUser(
       return reply.code(401).send({
         success: false,
         error: 'User not found',
-        code: 'USER_NOT_FOUND'
+        code: 'USER_NOT_FOUND',
       });
     }
 
@@ -61,7 +61,7 @@ export async function authenticateUser(
       return reply.code(403).send({
         success: false,
         error: 'Account is deactivated',
-        code: 'ACCOUNT_DEACTIVATED'
+        code: 'ACCOUNT_DEACTIVATED',
       });
     }
 
@@ -70,7 +70,7 @@ export async function authenticateUser(
       return reply.code(423).send({
         success: false,
         error: 'Account is temporarily locked',
-        code: 'ACCOUNT_LOCKED'
+        code: 'ACCOUNT_LOCKED',
       });
     }
 
@@ -81,20 +81,19 @@ export async function authenticateUser(
       name: payload.name,
       provider: payload.provider,
     };
-
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('expired')) {
         return reply.code(401).send({
           success: false,
           error: 'Token expired',
-          code: 'TOKEN_EXPIRED'
+          code: 'TOKEN_EXPIRED',
         });
       } else if (error.message.includes('Invalid')) {
         return reply.code(401).send({
           success: false,
           error: 'Invalid token',
-          code: 'INVALID_TOKEN'
+          code: 'INVALID_TOKEN',
         });
       }
     }
@@ -102,7 +101,7 @@ export async function authenticateUser(
     return reply.code(401).send({
       success: false,
       error: 'Authentication failed',
-      code: 'AUTH_FAILED'
+      code: 'AUTH_FAILED',
     });
   }
 }
@@ -116,7 +115,7 @@ export async function optionalAuth(
 ): Promise<void> {
   try {
     const authHeader = request.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return; // No token provided, continue without authentication
     }
@@ -141,7 +140,10 @@ export async function optionalAuth(
  * Rate limiting middleware
  */
 export function rateLimit(maxRequests: number, windowMs: number) {
-  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  return async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> => {
     const clientId = request.ip || 'unknown';
     const now = Date.now();
     const windowStart = now - windowMs;
@@ -163,13 +165,13 @@ export function rateLimit(maxRequests: number, windowMs: number) {
     // Check rate limit
     if (rateLimitEntry.count >= maxRequests) {
       const retryAfter = Math.ceil((rateLimitEntry.resetTime - now) / 1000);
-      
+
       reply.header('Retry-After', retryAfter.toString());
       return reply.code(429).send({
         success: false,
         error: 'Too many requests',
         code: 'RATE_LIMITED',
-        retryAfter
+        retryAfter,
       });
     }
 
@@ -187,7 +189,7 @@ export async function requireAdmin(
 ): Promise<void> {
   // First authenticate the user
   await authenticateUser(request, reply);
-  
+
   if (!request.user) {
     return; // Authentication already failed
   }
@@ -202,7 +204,7 @@ export async function requireAdmin(
     return reply.code(403).send({
       success: false,
       error: 'Access denied',
-      code: 'ACCESS_DENIED'
+      code: 'ACCESS_DENIED',
     });
   }
 
@@ -211,7 +213,7 @@ export async function requireAdmin(
     return reply.code(403).send({
       success: false,
       error: 'Admin access required',
-      code: 'ADMIN_REQUIRED'
+      code: 'ADMIN_REQUIRED',
     });
   }
 }
@@ -228,11 +230,17 @@ export async function securityHeaders(
   reply.header('X-Frame-Options', 'DENY');
   reply.header('X-XSS-Protection', '1; mode=block');
   reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  reply.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  
+  reply.header(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=()'
+  );
+
   // HSTS header for HTTPS
   if (request.protocol === 'https') {
-    reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    reply.header(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains'
+    );
   }
 }
 
@@ -240,17 +248,20 @@ export async function securityHeaders(
  * CORS configuration for authentication endpoints
  */
 export const corsOptions = {
-  origin: (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (
+    origin: string,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
-    
+
     // In production, replace with your actual domains
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:19006', // Expo dev server
-      'https://your-production-domain.com'
+      'https://your-production-domain.com',
     ];
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -259,7 +270,7 @@ export const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-Info']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-Info'],
 };
 
 /**
@@ -272,7 +283,7 @@ export async function sanitizeInput(
   if (request.body && typeof request.body === 'object') {
     sanitizeObject(request.body);
   }
-  
+
   if (request.query && typeof request.query === 'object') {
     sanitizeObject(request.query);
   }

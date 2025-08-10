@@ -135,7 +135,10 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
                   type: 'object',
                   properties: {
                     error: { type: 'string', example: 'Unauthorized' },
-                    message: { type: 'string', example: 'Invalid or expired token' },
+                    message: {
+                      type: 'string',
+                      example: 'Invalid or expired token',
+                    },
                   },
                 },
               },
@@ -249,7 +252,12 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
             enum: ['checking', 'savings', 'investment', 'retirement', 'debt'],
           },
           balance: { type: 'number', format: 'double' },
-          interestRate: { type: 'number', format: 'double', minimum: 0, maximum: 100 },
+          interestRate: {
+            type: 'number',
+            format: 'double',
+            minimum: 0,
+            maximum: 100,
+          },
           taxTreatment: {
             type: 'string',
             enum: ['taxable', 'traditional', 'roth', 'hsa'],
@@ -269,7 +277,13 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
           name: { type: 'string', maxLength: 100 },
           type: {
             type: 'string',
-            enum: ['fire', 'retirement', 'emergency_fund', 'house', 'education'],
+            enum: [
+              'fire',
+              'retirement',
+              'emergency_fund',
+              'house',
+              'education',
+            ],
           },
           targetAmount: { type: 'number', format: 'double', minimum: 0 },
           targetDate: { type: 'string', format: 'date' },
@@ -280,7 +294,14 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
         },
-        required: ['id', 'userId', 'name', 'type', 'targetAmount', 'targetDate'],
+        required: [
+          'id',
+          'userId',
+          'name',
+          'type',
+          'targetAmount',
+          'targetDate',
+        ],
       },
       ErrorResponse: {
         type: 'object',
@@ -332,7 +353,7 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
           userId: '123e4567-e89b-12d3-a456-426614174000',
           name: 'Primary Checking',
           type: 'checking',
-          balance: 5000.00,
+          balance: 5000.0,
           interestRate: 0.5,
           taxTreatment: 'taxable',
           institution: 'Chase Bank',
@@ -348,10 +369,10 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
           userId: '123e4567-e89b-12d3-a456-426614174000',
           name: 'FIRE by 50',
           type: 'fire',
-          targetAmount: 1000000.00,
+          targetAmount: 1000000.0,
           targetDate: '2035-01-01',
-          currentAmount: 150000.00,
-          monthlyContribution: 3000.00,
+          currentAmount: 150000.0,
+          monthlyContribution: 3000.0,
           priority: 1,
           isActive: true,
           createdAt: '2024-01-01T00:00:00Z',
@@ -372,11 +393,11 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
   addEndpoint(endpoint: APIEndpoint): void {
     const key = `${endpoint.method.toUpperCase()}:${endpoint.path}`;
     this.endpoints.set(key, endpoint);
-    
+
     if (!this.documentation.paths[endpoint.path]) {
       this.documentation.paths[endpoint.path] = {};
     }
-    
+
     this.documentation.paths[endpoint.path][endpoint.method.toLowerCase()] = {
       summary: endpoint.summary,
       description: endpoint.description,
@@ -448,7 +469,11 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
     let yaml = '';
 
     for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         yaml += `${spaces}${key}:\n${this.toYAML(value, indent + 1)}`;
       } else if (Array.isArray(value)) {
         yaml += `${spaces}${key}:\n`;
@@ -482,20 +507,22 @@ Welcome to the Drishti FIRE Planning API! This comprehensive API provides all th
 
       // Find endpoints for this tag
       Object.entries(this.documentation.paths).forEach(([path, methods]) => {
-        Object.entries(methods as any).forEach(([method, spec]: [string, any]) => {
-          if (spec.tags && spec.tags.includes(tag.name)) {
-            md += `### ${method.toUpperCase()} ${path}\n\n`;
-            md += `${spec.description}\n\n`;
-            
-            if (spec.parameters) {
-              md += `**Parameters:**\n\n`;
-              spec.parameters.forEach((param: any) => {
-                md += `- \`${param.name}\` (${param.in}): ${param.description}\n`;
-              });
-              md += '\n';
+        Object.entries(methods as any).forEach(
+          ([method, spec]: [string, any]) => {
+            if (spec.tags && spec.tags.includes(tag.name)) {
+              md += `### ${method.toUpperCase()} ${path}\n\n`;
+              md += `${spec.description}\n\n`;
+
+              if (spec.parameters) {
+                md += `**Parameters:**\n\n`;
+                spec.parameters.forEach((param: any) => {
+                  md += `- \`${param.name}\` (${param.in}): ${param.description}\n`;
+                });
+                md += '\n';
+              }
             }
           }
-        });
+        );
       });
     });
 

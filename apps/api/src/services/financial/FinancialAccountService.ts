@@ -288,7 +288,7 @@ export class FinancialAccountService {
         total_balance: string;
       }>(
         `
-        SELECT 
+        SELECT
           account_type,
           COUNT(*) as count,
           SUM(balance) as total_balance
@@ -314,7 +314,7 @@ export class FinancialAccountService {
         };
 
         // Categorize as assets or liabilities
-        if (['credit', 'loan'].includes(row.account_type)) {
+        if (['credit', 'loan', 'mortgage'].includes(row.account_type)) {
           totalLiabilities += Math.abs(balance); // Ensure positive for liabilities
         } else {
           totalAssets += balance;
@@ -327,6 +327,79 @@ export class FinancialAccountService {
         net_worth: totalAssets - totalLiabilities,
         accounts_by_type: accountsByType,
       };
+    } catch (error) {
+      throw SystemErrors.databaseError(error as Error);
+    }
+  }
+
+  /**
+   * Get derived net worth trends for the past N months.
+   * Uses current account balances as the latest month value and derives prior
+   * months using aggregated transaction deltas per month as an approximation.
+   *
+   * NOTE: This is a best-effort derivation until we persist historical snapshots.
+   */
+  async getNetWorthTrends(
+    userId: string,
+    months: number = 12
+  ): Promise<Array<{ month: string; value: number }>> {
+    try {
+      // Clamp months to a reasonable range
+      const m = Math.max(1, Math.min(60, Math.floor(months)));
+
+      // 1) Get current net worth
+      const summary = await this.getAccountSummary(userId);
+      const currentNetWorth = summary.net_worth;
+
+      // 2) Build month keys oldest -> newest for past m months
+      const monthsArr: Array<{ key: string; label: string; date: Date }> = [];
+      const now = new Date();
+      for (let i = m - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const y = d.getFullYear();
+        const mon = String(d.getMonth() + 1).padStart(2, '0');
+        const key = `${y}-${mon}`; // YYYY-MM
+        const label = d.toLocaleString('en-US', { month: 'short' });
+        monthsArr.push({ key, label, date: d });
+      }
+
+      // 3) Aggregate transaction deltas per month for the date range
+      const rangeStart = monthsArr[0].date; // first day of oldest month
+      const rangeEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0); // last day of current month
+
+      const txnResult = await query<{ month: string; delta: string }>(
+        `
+        SELECT to_char(date_trunc('month', transaction_date), 'YYYY-MM') as month,
+               COALESCE(SUM(amount), 0) as delta
+        FROM account_transactions
+        WHERE user_id = $1 AND transaction_date BETWEEN $2 AND $3
+        GROUP BY 1
+        ORDER BY 1 ASC
+      `,
+        [userId, rangeStart, rangeEnd]
+      );
+
+      const deltaByMonth = new Map<string, number>();
+      txnResult.rows.forEach(r => {
+        deltaByMonth.set(r.month, parseFloat(r.delta));
+      });
+
+      // 4) Derive monthly net worth values using backward accumulation
+      const values: number[] = new Array(m);
+      // Latest month is current net worth
+      values[m - 1] = currentNetWorth;
+      // Work backwards: prev = next - delta(next)
+      for (let idx = m - 2; idx >= 0; idx--) {
+        const nextMonthKey = monthsArr[idx + 1].key;
+        const nextDelta = deltaByMonth.get(nextMonthKey) || 0;
+        values[idx] = values[idx + 1] - nextDelta;
+      }
+
+      // 5) Return formatted series (oldest -> newest)
+      return monthsArr.map((mm, i) => ({
+        month: mm.label,
+        value: Math.round(values[i]),
+      }));
     } catch (error) {
       throw SystemErrors.databaseError(error as Error);
     }

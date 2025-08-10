@@ -42,16 +42,21 @@ export class ExportPdfService {
       const accounts = Array.isArray(data.accounts) ? data.accounts : [];
       doc.text(`Total accounts: ${accounts.length}`);
       accounts.slice(0, 10).forEach((acc: any, idx: number) => {
-        doc.text(`${idx + 1}. ${acc.name ?? acc.id ?? 'Account'} — balance: ${acc.balance ?? 'N/A'}`);
+        doc.text(
+          `${idx + 1}. ${acc.name ?? acc.id ?? 'Account'} — balance: ${acc.balance ?? 'N/A'}`
+        );
       });
-      if (accounts.length > 10) doc.text(`... and ${accounts.length - 10} more`);
+      if (accounts.length > 10)
+        doc.text(`... and ${accounts.length - 10} more`);
 
       // Goals summary
       addSection('Goals');
       const goals = Array.isArray(data.goals) ? data.goals : [];
       doc.text(`Total goals: ${goals.length}`);
       goals.slice(0, 10).forEach((g: any, idx: number) => {
-        doc.text(`${idx + 1}. ${g.name ?? g.id ?? 'Goal'} — target: ${g.target_amount ?? 'N/A'}`);
+        doc.text(
+          `${idx + 1}. ${g.name ?? g.id ?? 'Goal'} — target: ${g.target_amount ?? 'N/A'}`
+        );
       });
       if (goals.length > 10) doc.text(`... and ${goals.length - 10} more`);
 
@@ -67,7 +72,13 @@ export class ExportPdfService {
 
       // Footer
       doc.moveDown();
-      doc.fontSize(9).fillColor('#777').text('Note: This is a human-readable summary. For full portability, use JSON/CSV export.', { align: 'left' });
+      doc
+        .fontSize(9)
+        .fillColor('#777')
+        .text(
+          'Note: This is a human-readable summary. For full portability, use JSON/CSV export.',
+          { align: 'left' }
+        );
 
       doc.end();
     });
@@ -75,4 +86,3 @@ export class ExportPdfService {
 }
 
 export const exportPdfService = new ExportPdfService();
-

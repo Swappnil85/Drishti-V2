@@ -293,6 +293,50 @@ export async function financialRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // Net worth endpoints
+  fastify.get(
+    '/networth/summary',
+    async (request: AuthenticatedRequest, reply) => {
+      try {
+        const summary = await financialAccountService.getAccountSummary(
+          request.user!.userId
+        );
+        return reply.send({ success: true, data: summary });
+      } catch (error) {
+        if (error instanceof AppError) {
+          return reply.code(error.statusCode).send(error.toUserResponse());
+        }
+        return reply.code(500).send({
+          success: false,
+          error: 'Failed to fetch net worth summary',
+        });
+      }
+    }
+  );
+
+  fastify.get(
+    '/networth/trends',
+    async (request: AuthenticatedRequest, reply) => {
+      try {
+        const q = request.query as { months?: string };
+        const months = q?.months ? parseInt(q.months, 10) : 12;
+        const series = await financialAccountService.getNetWorthTrends(
+          request.user!.userId,
+          months
+        );
+        return reply.send({ success: true, data: series });
+      } catch (error) {
+        if (error instanceof AppError) {
+          return reply.code(error.statusCode).send(error.toUserResponse());
+        }
+        return reply.code(500).send({
+          success: false,
+          error: 'Failed to fetch net worth trends',
+        });
+      }
+    }
+  );
+
   // Financial Goals Routes
 
   // Create financial goal

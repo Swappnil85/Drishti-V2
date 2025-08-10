@@ -1,7 +1,9 @@
 import { privacyService } from '../services/privacy/PrivacyService';
 
 jest.mock('../db/connection', () => ({
-  query: jest.fn(async (_q: string, _p: any[]) => ({ rows: [{ preferences: { consent: { marketing: true, analytics: false } } }] })),
+  query: jest.fn(async (_q: string, _p: any[]) => ({
+    rows: [{ preferences: { consent: { marketing: true, analytics: false } } }],
+  })),
   transaction: jest.fn(async (fn: any) => await fn({ query: jest.fn() })),
 }));
 
@@ -12,8 +14,10 @@ describe('PrivacyService consent', () => {
   });
 
   it('updates user consent', async () => {
-    const res = await privacyService.updateUserConsent('user-1', { marketing: false, analytics: true });
+    const res = await privacyService.updateUserConsent('user-1', {
+      marketing: false,
+      analytics: true,
+    });
     expect(res).toEqual({ success: true });
   });
 });
-

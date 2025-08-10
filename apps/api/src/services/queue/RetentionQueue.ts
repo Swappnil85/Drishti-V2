@@ -11,11 +11,13 @@ export class RetentionQueue {
   }
 
   private setupProcessors() {
-    this.queue.process('daily-retention', async (job) => {
+    this.queue.process('daily-retention', async job => {
       console.log('🗑️  Processing daily retention job...');
       try {
         const result = await retentionService.runScheduledDeletions();
-        console.log(`✅ Processed ${result.processed.length} scheduled deletions`);
+        console.log(
+          `✅ Processed ${result.processed.length} scheduled deletions`
+        );
         return result;
       } catch (error) {
         console.error('❌ Retention job failed:', error);
@@ -26,11 +28,15 @@ export class RetentionQueue {
 
   async scheduleDaily() {
     // Schedule daily at 2 AM UTC
-    await this.queue.add('daily-retention', {}, {
-      repeat: { cron: '0 2 * * *' },
-      removeOnComplete: 10,
-      removeOnFail: 5,
-    });
+    await this.queue.add(
+      'daily-retention',
+      {},
+      {
+        repeat: { cron: '0 2 * * *' },
+        removeOnComplete: 10,
+        removeOnFail: 5,
+      }
+    );
     console.log('📅 Daily retention job scheduled for 2 AM UTC');
   }
 

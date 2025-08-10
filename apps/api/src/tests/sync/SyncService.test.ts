@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 import { syncService } from '../../services/sync/SyncService';
 import { query, transaction } from '../../db/connection';
 
@@ -25,7 +32,7 @@ describe('SyncService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
@@ -46,32 +53,35 @@ describe('SyncService', () => {
 
     it('should process create operation successfully', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [] }) // Check if record exists
           .mockResolvedValueOnce({ rows: [{ id: 'new-record' }] }) // Insert record
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'create' as const,
-          data: {
-            id: 'account-123',
-            user_id: testUserId,
-            name: 'Test Account',
-            account_type: 'checking',
-            balance: 1000,
-            currency: 'USD',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'create' as const,
+            data: {
+              id: 'account-123',
+              user_id: testUserId,
+              name: 'Test Account',
+              account_type: 'checking',
+              balance: 1000,
+              currency: 'USD',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -89,28 +99,31 @@ describe('SyncService', () => {
       };
 
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [existingRecord] }) // Record exists
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'create' as const,
-          data: {
-            id: 'account-123',
-            user_id: testUserId,
-            name: 'Test Account',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'create' as const,
+            data: {
+              id: 'account-123',
+              user_id: testUserId,
+              name: 'Test Account',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -130,28 +143,31 @@ describe('SyncService', () => {
       };
 
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [existingRecord] }) // Get existing record
           .mockResolvedValueOnce({ rows: [{ id: 'account-123' }] }) // Update record
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'update' as const,
-          data: {
-            id: 'account-123',
-            name: 'New Name',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'update' as const,
+            data: {
+              id: 'account-123',
+              name: 'New Name',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -170,27 +186,30 @@ describe('SyncService', () => {
       };
 
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [existingRecord] }) // Get existing record
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'update' as const,
-          data: {
-            id: 'account-123',
-            name: 'Client Name',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'update' as const,
+            data: {
+              id: 'account-123',
+              name: 'Client Name',
+            },
+            client_timestamp: Date.now() - 2000, // 2 seconds ago
           },
-          client_timestamp: Date.now() - 2000, // 2 seconds ago
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -209,27 +228,30 @@ describe('SyncService', () => {
       };
 
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [existingRecord] }) // Get existing record
           .mockResolvedValueOnce({ rows: [{ id: 'account-123' }] }) // Soft delete
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'delete' as const,
-          data: {
-            id: 'account-123',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'delete' as const,
+            data: {
+              id: 'account-123',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -242,26 +264,29 @@ describe('SyncService', () => {
 
     it('should handle delete operation when record does not exist', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [] }) // Record not found
           .mockResolvedValueOnce({ rows: [] }) // Get server changes
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'delete' as const,
-          data: {
-            id: 'account-123',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'delete' as const,
+            data: {
+              id: 'account-123',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -286,7 +311,8 @@ describe('SyncService', () => {
       ];
 
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({ rows: [] }) // No operations to process
           .mockResolvedValueOnce({ rows: serverChanges }) // financial_accounts changes
           .mockResolvedValueOnce({ rows: [] }) // financial_goals changes
@@ -294,7 +320,7 @@ describe('SyncService', () => {
           .mockResolvedValueOnce({ rows: [] }), // Update sync status
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
@@ -317,18 +343,20 @@ describe('SyncService', () => {
         query: jest.fn(),
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'invalid_table',
-          operation: 'create' as const,
-          data: { id: 'test' },
-          client_timestamp: Date.now(),
-        }],
+        operations: [
+          {
+            id: 'op-1',
+            table: 'invalid_table',
+            operation: 'create' as const,
+            data: { id: 'test' },
+            client_timestamp: Date.now(),
+          },
+        ],
         device_id: testDeviceId,
       };
 
@@ -344,22 +372,24 @@ describe('SyncService', () => {
         query: jest.fn(),
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 
       const syncRequest = {
-        operations: [{
-          id: 'op-1',
-          table: 'financial_accounts',
-          operation: 'create' as const,
-          data: {
-            id: 'account-123',
-            user_id: 'other-user-id', // Different user
-            name: 'Malicious Account',
+        operations: [
+          {
+            id: 'op-1',
+            table: 'financial_accounts',
+            operation: 'create' as const,
+            data: {
+              id: 'account-123',
+              user_id: 'other-user-id', // Different user
+              name: 'Malicious Account',
+            },
+            client_timestamp: Date.now(),
           },
-          client_timestamp: Date.now(),
-        }],
+        ],
         device_id: testDeviceId,
       };
 
@@ -367,33 +397,42 @@ describe('SyncService', () => {
 
       expect(result.success).toBe(true);
       expect(result.failed_operations).toHaveLength(1);
-      expect(result.failed_operations[0].error).toContain('Cannot modify data for other users');
+      expect(result.failed_operations[0].error).toContain(
+        'Cannot modify data for other users'
+      );
     });
 
     it('should handle database errors gracefully', async () => {
-      mockTransaction.mockRejectedValue(new Error('Database connection failed'));
+      mockTransaction.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       const syncRequest = {
         operations: [],
         device_id: testDeviceId,
       };
 
-      await expect(syncService.processSync(testUserId, syncRequest))
-        .rejects
-        .toThrow('Database connection failed');
+      await expect(
+        syncService.processSync(testUserId, syncRequest)
+      ).rejects.toThrow('Database connection failed');
     });
 
     it('should handle multiple operations with mixed results', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           // First operation (create) - success
           .mockResolvedValueOnce({ rows: [] }) // Check if exists
           .mockResolvedValueOnce({ rows: [{ id: 'account-1' }] }) // Insert
           // Second operation (update) - conflict
-          .mockResolvedValueOnce({ rows: [{ 
-            id: 'account-2', 
-            updated_at: new Date(Date.now() + 1000) 
-          }] }) // Get existing (newer)
+          .mockResolvedValueOnce({
+            rows: [
+              {
+                id: 'account-2',
+                updated_at: new Date(Date.now() + 1000),
+              },
+            ],
+          }) // Get existing (newer)
           // Third operation (delete) - success
           .mockResolvedValueOnce({ rows: [{ id: 'account-3' }] }) // Get existing
           .mockResolvedValueOnce({ rows: [{ id: 'account-3' }] }) // Delete
@@ -404,7 +443,7 @@ describe('SyncService', () => {
           .mockResolvedValueOnce({ rows: [] }),
       };
 
-      mockTransaction.mockImplementation(async (callback) => {
+      mockTransaction.mockImplementation(async callback => {
         return await callback(mockClient);
       });
 

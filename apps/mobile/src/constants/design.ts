@@ -112,6 +112,14 @@ export const COLORS = {
     medium: '#BDBDBD',
     dark: '#757575',
   },
+  // Sun Palette (light yellow variant)
+  sun: {
+    background: '#FFFDE7',
+    primary: '#FBC02D',
+    onPrimary: '#1F2937',
+    accent: '#FFE082',
+    border: '#FFE082',
+  },
 
   // Financial Colors
   financial: {

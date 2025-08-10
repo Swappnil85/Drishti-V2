@@ -92,7 +92,7 @@ class HealthMonitoringService extends EventEmitter {
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private metricsInterval: NodeJS.Timeout | null = null;
   private startTime: Date = new Date();
-  
+
   private readonly config: MonitoringConfig = {
     healthCheckInterval: 30000, // 30 seconds
     metricsCollectionInterval: 60000, // 1 minute
@@ -100,18 +100,22 @@ class HealthMonitoringService extends EventEmitter {
       responseTime: 5000, // 5 seconds
       errorRate: 0.05, // 5%
       memoryUsage: 0.85, // 85%
-      diskUsage: 0.90, // 90%
-      cpuUsage: 0.80, // 80%
+      diskUsage: 0.9, // 90%
+      cpuUsage: 0.8, // 80%
     },
     integrations: {
-      sentry: process.env.SENTRY_DSN ? {
-        dsn: process.env.SENTRY_DSN,
-        environment: process.env.NODE_ENV || 'development',
-      } : undefined,
-      slack: process.env.SLACK_WEBHOOK_URL ? {
-        webhookUrl: process.env.SLACK_WEBHOOK_URL,
-        channel: process.env.SLACK_CHANNEL || '#alerts',
-      } : undefined,
+      sentry: process.env.SENTRY_DSN
+        ? {
+            dsn: process.env.SENTRY_DSN,
+            environment: process.env.NODE_ENV || 'development',
+          }
+        : undefined,
+      slack: process.env.SLACK_WEBHOOK_URL
+        ? {
+            webhookUrl: process.env.SLACK_WEBHOOK_URL,
+            channel: process.env.SLACK_CHANNEL || '#alerts',
+          }
+        : undefined,
     },
   };
 
@@ -174,7 +178,7 @@ class HealthMonitoringService extends EventEmitter {
     ];
 
     const results = await Promise.allSettled(checks);
-    
+
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         this.healthChecks.set(result.value.name, result.value);
@@ -199,11 +203,11 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkDatabase(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       const result = await query('SELECT 1 as health_check');
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'database',
         status: responseTime < 1000 ? 'healthy' : 'degraded',
@@ -222,7 +226,8 @@ class HealthMonitoringService extends EventEmitter {
         responseTime: Date.now() - startTime,
         details: { connected: false },
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : 'Database connection failed',
+        error:
+          error instanceof Error ? error.message : 'Database connection failed',
       };
     }
   }
@@ -234,15 +239,15 @@ class HealthMonitoringService extends EventEmitter {
     const startTime = Date.now();
     const testKey = 'health_check_' + Date.now();
     const testValue = 'test_value';
-    
+
     try {
       await cacheService.set(testKey, testValue, { ttl: 10 });
       const retrieved = await cacheService.get(testKey);
       await cacheService.delete(testKey);
-      
+
       const responseTime = Date.now() - startTime;
       const isWorking = retrieved === testValue;
-      
+
       return {
         name: 'cache',
         status: isWorking && responseTime < 500 ? 'healthy' : 'degraded',
@@ -270,11 +275,11 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkWebSocket(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       const stats = websocketService.getStats();
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'websocket',
         status: 'healthy',
@@ -289,7 +294,8 @@ class HealthMonitoringService extends EventEmitter {
         responseTime: Date.now() - startTime,
         details: { available: false },
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : 'WebSocket check failed',
+        error:
+          error instanceof Error ? error.message : 'WebSocket check failed',
       };
     }
   }
@@ -299,11 +305,11 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkAuthentication(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       const stats = advancedAuthService.getStats();
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'authentication',
         status: 'healthy',
@@ -318,7 +324,8 @@ class HealthMonitoringService extends EventEmitter {
         responseTime: Date.now() - startTime,
         details: { available: false },
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : 'Auth service check failed',
+        error:
+          error instanceof Error ? error.message : 'Auth service check failed',
       };
     }
   }
@@ -328,11 +335,11 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkSecurity(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       const stats = securityMiddleware.getStats();
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: 'security',
         status: 'healthy',
@@ -357,25 +364,25 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkDiskSpace(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       // Simplified disk check - in production use proper disk usage library
       const stats = {
         total: 100 * 1024 * 1024 * 1024, // 100GB
-        used: 50 * 1024 * 1024 * 1024,   // 50GB
-        free: 50 * 1024 * 1024 * 1024,   // 50GB
+        used: 50 * 1024 * 1024 * 1024, // 50GB
+        free: 50 * 1024 * 1024 * 1024, // 50GB
       };
-      
+
       const usagePercentage = stats.used / stats.total;
       const responseTime = Date.now() - startTime;
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
       if (usagePercentage > this.config.alertThresholds.diskUsage) {
         status = 'unhealthy';
       } else if (usagePercentage > 0.75) {
         status = 'degraded';
       }
-      
+
       return {
         name: 'disk_space',
         status,
@@ -393,7 +400,8 @@ class HealthMonitoringService extends EventEmitter {
         responseTime: Date.now() - startTime,
         details: { available: false },
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : 'Disk space check failed',
+        error:
+          error instanceof Error ? error.message : 'Disk space check failed',
       };
     }
   }
@@ -403,20 +411,20 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async checkMemoryUsage(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       const memUsage = process.memoryUsage();
       const totalMemory = memUsage.rss + memUsage.heapTotal + memUsage.external;
       const usagePercentage = memUsage.heapUsed / memUsage.heapTotal;
       const responseTime = Date.now() - startTime;
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
       if (usagePercentage > this.config.alertThresholds.memoryUsage) {
         status = 'unhealthy';
-      } else if (usagePercentage > 0.70) {
+      } else if (usagePercentage > 0.7) {
         status = 'degraded';
       }
-      
+
       return {
         name: 'memory_usage',
         status,
@@ -447,7 +455,7 @@ class HealthMonitoringService extends EventEmitter {
     try {
       const memUsage = process.memoryUsage();
       const cpuUsage = process.cpuUsage();
-      
+
       // Simplified metrics - in production use proper system monitoring libraries
       const metrics: SystemMetrics = {
         cpu: {
@@ -472,13 +480,12 @@ class HealthMonitoringService extends EventEmitter {
           connectionsActive: 10,
         },
       };
-      
+
       this.systemMetrics = metrics;
       this.emit('systemMetrics', metrics);
-      
+
       // Send to external monitoring services
       await this.sendMetricsToExternalServices(metrics);
-      
     } catch (error) {
       console.error('Failed to collect system metrics:', error);
     }
@@ -505,7 +512,7 @@ class HealthMonitoringService extends EventEmitter {
         metadata: check.details,
       });
     }
-    
+
     // Check response time thresholds
     if (check.responseTime > this.config.alertThresholds.responseTime) {
       this.createAlert({
@@ -523,7 +530,10 @@ class HealthMonitoringService extends EventEmitter {
    */
   private evaluateSystemMetrics(metrics: SystemMetrics): void {
     // Memory usage alert
-    if (metrics.memory.percentage > this.config.alertThresholds.memoryUsage * 100) {
+    if (
+      metrics.memory.percentage >
+      this.config.alertThresholds.memoryUsage * 100
+    ) {
       this.createAlert({
         severity: 'high',
         title: 'High Memory Usage',
@@ -532,7 +542,7 @@ class HealthMonitoringService extends EventEmitter {
         metadata: metrics.memory,
       });
     }
-    
+
     // Disk usage alert
     if (metrics.disk.percentage > this.config.alertThresholds.diskUsage * 100) {
       this.createAlert({
@@ -548,14 +558,16 @@ class HealthMonitoringService extends EventEmitter {
   /**
    * Create alert
    */
-  private createAlert(alertData: Omit<Alert, 'id' | 'timestamp' | 'resolved'>): void {
+  private createAlert(
+    alertData: Omit<Alert, 'id' | 'timestamp' | 'resolved'>
+  ): void {
     const alert: Alert = {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
       resolved: false,
       ...alertData,
     };
-    
+
     this.alerts.set(alert.id, alert);
     this.emit('alert', alert);
   }
@@ -565,22 +577,27 @@ class HealthMonitoringService extends EventEmitter {
    */
   private async handleAlert(alert: Alert): Promise<void> {
     console.warn(`🚨 Alert [${alert.severity.toUpperCase()}]: ${alert.title}`);
-    
+
     // Send to external services
     await this.sendAlertToExternalServices(alert);
-    
+
     // Auto-resolve low severity alerts after 5 minutes
     if (alert.severity === 'low') {
-      setTimeout(() => {
-        this.resolveAlert(alert.id);
-      }, 5 * 60 * 1000);
+      setTimeout(
+        () => {
+          this.resolveAlert(alert.id);
+        },
+        5 * 60 * 1000
+      );
     }
   }
 
   /**
    * Send metrics to external monitoring services
    */
-  private async sendMetricsToExternalServices(metrics: SystemMetrics): Promise<void> {
+  private async sendMetricsToExternalServices(
+    metrics: SystemMetrics
+  ): Promise<void> {
     // DataDog integration
     if (this.config.integrations.datadog) {
       try {
@@ -609,7 +626,7 @@ class HealthMonitoringService extends EventEmitter {
         console.error('Failed to send alert to Sentry:', error);
       }
     }
-    
+
     // Slack integration
     if (this.config.integrations.slack) {
       try {
@@ -648,14 +665,14 @@ class HealthMonitoringService extends EventEmitter {
     const checks = Array.from(this.healthChecks.values());
     const unhealthyCount = checks.filter(c => c.status === 'unhealthy').length;
     const degradedCount = checks.filter(c => c.status === 'degraded').length;
-    
+
     let overall: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
     if (unhealthyCount > 0) {
       overall = 'unhealthy';
     } else if (degradedCount > 0) {
       overall = 'degraded';
     }
-    
+
     return {
       overall,
       checks,
@@ -691,8 +708,11 @@ class HealthMonitoringService extends EventEmitter {
       config: {
         healthCheckInterval: this.config.healthCheckInterval,
         metricsCollectionInterval: this.config.metricsCollectionInterval,
-        integrations: Object.keys(this.config.integrations).filter(key => 
-          this.config.integrations[key as keyof typeof this.config.integrations]
+        integrations: Object.keys(this.config.integrations).filter(
+          key =>
+            this.config.integrations[
+              key as keyof typeof this.config.integrations
+            ]
         ),
       },
     };

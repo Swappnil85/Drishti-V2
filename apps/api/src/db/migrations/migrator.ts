@@ -51,7 +51,7 @@ const calculateChecksum = (content: string): string => {
 const loadMigrationFiles = async (): Promise<Migration[]> => {
   const migrationsDir = path.join(__dirname, '.');
   const files = await fs.readdir(migrationsDir);
-  
+
   const migrationFiles = files
     .filter(file => file.endsWith('.sql') && file !== 'migrator.ts')
     .sort(); // Sort to ensure consistent order
@@ -61,11 +61,13 @@ const loadMigrationFiles = async (): Promise<Migration[]> => {
   for (const file of migrationFiles) {
     const filePath = path.join(migrationsDir, file);
     const content = await fs.readFile(filePath, 'utf-8');
-    
+
     // Parse migration file (expecting -- UP and -- DOWN sections)
     const sections = content.split('-- DOWN');
     if (sections.length !== 2) {
-      throw new Error(`Invalid migration file format: ${file}. Expected -- UP and -- DOWN sections.`);
+      throw new Error(
+        `Invalid migration file format: ${file}. Expected -- UP and -- DOWN sections.`
+      );
     }
 
     const upSection = sections[0].replace('-- UP', '').trim();
@@ -74,7 +76,9 @@ const loadMigrationFiles = async (): Promise<Migration[]> => {
     // Extract timestamp and name from filename (format: YYYYMMDD_HHMMSS_name.sql)
     const match = file.match(/^(\d{8}_\d{6})_(.+)\.sql$/);
     if (!match) {
-      throw new Error(`Invalid migration filename format: ${file}. Expected: YYYYMMDD_HHMMSS_name.sql`);
+      throw new Error(
+        `Invalid migration filename format: ${file}. Expected: YYYYMMDD_HHMMSS_name.sql`
+      );
     }
 
     const [, timestampStr, name] = match;
@@ -84,7 +88,7 @@ const loadMigrationFiles = async (): Promise<Migration[]> => {
       parseInt(timestampStr.substr(6, 2)), // day
       parseInt(timestampStr.substr(9, 2)), // hour
       parseInt(timestampStr.substr(11, 2)), // minute
-      parseInt(timestampStr.substr(13, 2))  // second
+      parseInt(timestampStr.substr(13, 2)) // second
     );
 
     migrations.push({
@@ -100,7 +104,9 @@ const loadMigrationFiles = async (): Promise<Migration[]> => {
 };
 
 // Get executed migrations from database
-const getExecutedMigrations = async (client: PoolClient): Promise<MigrationRecord[]> => {
+const getExecutedMigrations = async (
+  client: PoolClient
+): Promise<MigrationRecord[]> => {
   const result = await client.query(
     'SELECT id, name, executed_at, checksum FROM migrations ORDER BY executed_at ASC'
   );
@@ -116,7 +122,9 @@ const executeMigration = async (
   const sql = direction === 'up' ? migration.up : migration.down;
   const checksum = calculateChecksum(migration.up);
 
-  console.log(`[Migration] Executing ${direction}: ${migration.id}_${migration.name}`);
+  console.log(
+    `[Migration] Executing ${direction}: ${migration.id}_${migration.name}`
+  );
 
   try {
     // Execute the migration SQL
@@ -130,12 +138,19 @@ const executeMigration = async (
       );
     } else {
       // Remove the migration record
-      await client.query('DELETE FROM migrations WHERE id = $1', [migration.id]);
+      await client.query('DELETE FROM migrations WHERE id = $1', [
+        migration.id,
+      ]);
     }
 
-    console.log(`[Migration] Successfully executed ${direction}: ${migration.id}_${migration.name}`);
+    console.log(
+      `[Migration] Successfully executed ${direction}: ${migration.id}_${migration.name}`
+    );
   } catch (error) {
-    console.error(`[Migration] Failed to execute ${direction}: ${migration.id}_${migration.name}`, error);
+    console.error(
+      `[Migration] Failed to execute ${direction}: ${migration.id}_${migration.name}`,
+      error
+    );
     throw error;
   }
 };
@@ -144,7 +159,7 @@ const executeMigration = async (
 export const runMigrations = async (): Promise<MigrationResult> => {
   const pool = getPool();
   const client = await pool.connect();
-  
+
   const result: MigrationResult = {
     success: true,
     migrationsRun: [],
@@ -159,7 +174,7 @@ export const runMigrations = async (): Promise<MigrationResult> => {
 
     // Load all migration files
     const allMigrations = await loadMigrationFiles();
-    
+
     // Get executed migrations
     const executedMigrations = await getExecutedMigrations(client);
     const executedIds = new Set(executedMigrations.map(m => m.id));
@@ -173,7 +188,9 @@ export const runMigrations = async (): Promise<MigrationResult> => {
       return result;
     }
 
-    console.log(`[Migration] Found ${pendingMigrations.length} pending migrations`);
+    console.log(
+      `[Migration] Found ${pendingMigrations.length} pending migrations`
+    );
 
     // Execute pending migrations
     for (const migration of pendingMigrations) {
@@ -189,13 +206,16 @@ export const runMigrations = async (): Promise<MigrationResult> => {
     }
 
     await client.query('COMMIT');
-    console.log(`[Migration] Successfully executed ${result.migrationsRun.length} migrations`);
-
+    console.log(
+      `[Migration] Successfully executed ${result.migrationsRun.length} migrations`
+    );
   } catch (error) {
     await client.query('ROLLBACK');
     result.success = false;
     if (!result.errors.length) {
-      result.errors.push(error instanceof Error ? error.message : 'Unknown migration error');
+      result.errors.push(
+        error instanceof Error ? error.message : 'Unknown migration error'
+      );
     }
     console.error('[Migration] Migration failed, rolled back:', error);
   } finally {
@@ -209,7 +229,7 @@ export const runMigrations = async (): Promise<MigrationResult> => {
 export const rollbackMigration = async (): Promise<MigrationResult> => {
   const pool = getPool();
   const client = await pool.connect();
-  
+
   const result: MigrationResult = {
     success: true,
     migrationsRun: [],
@@ -231,25 +251,34 @@ export const rollbackMigration = async (): Promise<MigrationResult> => {
     }
 
     const lastMigration = lastMigrationResult.rows[0];
-    
+
     // Load all migrations to find the one to rollback
     const allMigrations = await loadMigrationFiles();
-    const migrationToRollback = allMigrations.find(m => m.id === lastMigration.id);
+    const migrationToRollback = allMigrations.find(
+      m => m.id === lastMigration.id
+    );
 
     if (!migrationToRollback) {
-      throw new Error(`Migration file not found for rollback: ${lastMigration.id}_${lastMigration.name}`);
+      throw new Error(
+        `Migration file not found for rollback: ${lastMigration.id}_${lastMigration.name}`
+      );
     }
 
     await executeMigration(client, migrationToRollback, 'down');
-    result.migrationsRun.push(`${migrationToRollback.id}_${migrationToRollback.name} (rollback)`);
+    result.migrationsRun.push(
+      `${migrationToRollback.id}_${migrationToRollback.name} (rollback)`
+    );
 
     await client.query('COMMIT');
-    console.log(`[Migration] Successfully rolled back migration: ${migrationToRollback.id}_${migrationToRollback.name}`);
-
+    console.log(
+      `[Migration] Successfully rolled back migration: ${migrationToRollback.id}_${migrationToRollback.name}`
+    );
   } catch (error) {
     await client.query('ROLLBACK');
     result.success = false;
-    result.errors.push(error instanceof Error ? error.message : 'Unknown rollback error');
+    result.errors.push(
+      error instanceof Error ? error.message : 'Unknown rollback error'
+    );
     console.error('[Migration] Rollback failed:', error);
   } finally {
     client.release();
@@ -269,11 +298,11 @@ export const getMigrationStatus = async (): Promise<{
 
   try {
     await createMigrationsTable(client);
-    
+
     const allMigrations = await loadMigrationFiles();
     const executedMigrations = await getExecutedMigrations(client);
     const executedIds = new Set(executedMigrations.map(m => m.id));
-    
+
     const pendingMigrations = allMigrations
       .filter(m => !executedIds.has(m.id))
       .map(m => `${m.id}_${m.name}`);

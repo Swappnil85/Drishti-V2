@@ -423,4 +423,10 @@ export interface ThemeContextType {
   sizes: typeof import('../constants/design').SIZES;
   isDark: boolean;
   toggleTheme: () => void;
+  // Palette controls
+  // default -> standard; sun -> experimental light yellow
+  // Persisted via AsyncStorage
+  // Consumers can expose a toggle in Settings
+  togglePalette?: () => void;
+  palette?: 'default' | 'sun';
 }
