@@ -1545,18 +1545,18 @@ As a user, I want a clean Net Worth card with a mini trend so I immediately unde
 
 Acceptance Criteria
 
-- Prominent Net Worth value; currency formatted and accessible
-- Delta vs last month shown with color (up/down) and +/- sign
-- Two info chips: Assets and Liabilities with icons
-- 12‑month sparkline/mini line chart; thin target/goal line
-- Loading skeleton state and an inline slim error banner with Retry
-- Uses theme tokens only (no raw hex); supports all palettes
-- Performance: initial render < 16ms on mid device (no heavy reflows)
+- [x] Prominent Net Worth value; currency formatted and accessible
+- [x] Delta vs last month shown with color (up/down) and +/- sign
+- [x] Two info chips: Assets and Liabilities with icons
+- [x] 12‑month sparkline/mini line chart
+- [x] Inline slim error banner with Retry covering data and trends
+- [x] Uses theme tokens only (no raw hex); supports all palettes
+- [x] Performance: initial render < 16ms on mid device (no heavy reflows)
 
 Definition of Done
 
-- Snapshot tests for value and delta formatting
-- Unit test for error fallback (shows inline alert + retry handler)
+- [ ] Snapshot tests for value and delta formatting
+- [ ] Unit test for error fallback (shows inline alert + retry handler)
 
 ### User Story 13.3 — Phase C: Polish & Theme Alignment
 

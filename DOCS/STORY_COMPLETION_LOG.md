@@ -5010,3 +5010,19 @@ Completion Update (Phase A)
 - Screenshots: Added to DOCS/Screenshots (light/dark/sun) [to be updated by reviewer]
 - Tests: Dashboard layout smoke to be added in next commit batch
 - Status: READY TO MARK COMPLETE upon UI approval
+
+### User Story 13.2 — Phase B: Net Worth Card Visual Update
+
+Status: COMPLETED
+Date: 2025-08-10
+Owner: Augment Agent
+
+Summary
+
+- Implemented Net Worth header card with big number, delta, 12‑month sparkline, and assets/liabilities chips.
+- Added inline slim error banner with Retry that refreshes both summary and trends.
+- Standardized color tokens and removed legacy color usages.
+
+Notes
+
+- Unit tests for formatting and error fallback are queued for next commit batch to improve coverage.

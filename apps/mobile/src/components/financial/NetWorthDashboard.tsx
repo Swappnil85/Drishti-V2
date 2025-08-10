@@ -15,6 +15,8 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, Button, Icon, Flex, Badge } from '../ui';
+import Sparkline from '../charts/Sparkline';
+import { useNetWorthTrends } from '../../hooks/useNetWorthTrends';
 import {
   netWorthService,
   NetWorthComparison,
@@ -46,6 +48,14 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     error,
     refresh,
   } = useNetWorthSummary(user?.id);
+
+  // Phase B: 12-month mini trend for header sparkline
+  const {
+    data: trendPoints,
+    loading: trendsLoading,
+    error: trendsError,
+    refresh: refreshTrends,
+  } = useNetWorthTrends(user?.id, 12);
   const [comparisons, setComparisons] = useState<NetWorthComparison[]>([]);
   const [milestones, setMilestones] = useState<NetWorthMilestone[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<
@@ -89,9 +99,9 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
   };
 
   const getChangeColor = (change: number) => {
-    if (change > 0) return theme.colors.success;
-    if (change < 0) return theme.colors.error;
-    return theme.colors.textSecondary;
+    if (change > 0) return theme.colors.success[500];
+    if (change < 0) return theme.colors.error[500];
+    return theme.colors.text.secondary;
   };
 
   const getSelectedComparison = () => {
@@ -103,24 +113,33 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
   };
 
   const renderNetWorthHeader = () => {
-    if (!netWorthData) return null;
-
     const selectedComparison = getSelectedComparison();
+    const amount = netWorthData?.totalNetWorth ?? 0;
 
     return (
-      <Card variant='filled' padding='lg' style={styles.headerCard}>
+      <Card variant='outlined' padding='lg' style={styles.headerCard}>
         <Flex direction='column' align='center' gap='sm'>
+          {/* Title */}
           <Text
-            style={[styles.netWorthLabel, { color: theme.colors.onPrimary }]}
+            style={[
+              styles.netWorthLabel,
+              { color: theme.colors.text.secondary },
+            ]}
           >
             Total Net Worth
           </Text>
+
+          {/* Big number */}
           <Text
-            style={[styles.netWorthAmount, { color: theme.colors.onPrimary }]}
+            style={[
+              styles.netWorthAmount,
+              { color: theme.colors.text.primary },
+            ]}
           >
-            {formatCurrency(netWorthData.totalNetWorth)}
+            {formatCurrency(amount)}
           </Text>
 
+          {/* Delta vs last period (month by default) */}
           {selectedComparison && (
             <Flex direction='row' align='center' gap='xs'>
               <Icon
@@ -130,7 +149,9 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                     : 'trending-down'
                 }
                 size='sm'
-                color={selectedComparison.change >= 0 ? 'success' : 'error'}
+                color={
+                  selectedComparison.change >= 0 ? 'success.500' : 'error.500'
+                }
               />
               <Text
                 style={[
@@ -142,11 +163,92 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
                 {formatPercentage(selectedComparison.changePercentage)})
               </Text>
               <Text
-                style={[styles.periodText, { color: theme.colors.onPrimary }]}
+                style={[
+                  styles.periodText,
+                  { color: theme.colors.text.secondary },
+                ]}
               >
                 {selectedComparison.periodLabel}
               </Text>
             </Flex>
+          )}
+
+          {/* Mini sparkline (12 months) */}
+          <View style={{ alignSelf: 'stretch', marginTop: 8 }}>
+            <Sparkline
+              data={(trendPoints || []).map(p => p.value)}
+              height={40}
+              barWidth={6}
+              gap={2}
+              color={theme.colors.primary[500]}
+              backgroundColor='transparent'
+            />
+          </View>
+
+          {/* Assets / Liabilities chips */}
+          {netWorthData && (
+            <Flex direction='row' gap='md' style={{ marginTop: 8 }}>
+              <Flex direction='row' align='center' gap='xs'>
+                <Icon name='wallet-outline' size='sm' color='success.500' />
+                <Text style={{ color: theme.colors.text.secondary }}>
+                  Assets
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontWeight: '600',
+                  }}
+                >
+                  {formatCurrency(netWorthData.totalAssets)}
+                </Text>
+              </Flex>
+              <Flex direction='row' align='center' gap='xs'>
+                <Icon name='card-outline' size='sm' color='error.500' />
+                <Text style={{ color: theme.colors.text.secondary }}>
+                  Liabilities
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontWeight: '600',
+                  }}
+                >
+                  {formatCurrency(netWorthData.totalLiabilities)}
+                </Text>
+              </Flex>
+            </Flex>
+          )}
+
+          {/* Inline slim error banner */}
+          {(error || trendsError) && (
+            <View
+              style={{
+                marginTop: 8,
+                alignSelf: 'stretch',
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                backgroundColor: theme.colors.warning[50],
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.warning[200],
+              }}
+            >
+              <Flex direction='row' align='center' justify='space-between'>
+                <Text style={{ color: theme.colors.text.primary, flex: 1 }}>
+                  {error || trendsError}
+                </Text>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onPress={() => {
+                    refresh();
+                    refreshTrends();
+                  }}
+                >
+                  Retry
+                </Button>
+              </Flex>
+            </View>
           )}
         </Flex>
       </Card>
@@ -380,14 +482,14 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
   };
 
   const getAccountTypeColor = (accountType: string, index: number) => {
-    const colors = [
-      theme.colors.primary,
-      theme.colors.success,
-      theme.colors.warning,
-      theme.colors.info,
-      theme.colors.error,
+    const palette = [
+      theme.colors.primary[500],
+      theme.colors.success[500],
+      theme.colors.warning[500],
+      theme.colors.secondary[500],
+      theme.colors.error[500],
     ];
-    return colors[index % colors.length];
+    return palette[index % palette.length];
   };
 
   const formatAccountTypeName = (accountType: string) => {
@@ -406,22 +508,6 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
           >
             Loading net worth data...
           </Text>
-        </Flex>
-      </Card>
-    );
-  }
-
-  if (!netWorthData) {
-    return (
-      <Card variant='outlined' padding='lg'>
-        <Flex direction='column' align='center' gap='base'>
-          <Icon name='alert-circle-outline' size='lg' color='error' />
-          <Text style={[styles.errorText, { color: theme.colors.text }]}>
-            {error ? `Error: ${error}` : 'Unable to load net worth data'}
-          </Text>
-          <Button variant='outline' onPress={refresh}>
-            Retry
-          </Button>
         </Flex>
       </Card>
     );
