@@ -14,6 +14,10 @@ This comprehensive document serves as the master record for both detailed user s
 - **User Stories Completed**: 51+ individual stories across infrastructure, security, data models, UI framework, user management, financial account management, financial calculations, data visualization, and enterprise-grade backend API platform
 - **Quality Rating**: A+ (Perfect across all completed epics, Epic 11 achieved 100% error-free implementation)
 - **Production Readiness**: Epic 1-11 approved for production and deployed to master branch
+- 2025-08-11: Epic 13 – Phase C COMPLETE. Dashboard polish shipped: standardized typography and token usage, outlined cards, sparkline guard with caption, thin warning banner with Retry, spacing tuned. Unit tests added for NetWorth formatting and retry handler.
+
+- 2025-08-11: V1 Frontend archived to apps/\_archive/mobile-v1. V2 Planning started; placeholders created under DOCS/v2.
+
 - **Technical Debt**: Zero - Epic 11 achieved perfect code quality with comprehensive optimization
 
 **Key Achievements**:

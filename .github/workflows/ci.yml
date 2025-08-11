@@ -171,18 +171,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests with coverage
+      - name: Run tests with coverage (API only; mobile archived)
         run: |
           npm run test --workspace=apps/api -- --coverage
-          npm run test --workspace=apps/mobile -- --coverage
         env:
           CI: true
 
-      - name: Upload coverage reports
+      - name: Upload coverage reports (API only)
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
           path: |
             apps/api/coverage/
-            apps/mobile/coverage/
           retention-days: 7

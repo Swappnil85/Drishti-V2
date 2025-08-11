@@ -1,0 +1,469 @@
+import React, { useMemo, useState, useEffect } from "react";
+import { Home as HomeIcon, Wallet, Target as TargetIcon, Settings as SettingsIcon, GitBranch, Plus, WifiOff, Wifi, Lock, Moon, Sun, Star, Trophy } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
+
+// =============================================================
+// Drishti — V2 (Single-file, compile-safe)
+// - Default: DrishtiV2_h56 (Home chart height h-56)
+// - Named:  DrishtiV2 (Home chart height h-64)
+// - Mobile tooltip improvements ONLY (as requested):
+//   • Larger tap targets (dot/activeDot) on touch devices
+//   • Keeps existing dark-aware tooltip & UI unchanged elsewhere
+// =============================================================
+
+// ---------- Data ----------
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const TARGET_DEC = 150000;
+const APP_ACTUAL_9M = [12000, 17500, 25500, 34000, 46000, 61000, 73000, 86000, 99000];
+
+const ACCOUNTS = [
+  { id: "a1", name: "Everyday (CBA)", type: "checking", balance: 2450.35 },
+  { id: "a2", name: "High‑Interest Savings", type: "savings", balance: 17250.0 },
+  { id: "a3", name: "Vanguard ETF", type: "investment", balance: 32010.2 },
+  { id: "a4", name: "Super (UniSuper)", type: "retirement", balance: 68000.0 },
+];
+
+// ---------- Theme ----------
+const vibes = {
+  neon: {
+    accent: "#8b5cf6",
+    textGradDark: "text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-cyan-300",
+    textGradLight: "text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 via-fuchsia-700 to-cyan-700",
+  },
+};
+
+function makeTone(dark, palette) {
+  const isSunLight = palette === "sun" && !dark;
+  const appBg = isSunLight ? "#ffff00" : dark ? "#0b1220" : "#fafafa";
+  const headerGrad = isSunLight ? "text-neutral-900" : dark ? vibes.neon.textGradDark : vibes.neon.textGradLight;
+  const phoneBorder = isSunLight ? "border-[rgba(0,0,0,0.15)]" : dark ? "border-white/10" : "border-neutral-200";
+  const phoneBg = isSunLight ? "bg-transparent" : dark ? "bg-[#0d1528]/80" : "bg-white/90";
+  const text = isSunLight ? "text-neutral-900" : dark ? "text-neutral-100" : "text-neutral-900";
+  const sectionTitle = isSunLight ? "text-neutral-800" : dark ? "text-neutral-400" : "text-neutral-500";
+  const dim = isSunLight ? "text-neutral-800" : dark ? "text-neutral-300" : "text-neutral-600";
+  const sub = isSunLight ? "text-neutral-700" : dark ? "text-neutral-400" : "text-neutral-500";
+  const cardBorder = isSunLight ? "border-[rgba(0,0,0,0.15)]" : dark ? "border-white/10" : "border-neutral-200";
+  const cardBg = isSunLight ? "bg-[rgba(255,255,255,0.95)] shadow" : dark ? "bg-white/5 backdrop-blur-xl" : "bg-white shadow-sm";
+  const chip = isSunLight ? "border border-[rgba(0,0,0,0.15)] bg-white/85" : dark ? "border border-white/10 bg-white/5" : "border-neutral-200 bg-neutral-100";
+  const tabWrap = isSunLight ? "border-[rgba(0,0,0,0.15)] bg-[rgba(255,255,255,0.9)] backdrop-blur shadow" : dark ? "border-white/10 bg-white/5 backdrop-blur-xl shadow" : "border-neutral-200 bg-white/90 backdrop-blur shadow";
+  const btn = isSunLight ? "bg-black/10" : dark ? "bg-white/10" : "bg-neutral-100";
+  const sheetBorder = isSunLight ? "border-[rgba(0,0,0,0.15)]" : dark ? "border-white/10" : "border-neutral-200";
+  const iconBtn = isSunLight ? "border-[rgba(0,0,0,0.15)] bg-white shadow-sm" : dark ? "border-white/10 bg-white/10 shadow-sm" : "border-neutral-200 bg-white shadow-sm";
+  const chartGrid = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const chartAxis = dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)";
+  const targetStroke = dark ? "#facc15" : "#a16207";
+  return { appBg, headerGrad, phoneBorder, phoneBg, sectionTitle, dim, sub, text, cardBorder, cardBg, chip, tabWrap, btn, sheetBorder, iconBtn, chartGrid, chartAxis, targetStroke, isSunLight };
+}
+
+// ---------- Helpers ----------
+const audFmt = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" });
+
+function buildSeries12m(actual9) {
+  const out = [];
+  const total = 12;
+  const step = TARGET_DEC / (total - 1);
+  const last3 = actual9.slice(-3);
+  const avgDelta = (last3[2] - last3[0]) / 2;
+  let prev = actual9[actual9.length - 1];
+  for (let i = 0; i < total; i++) {
+    let value;
+    if (i < actual9.length) {
+      value = actual9[i];
+    } else if (i < 11) {
+      prev = prev + avgDelta;
+      value = Math.round(prev);
+    } else {
+      value = null;
+    }
+    out.push({ m: i, month: MONTHS[i], value, target: Math.round(step * i) });
+  }
+  return out;
+}
+
+function buildAccountSeries(seed) {
+  const base = buildSeries12m(APP_ACTUAL_9M);
+  const factor = 0.2 + (seed % 5) * 0.15; // 0.2..0.8
+  return base.map(d => ({ ...d, value: d.value == null ? null : Math.round(d.value * factor), target: Math.round(d.target * factor) }));
+}
+
+const series12m = buildSeries12m(APP_ACTUAL_9M);
+
+// ---------- UI Primitives ----------
+function Section({ title, children, action, tone }) {
+  const isQuickActions = title === "Quick Actions";
+  return (
+    <div className={isQuickActions ? "mb-2" : "mb-5"}>
+      <div className="mb-2 flex items-center justify-between px-5">
+        <h3 className={`text-sm font-semibold uppercase tracking-wide ${tone.sectionTitle}`}>{title}</h3>
+        {action}
+      </div>
+      <div className="px-4">{children}</div>
+    </div>
+  );
+}
+
+function Card({ children, onClick, className = "", tone }) {
+  return (
+    <div role={onClick ? "button" : undefined} tabIndex={onClick ? 0 : -1} onClick={onClick} className={`rounded-2xl ${tone.cardBg} ${tone.sheetBorder} border p-4 ${onClick ? "cursor-pointer focus:ring-2 ring-indigo-500/50" : ""} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function RingProgress({ value = 38, size = 80, accent = "#8b5cf6", dark = true }) {
+  const clamped = Math.min(100, Math.max(0, value));
+  const ring = { background: `conic-gradient(${accent} ${clamped * 3.6}deg, ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} 0deg)` };
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <div className="absolute inset-0 rounded-full" style={ring} />
+      <div className={`absolute inset-1 rounded-full ${dark ? "bg-black/60" : "bg-white"} ${dark ? "backdrop-blur" : ""}`} />
+      <div className="absolute inset-0 grid place-items-center text-sm font-semibold">{clamped}%</div>
+    </div>
+  );
+}
+
+function Toggle({ label, checked, onChange }) {
+  return (
+    <label className="flex items-center gap-2 text-sm">
+      <input type="checkbox" className="h-4 w-4" checked={checked} onChange={e => onChange(e.target.checked)} />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+// ---------- Charts ----------
+function TooltipContent({ active, payload, label, dark }) {
+  if (!active || !payload || !payload.length) return null;
+  const p = payload[0].payload;
+  const prev = p.m > 0 ? p.series[p.m - 1]?.value : null;
+  const delta = prev == null || p.value == null ? null : p.value - prev;
+  const sign = delta == null ? "" : delta >= 0 ? "+" : "−";
+  const wrapper = dark ? "bg-slate-800/95 text-neutral-100 border-white/10" : "bg-white/95 text-neutral-900 border-black/10";
+  const accent = dark ? (p.value - p.target >= 0 ? "text-emerald-300" : "text-rose-300") : (p.value - p.target >= 0 ? "text-emerald-600" : "text-rose-600");
+  return (
+    <div className={`rounded-xl border px-3 py-2 text-xs shadow ${wrapper}`}>
+      <div className="font-medium">{label}</div>
+      <div>Target: {audFmt.format(p.target)}</div>
+      {p.value == null ? (
+        <div>Actual: — (no data yet)</div>
+      ) : (
+        <>
+          <div>Actual: {audFmt.format(p.value)}{delta == null ? "" : ` (${sign}${audFmt.format(Math.abs(delta))} m/m)`}</div>
+          <div className={accent}>
+            {p.value - p.target >= 0 ? "Above" : "Below"} target by {audFmt.format(Math.abs(p.value - p.target))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function useIsTouchDevice() {
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    try {
+      const coarse = typeof window !== "undefined" && (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      const touchPts = typeof navigator !== "undefined" && navigator.maxTouchPoints > 0;
+      setIsTouch(Boolean(coarse || touchPts));
+    } catch (_) {
+      setIsTouch(false);
+    }
+  }, []);
+  return isTouch;
+}
+
+function NetWorthChart({ tone, series, dark, heightClass }) {
+  const isTouch = useIsTouchDevice();
+  const data = series.map(d => ({ ...d, series }));
+  const dotCfg = isTouch ? { r: 4 } : { r: 2.5 };
+  const activeDotCfg = isTouch ? { r: 9 } : { r: 4 };
+  return (
+    <div className={heightClass}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
+          <CartesianGrid stroke={tone.chartGrid} vertical={false} />
+          <XAxis dataKey="month" tick={{ fill: tone.chartAxis, fontSize: 10 }} tickMargin={6} />
+          <YAxis tick={{ fill: tone.chartAxis, fontSize: 10 }} tickFormatter={(v) => new Intl.NumberFormat("en-AU", { notation: "compact" }).format(v)} width={40} />
+          <Tooltip content={<TooltipContent dark={dark} />} cursor={{ strokeDasharray: "3 3" }} />
+          <Legend verticalAlign="top" align="right" iconType="plainline" wrapperStyle={{ fontSize: 10, color: tone.chartAxis }} />
+          <Line name="Target" type="linear" dataKey="target" stroke={tone.targetStroke} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
+          <Line name="Actual" type="monotone" dataKey="value" strokeWidth={2.2} dot={dotCfg} activeDot={activeDotCfg} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// ---------- Screens ----------
+function HomeScreen({ go, offline, tone, dark, chartHeightHome }) {
+  return (
+    <div className="space-y-4">
+      {offline && (
+        <div className={`mx-4 mt-3 flex items-center gap-2 rounded-xl p-3 text-amber-700 ${tone.btn}`}>
+          <WifiOff className="h-4 w-4" />
+          <span className="text-sm">Offline mode: syncing when you're back ✈️</span>
+        </div>
+      )}
+      <Section title="Net Worth" tone={tone}>
+        <Card tone={tone}>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className={`text-sm ${tone.dim}`}>Current</p>
+              <p className="text-3xl font-semibold">$120,000</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm" style={{ color: "#16a34a" }}>+ $4,320 (30d)</p>
+              <p className={`text-xs ${tone.sub}`}>Updated just now</p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <NetWorthChart tone={tone} series={series12m} dark={dark} heightClass={chartHeightHome} />
+            <p className={`mt-1 px-1 text-[10px] ${tone.sub}`}>Gold = target. Tap any point for m/m delta & target gap.</p>
+          </div>
+        </Card>
+      </Section>
+      <Section title="Streaks & Wins" tone={tone} action={<span className={`text-xs ${tone.sub}`}>Private by default</span>}>
+        <div className="grid grid-cols-2 gap-3">
+          <Card tone={tone}><div className="flex items-center gap-3"><Star className="h-4 w-4" /><div><p className="text-sm">7‑day Save Streak</p><p className={`text-xs ${tone.sub}`}>Nice consistency 🔥</p></div></div></Card>
+          <Card tone={tone}><div className="flex items-center gap-3"><Trophy className="h-4 w-4" /><div><p className="text-sm">+$500 this week</p><p className={`text-xs ${tone.sub}`}>Auto‑sweep + roundup</p></div></div></Card>
+        </div>
+      </Section>
+      <Section title="Quick Actions" tone={tone}>
+        <div className="grid grid-cols-3 gap-3 mb-0">
+          <Card onClick={() => go("accounts/new")} tone={tone}><div className="flex flex-col items-center gap-2"><Plus /><span className="text-xs">Add Account</span></div></Card>
+          <Card onClick={() => go("scenarios/new")} tone={tone}><div className="flex flex-col items-center gap-2"><GitBranch /><span className="text-xs">New Scenario</span></div></Card>
+          <Card onClick={() => go("plan")} tone={tone}><div className="flex flex-col items-center gap-2"><TargetIcon /><span className="text-xs">Adjust Plan</span></div></Card>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function AccountsScreen({ go, tone }) {
+  return (
+    <div className="space-y-3 p-4">
+      {ACCOUNTS.map(a => (
+        <Card key={a.id} onClick={() => go(`accounts/${a.id}`)} tone={tone}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-sm capitalize ${tone.dim}`}>{a.type}</p>
+              <p className="font-medium">{a.name}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-semibold">{a.balance.toLocaleString("en-AU", { style: "currency", currency: "AUD" })}</p>
+              <p className={`text-xs ${tone.sub}`}>Tap for details</p>
+            </div>
+          </div>
+        </Card>
+      ))}
+      <button onClick={() => go("accounts/new")} className={`mx-4 my-2 w-[calc(100%-2rem)] rounded-2xl py-3 font-medium ${tone.btn}`}>Add account</button>
+    </div>
+  );
+}
+
+function AccountDetail({ id, tone, dark }) {
+  const acc = ACCOUNTS.find(a => a.id === id);
+  const series = useMemo(() => buildAccountSeries(id.charCodeAt(0)), [id]);
+  if (!acc) return <div className="p-6">Account not found.</div>;
+  return (
+    <div className="space-y-4 p-4">
+      <Card tone={tone}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={`text-sm capitalize ${tone.dim}`}>{acc.type}</p>
+            <p className="text-xl font-semibold">{acc.name}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-semibold">{acc.balance.toLocaleString("en-AU", { style: "currency", currency: "AUD" })}</p>
+            <p className={`text-xs ${tone.sub}`}>Last sync: 2d ago</p>
+          </div>
+        </div>
+      </Card>
+      <Card tone={tone}>
+        <p className={`text-sm ${tone.dim}`}>Account history (12m)</p>
+        <div className="mt-2"><NetWorthChart tone={tone} series={series} dark={dark} heightClass="h-40" /></div>
+      </Card>
+    </div>
+  );
+}
+
+function PlanScreen({ tone }) {
+  const [contrib, setContrib] = useState(1500);
+  const feasibility = useMemo(() => (contrib >= 1800 ? "On track" : contrib >= 1200 ? "Stretch" : "At risk"), [contrib]);
+  const feasColor = feasibility === "On track" ? "text-emerald-600" : feasibility === "Stretch" ? "text-amber-600" : "text-rose-600";
+  return (
+    <div className="space-y-4 p-4">
+      <Card tone={tone}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={`text-sm ${tone.dim}`}>Primary goal</p>
+            <p className="text-xl font-semibold">FIRE $1.25M by 2045</p>
+            <p className={`text-xs ${tone.sub}`}>Projection updates weekly</p>
+          </div>
+          <RingProgress value={38} accent="#8b5cf6" dark={true} />
+        </div>
+      </Card>
+      <Card tone={tone}>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${tone.dim}`}>Monthly contribution</span>
+            <span className="text-sm font-medium">${contrib}</span>
+          </div>
+          <input aria-label="Monthly contribution" type="range" min={200} max={3000} step={100} value={contrib} onChange={e => setContrib(parseInt(e.target.value, 10))} className="w-full accent-indigo-500"/>
+          <p className={`text-sm font-medium ${feasColor}`}>{feasibility}</p>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function ScenariosScreen({ tone }) {
+  const scenarios = [
+    { id: "s1", name: "Base Plan", desc: "7% market, 3% inflation" },
+    { id: "s2", name: "Bear Market", desc: "3% market, 3% inflation" },
+    { id: "s3", name: "Aggressive Savings", desc: "+10% savings rate" },
+  ];
+  return (
+    <div className="space-y-3 p-4">
+      {scenarios.map(s => (
+        <Card key={s.id} tone={tone}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-xs ${tone.dim}`}>Scenario</p>
+              <p className="font-medium">{s.name}</p>
+              <p className={`text-xs ${tone.sub}`}>{s.desc}</p>
+            </div>
+            <button className={`rounded-xl px-3 py-2 text-sm ${tone.btn}`}>Compare</button>
+          </div>
+        </Card>
+      ))}
+      <button className={`mx-4 my-2 w-[calc(100%-2rem)] rounded-2xl py-3 font-medium ${tone.btn}`}>New scenario</button>
+    </div>
+  );
+}
+
+function SettingsScreen({ offline, setOffline, dark, setDark, tone, palette, setPalette }) {
+  return (
+    <div className="space-y-4 p-4">
+      <Card tone={tone}>
+        <div className="flex items-center gap-2"><Lock className="h-4 w-4" /><span className="font-medium">Security</span></div>
+        <div className={`mt-3 space-y-2 text-sm ${tone.dim}`}>
+          <Toggle label="Enable biometrics" checked={true} onChange={() => {}} />
+          <Toggle label="Auto-lock after 5 minutes" checked={true} onChange={() => {}} />
+        </div>
+      </Card>
+      <Card tone={tone}>
+        <div className="flex items-center gap-2"><Wifi className="h-4 w-4" /><span className="font-medium">Connectivity</span></div>
+        <div className={`mt-3 space-y-2 text-sm ${tone.dim}`}>
+          <Toggle label="Offline mode (local‑only)" checked={offline} onChange={setOffline} />
+        </div>
+      </Card>
+      <Card tone={tone}>
+        <div className="mb-2 font-medium">Palette</div>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <button onClick={() => setPalette("navy")} className={`rounded-xl px-3 py-2 ${tone.btn}`}>Dark Navy</button>
+          <button onClick={() => { setPalette("sun"); setDark(false); }} className={`rounded-xl px-3 py-2 ${tone.btn}`}>Light Yellow (#ffff00)</button>
+        </div>
+        <p className={`mt-2 text-xs ${tone.sub}`}>Tip: Light Yellow previews best with Light theme; we auto-toggle it on.</p>
+      </Card>
+      <Card tone={tone}>
+        <div className="flex items-center gap-2">{dark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}<span className="font-medium">Appearance</span></div>
+        <div className={`mt-3 space-y-2 text-sm ${tone.dim}`}>
+          <Toggle label="Dark theme" checked={dark} onChange={setDark} />
+          <Toggle label="High contrast mode" checked={false} onChange={() => {}} />
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+const TabButton = ({ icon: Icon, label, active, onClick, tone, dark }) => (
+  <button onClick={onClick} className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs ${active ? (dark ? "bg-white/15 text-neutral-100" : "bg-black/10 text-neutral-900") : (dark ? "text-current/70" : "text-neutral-700")}`}>
+    <Icon className="h-5 w-5" />
+    <span>{label}</span>
+  </button>
+);
+
+// ---------- App Shell (parametrized) ----------
+function DrishtiApp({ chartHeightHome = "h-56" }) {
+  const [route, setRoute] = useState("home");
+  const [offline, setOffline] = useState(false);
+  const [dark, setDark] = useState(true);
+  const [palette, setPalette] = useState("navy");
+
+  useEffect(() => {
+    // Runtime assertions
+    const built = buildSeries12m(APP_ACTUAL_9M);
+    console.assert(built.length === 12, "Expected 12 months of data");
+    console.assert(built[11].target === 150000, "Dec target must be $150,000");
+  }, []);
+
+  const header = useMemo(() => {
+    if (route.startsWith("accounts/")) return "Account";
+    if (route === "accounts") return "Accounts";
+    if (route.startsWith("plan")) return "Plan";
+    if (route.startsWith("scenarios")) return "Scenarios";
+    if (route === "settings") return "Settings";
+    return "Home";
+  }, [route]);
+
+  const tone = makeTone(dark, palette);
+  const go = (r) => setRoute(r);
+
+  return (
+    <div className={`h-full w-full p-6 ${tone.text}`} style={{ backgroundColor: tone.appBg }}>
+      <div className={`relative mx-auto flex h-[844px] w-[390px] flex-col overflow-hidden rounded-[2rem] border ${tone.phoneBorder} ${tone.phoneBg} ${tone.text}`} role="application" aria-label="Drishti mobile prototype">
+        {/* Header */}
+        <div className={`flex items-center justify-between px-4 py-3 bg-transparent`}>
+          <div className={`font-semibold ${tone.headerGrad}`}>{header} <span className="text-[10px] opacity-60 align-middle">v2</span></div>
+          <div className="flex items-center gap-2 text-xs">
+            <button onClick={() => setOffline(!offline)} className={`rounded-full px-2 py-1 border ${tone.iconBtn}`} aria-label="Toggle offline">{offline ? <WifiOff className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}</button>
+            <button onClick={() => setDark(!dark)} className={`rounded-full px-2 py-1 border ${tone.iconBtn}`} aria-label="Toggle theme">{dark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}</button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto pb-16">
+          <AnimatePresence mode="wait">
+            <motion.div key={route + (dark ? "d" : "l") + palette} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }}>
+              {route === "home" && <HomeScreen go={go} offline={offline} tone={tone} dark={dark} chartHeightHome={chartHeightHome} />}
+              {route === "accounts" && <AccountsScreen go={go} tone={tone} />}
+              {route.startsWith("accounts/") && <AccountDetail id={route.split("/")[1]} tone={tone} dark={dark} />}
+              {route.startsWith("plan") && <PlanScreen tone={tone} />}
+              {route.startsWith("scenarios") && <ScenariosScreen tone={tone} />}
+              {route === "settings" && <SettingsScreen offline={offline} setOffline={setOffline} dark={dark} setDark={setDark} tone={tone} palette={palette} setPalette={setPalette} />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Bottom Nav */}
+        <div className={`absolute bottom-0 left-0 right-0 flex items-center justify-around gap-2 px-3 py-2 bg-transparent`}>
+          <div className={`flex w-full items-center justify-around rounded-2xl border px-2 py-2 ${tone.tabWrap}`}>
+            <TabButton icon={HomeIcon} label="Home" active={route === "home"} onClick={() => go("home")} tone={tone} dark={dark} />
+            <TabButton icon={Wallet} label="Accounts" active={route.startsWith("accounts")} onClick={() => go("accounts")} tone={tone} dark={dark} />
+            <TabButton icon={TargetIcon} label="Plan" active={route.startsWith("plan")} onClick={() => go("plan")} tone={tone} dark={dark} />
+            <TabButton icon={GitBranch} label="Scenarios" active={route.startsWith("scenarios")} onClick={() => go("scenarios")} tone={tone} dark={dark} />
+            <TabButton icon={SettingsIcon} label="Settings" active={route === "settings"} onClick={() => go("settings")} tone={tone} dark={dark} />
+          </div>
+        </div>
+      </div>
+
+      {/* Note */}
+      <div className="mx-auto mt-4 w-[390px] text-center text-xs text-neutral-600">
+        <p>Default export: DrishtiV2_h56 (Home chart h-56). Named export DrishtiV2 uses h-64. Mobile tap targets enabled.</p>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Public Exports ----------
+export function DrishtiV2() { // h-64
+  return <DrishtiApp chartHeightHome="h-64" />;
+}
+
+export function DrishtiV2_h56() { // h-56 (default)
+  return <DrishtiApp chartHeightHome="h-56" />;
+}
+
+export default DrishtiV2_h56;

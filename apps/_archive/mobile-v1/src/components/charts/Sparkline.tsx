@@ -21,12 +21,26 @@ const Sparkline: React.FC<SparklineProps> = ({
   backgroundColor = 'transparent',
   style,
 }) => {
+  if (!data || data.length === 0) {
+    return <View style={[{ height, backgroundColor }, style]} />;
+  }
+
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = Math.max(1, max - min);
 
   return (
-    <View style={[{ height, backgroundColor, flexDirection: 'row', alignItems: 'flex-end' }, style]}>
+    <View
+      style={[
+        {
+          height,
+          backgroundColor,
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+        },
+        style,
+      ]}
+    >
       {data.map((v, i) => {
         const h = Math.max(2, ((v - min) / range) * (height - 6));
         return (
@@ -48,4 +62,3 @@ const Sparkline: React.FC<SparklineProps> = ({
 };
 
 export default Sparkline;
-

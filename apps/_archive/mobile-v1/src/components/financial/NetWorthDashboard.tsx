@@ -15,6 +15,12 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, Button, Icon, Flex, Badge, Text } from '../ui';
 import Sparkline from '../charts/Sparkline';
+import {
+  formatCurrency,
+  formatPercentage,
+  makeRetry,
+} from './NetWorthDashboard.utils';
+import NetWorthErrorBanner from './NetWorthErrorBanner';
 import { useNetWorthTrends } from '../../hooks/useNetWorthTrends';
 import {
   netWorthService,
@@ -81,20 +87,6 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
     } catch (error) {
       console.error('Error loading comparison/milestone data:', error);
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatPercentage = (percentage: number) => {
-    const sign = percentage >= 0 ? '+' : '';
-    return `${sign}${percentage.toFixed(1)}%`;
   };
 
   const getChangeColor = (change: number) => {
@@ -174,14 +166,20 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
           {/* Mini sparkline (12 months) */}
           <View style={{ alignSelf: 'stretch', marginTop: 8 }}>
-            <Sparkline
-              data={(trendPoints || []).map(p => p.value)}
-              height={40}
-              barWidth={6}
-              gap={2}
-              color={theme.colors.primary[500]}
-              backgroundColor='transparent'
-            />
+            {trendPoints && trendPoints.length > 0 ? (
+              <Sparkline
+                data={trendPoints.map(p => p.value)}
+                height={40}
+                barWidth={6}
+                gap={2}
+                color={theme.colors.primary[500]}
+                backgroundColor='transparent'
+              />
+            ) : (
+              <Text variant='caption' color='text.secondary' align='center'>
+                No trend data yet
+              </Text>
+            )}
           </View>
 
           {/* Assets / Liabilities chips */}
@@ -220,34 +218,10 @@ const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
           {/* Inline slim error banner */}
           {(error || trendsError) && (
-            <View
-              style={{
-                marginTop: 8,
-                alignSelf: 'stretch',
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                backgroundColor: theme.colors.warning[50],
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: theme.colors.warning[200],
-              }}
-            >
-              <Flex direction='row' align='center' justify='space-between'>
-                <Text style={{ color: theme.colors.text.primary, flex: 1 }}>
-                  {error || trendsError}
-                </Text>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onPress={() => {
-                    refresh();
-                    refreshTrends();
-                  }}
-                >
-                  Retry
-                </Button>
-              </Flex>
-            </View>
+            <NetWorthErrorBanner
+              message={(error || trendsError) as string}
+              onRetry={makeRetry(refresh, refreshTrends)}
+            />
           )}
         </Flex>
       </Card>
@@ -534,7 +508,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerCard: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   netWorthLabel: {
     fontSize: 14,
@@ -566,7 +540,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   breakdownCard: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   breakdownHeader: {
     marginBottom: 16,
@@ -603,7 +577,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   milestonesCard: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   milestonesHeader: {
     marginBottom: 16,
@@ -637,7 +611,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   actionsCard: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   actionButton: {
     flex: 1,

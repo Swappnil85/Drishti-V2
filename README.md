@@ -9,7 +9,7 @@ Drishti is an innovative mobile application that leverages artificial intelligen
 This project uses a **monorepo structure** with the following components:
 
 - **`apps/api`** - Fastify-based Node.js backend API with PostgreSQL database
-- **`apps/mobile`** - React Native Expo mobile application with TypeScript
+- ~~**`apps/mobile`** - React Native Expo mobile application with TypeScript~~ (archived → `apps/_archive/mobile-v1/`)
 - **`packages/shared`** - Shared utilities and types across applications
 
 ## 🚀 Getting Started
@@ -56,8 +56,9 @@ Or run individual applications:
 # API Backend
 npm run dev --workspace=apps/api
 
-# Mobile App
-npm run dev --workspace=apps/mobile
+# Mobile App (archived)
+# npm run dev --workspace=apps/mobile
+# See apps/_archive/mobile-v1/
 ```
 
 ## 🚀 Development Status
@@ -124,7 +125,7 @@ npm run dev --workspace=apps/mobile
 Drishti/
 ├── apps/
 │   ├── api/          # Backend API
-│   └── mobile/       # Mobile application
+│   └── _archive/mobile-v1/  # Archived mobile application
 ├── packages/
 │   └── shared/       # Shared utilities
 ├── DOCS/             # Project documentation

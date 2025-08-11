@@ -7,7 +7,9 @@ export interface StreaksWinsProps {
   monthlyChanges: Array<{ change: number; month: string; year: number }>;
 }
 
-function computeStreaksAndWins(monthlyChanges: Array<{ change: number; month: string; year: number }>) {
+function computeStreaksAndWins(
+  monthlyChanges: Array<{ change: number; month: string; year: number }>
+) {
   let currentStreak = 0;
   let bestStreak = 0;
   let wins = 0;
@@ -24,42 +26,64 @@ function computeStreaksAndWins(monthlyChanges: Array<{ change: number; month: st
   }
 
   // Recent win: last positive change month
-  const lastWinIndex = [...monthlyChanges].reverse().findIndex(m => m.change > 0);
-  const lastWin = lastWinIndex >= 0 ? monthlyChanges[monthlyChanges.length - 1 - lastWinIndex] : null;
+  const lastWinIndex = [...monthlyChanges]
+    .reverse()
+    .findIndex(m => m.change > 0);
+  const lastWin =
+    lastWinIndex >= 0
+      ? monthlyChanges[monthlyChanges.length - 1 - lastWinIndex]
+      : null;
 
   return { currentStreak, bestStreak, wins, lastWin };
 }
 
 const HomeStreaksWins: React.FC<StreaksWinsProps> = ({ monthlyChanges }) => {
-  const summary = useMemo(() => computeStreaksAndWins(monthlyChanges), [monthlyChanges]);
+  const summary = useMemo(
+    () => computeStreaksAndWins(monthlyChanges),
+    [monthlyChanges]
+  );
 
   return (
     <Card variant='outlined' padding='lg'>
       <Flex direction='row' justify='space-between' align='center'>
         <View style={styles.item}>
-          <Text style={styles.label}>Current Streak</Text>
+          <Text variant='caption' color='text.secondary'>
+            Current Streak
+          </Text>
           <Flex direction='row' align='center' gap='xs'>
-            <Icon name='flame' size='sm' color='warning' />
-            <Text style={styles.value}>{summary.currentStreak} mo</Text>
+            <Icon name='flame' size='sm' color='warning.500' />
+            <Text variant='body1' weight='semiBold' color='text.primary'>
+              {summary.currentStreak} mo
+            </Text>
           </Flex>
         </View>
 
         <View style={styles.item}>
-          <Text style={styles.label}>Best Streak</Text>
+          <Text variant='caption' color='text.secondary'>
+            Best Streak
+          </Text>
           <Flex direction='row' align='center' gap='xs'>
-            <Icon name='trophy' size='sm' color='success' />
-            <Text style={styles.value}>{summary.bestStreak} mo</Text>
+            <Icon name='trophy' size='sm' color='success.500' />
+            <Text variant='body1' weight='semiBold' color='text.primary'>
+              {summary.bestStreak} mo
+            </Text>
           </Flex>
         </View>
 
         <View style={styles.item}>
-          <Text style={styles.label}>Wins</Text>
+          <Text variant='caption' color='text.secondary'>
+            Wins
+          </Text>
           <Flex direction='row' align='center' gap='xs'>
-            <Icon name='checkmark-circle' size='sm' color='success' />
-            <Text style={styles.value}>{summary.wins}</Text>
+            <Icon name='checkmark-circle' size='sm' color='success.500' />
+            <Text variant='body1' weight='semiBold' color='text.primary'>
+              {summary.wins}
+            </Text>
           </Flex>
           {summary.lastWin && (
-            <Text style={styles.subtle}>Last: {summary.lastWin.month} {summary.lastWin.year}</Text>
+            <Text style={styles.subtle}>
+              Last: {summary.lastWin.month} {summary.lastWin.year}
+            </Text>
           )}
         </View>
       </Flex>
@@ -75,4 +99,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeStreaksWins;
-
