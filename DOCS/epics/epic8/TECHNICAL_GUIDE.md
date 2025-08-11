@@ -7,7 +7,7 @@ Epic 8 implements a comprehensive goal management system with advanced AI/ML cap
 ## 📁 Project Structure
 
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── services/financial/
 │   ├── FIREGoalService.ts                    # Core goal management
 │   ├── LifeEventImpactModelingService.ts     # ML-based predictions

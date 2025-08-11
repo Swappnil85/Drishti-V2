@@ -8,10 +8,10 @@ This directory contains the consolidated technical documentation for Epic 1 (Cor
 
 | Document | Purpose | Audience | Status |
 |----------|---------|----------|--------|
-| **<mcfile name="OVERVIEW.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/OVERVIEW.md"></mcfile>** | Epic summary, objectives, and completion status | All stakeholders | ✅ Complete |
-| **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** | Technical implementation details and architecture | Developers, Architects | ✅ Complete |
-| **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>** | Quality assurance testing and validation results | QA Engineers, Project Managers | ✅ Complete |
-| **<mcfile name="SECURITY_AUDIT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** | Security assessment and recommendations | Security Engineers, DevOps | ✅ Complete |
+| **<mcfile name="OVERVIEW.md" path="DOCS/epics/epic1/OVERVIEW.md"></mcfile>** | Epic summary, objectives, and completion status | All stakeholders | ✅ Complete |
+| **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** | Technical implementation details and architecture | Developers, Architects | ✅ Complete |
+| **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>** | Quality assurance testing and validation results | QA Engineers, Project Managers | ✅ Complete |
+| **<mcfile name="SECURITY_AUDIT.md" path="DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** | Security assessment and recommendations | Security Engineers, DevOps | ✅ Complete |
 
 ## 🎯 Epic 1 Summary
 
@@ -40,22 +40,22 @@ This directory contains the consolidated technical documentation for Epic 1 (Cor
 ## 📖 How to Use This Documentation
 
 ### For New Team Members
-1. Start with **<mcfile name="OVERVIEW.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/OVERVIEW.md"></mcfile>** for epic context and objectives
-2. Review **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** for implementation details
-3. Check **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>** for quality standards
-4. Review **<mcfile name="SECURITY_AUDIT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** for security considerations
+1. Start with **<mcfile name="OVERVIEW.md" path="DOCS/epics/epic1/OVERVIEW.md"></mcfile>** for epic context and objectives
+2. Review **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** for implementation details
+3. Check **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>** for quality standards
+4. Review **<mcfile name="SECURITY_AUDIT.md" path="DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** for security considerations
 
 ### For Project Managers
-- **<mcfile name="OVERVIEW.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/OVERVIEW.md"></mcfile>**: Business value, metrics, and completion status
-- **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>**: Quality assurance and testing results
+- **<mcfile name="OVERVIEW.md" path="DOCS/epics/epic1/OVERVIEW.md"></mcfile>**: Business value, metrics, and completion status
+- **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>**: Quality assurance and testing results
 
 ### For Developers
-- **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>**: Architecture, implementation, and development workflow
-- **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>**: Testing standards and validation procedures
+- **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>**: Architecture, implementation, and development workflow
+- **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>**: Testing standards and validation procedures
 
 ### For Security Engineers
-- **<mcfile name="SECURITY_AUDIT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>**: Comprehensive security assessment and recommendations
-- **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>**: Security implementation details
+- **<mcfile name="SECURITY_AUDIT.md" path="DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>**: Comprehensive security assessment and recommendations
+- **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>**: Security implementation details
 
 ## 🔄 Documentation Maintenance
 
@@ -68,10 +68,10 @@ This directory contains the consolidated technical documentation for Epic 1 (Cor
 
 ### Review Process
 
-- **Technical Changes**: Update **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** when architecture or implementation changes
-- **Quality Updates**: Update **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>** when testing procedures or results change
-- **Security Changes**: Update **<mcfile name="SECURITY_AUDIT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** when security measures are modified
-- **Epic Updates**: Update **<mcfile name="OVERVIEW.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/OVERVIEW.md"></mcfile>** for high-level changes or completion status
+- **Technical Changes**: Update **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** when architecture or implementation changes
+- **Quality Updates**: Update **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>** when testing procedures or results change
+- **Security Changes**: Update **<mcfile name="SECURITY_AUDIT.md" path="DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** when security measures are modified
+- **Epic Updates**: Update **<mcfile name="OVERVIEW.md" path="DOCS/epics/epic1/OVERVIEW.md"></mcfile>** for high-level changes or completion status
 
 ### Quality Standards
 

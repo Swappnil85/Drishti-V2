@@ -102,7 +102,7 @@ const registerSchema = Joi.object({
 **Issue**: Lockout bypass through app restart, no SecureStore validation  
 **Risk Level**: **MEDIUM**  
 **Impact**: Biometric authentication bypass  
-**Location**: `apps/mobile/src/services/auth/BiometricService.ts`
+**Location**: `apps/_archive/mobile-v1//src/services/auth/BiometricService.ts`
 
 **Required Fixes**:
 

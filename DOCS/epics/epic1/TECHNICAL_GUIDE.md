@@ -48,7 +48,7 @@ Drishti/
 
 #### Epic 1 Architecture Overview
 - **Backend API (apps/api/)**: Fastify foundation with basic endpoints
-- **Mobile App (apps/mobile/)**: React Native + Expo foundation
+- **Mobile App (apps/_archive/mobile-v1//)**: React Native + Expo foundation
 - **Shared Package (packages/shared/)**: Common TypeScript interfaces and utilities
 
 ## 🗄️ Database Implementation

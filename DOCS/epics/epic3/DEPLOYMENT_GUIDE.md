@@ -204,7 +204,7 @@ curl -X GET http://localhost:3000/health
 ### 1. WatermelonDB Configuration
 
 ```typescript
-// apps/mobile/src/database/index.ts
+// apps/_archive/mobile-v1//src/database/index.ts
 import { Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import { schema } from './schema';
@@ -228,7 +228,7 @@ export const database = new Database({
 ### 2. Encryption Service Configuration
 
 ```typescript
-// apps/mobile/src/services/encryption/config.ts
+// apps/_archive/mobile-v1//src/services/encryption/config.ts
 export const ENCRYPTION_CONFIG = {
   algorithm: 'AES-256-GCM',
   keyLength: 32, // 256 bits
@@ -244,7 +244,7 @@ export const ENCRYPTION_CONFIG = {
 
 ```bash
 # Install dependencies
-cd apps/mobile
+cd apps/_archive/mobile-v1/
 npm install
 
 # Configure environment

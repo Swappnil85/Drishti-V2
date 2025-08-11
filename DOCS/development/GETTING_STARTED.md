@@ -89,7 +89,7 @@ npm run dev --workspace=apps/api
 #### Terminal 2 - Mobile App
 
 ```bash
-npm run dev --workspace=apps/mobile
+npm run dev --workspace=apps/_archive/mobile-v1/
 ```
 
 ### 6. Verify Setup
@@ -198,7 +198,7 @@ npm run type-check       # Run TypeScript type checking
 
 # Workspace-specific scripts
 npm run dev --workspace=apps/api      # Start API only
-npm run dev --workspace=apps/mobile   # Start mobile app only
+npm run dev --workspace=apps/_archive/mobile-v1/   # Start mobile app only
 npm run test --workspace=apps/api     # Test API only
 ```
 
@@ -219,7 +219,7 @@ npm run seed             # Seed database with test data
 ### Mobile Scripts
 
 ```bash
-cd apps/mobile
+cd apps/_archive/mobile-v1/
 
 npm run start            # Start Expo development server
 npm run android          # Start on Android emulator
@@ -256,7 +256,7 @@ Install the following extensions for the best development experience:
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "eslint.workingDirectories": ["apps/api", "apps/mobile", "packages/shared"]
+  "eslint.workingDirectories": ["apps/api", "apps/_archive/mobile-v1/", "packages/shared"]
 }
 ```
 
@@ -358,7 +358,7 @@ describe('Button Component', () => {
 
 ### Adding a New Mobile Screen
 
-1. Create screen component in `apps/mobile/src/screens/`
+1. Create screen component in `apps/_archive/mobile-v1//src/screens/`
 2. Add navigation configuration
 3. Implement state management if needed
 4. Add accessibility features

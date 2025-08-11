@@ -1,3 +1,15 @@
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs: `DOCS/v2/PRD.md` for V2 planning.
+
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs:  for V2 planning.
+
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs:  for V2 planning.
+
 ## Frontend V2 Progress & Checklist
 
 Updated: August 2025

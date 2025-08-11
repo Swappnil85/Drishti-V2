@@ -1,3 +1,15 @@
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs: `DOCS/v2/PRD.md` for V2 planning.
+
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs:  for V2 planning.
+
+# ARCHIVED (V1) — Reference Only — Do Not Use For V2
+
+> See active docs:  for V2 planning.
+
 ## Drishti Frontend V2 Integration RFC
 
 ### Summary
@@ -8,7 +20,7 @@ This RFC documents how we will adapt the proposed UI in DOCS/Design_Update to th
 
 - UI prototype source: DOCS/Design_Update
 - Visual references: DOCS/Screenshots (use for colors, spacing, typography cues)
-- Mobile app: apps/mobile (Expo + React Native + Reanimated + victory-native + RN Vector Icons)
+- Mobile app: apps/_archive/mobile-v1/ (Expo + React Native + Reanimated + victory-native + RN Vector Icons)
 - Backend: apps/api (Fastify + TypeScript)
 
 ---
@@ -34,9 +46,9 @@ Navigation
 
 State/Services
 
-- Offline: apps/mobile/src/services/sync/OfflineService.ts
-- Biometrics: apps/mobile/src/services/auth/BiometricService.ts
-- Security/Pinning: apps/mobile/src/services/api/PinnedAxios.ts + security services
+- Offline: apps/_archive/mobile-v1//src/services/sync/OfflineService.ts
+- Biometrics: apps/_archive/mobile-v1//src/services/auth/BiometricService.ts
+- Security/Pinning: apps/_archive/mobile-v1//src/services/api/PinnedAxios.ts + security services
 - Local data: WatermelonDB; NetWorthService provides derived metrics
 
 ---

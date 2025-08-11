@@ -65,7 +65,7 @@ New Components: 9 files created
 
 All requirements implemented, tested, and deployed. The Financial Calculation Engine is operational and ready for user traffic.
 
-**Documentation**: /Users/Swapnil/Programming/Drishti/DOCS/epics/epic7/
+**Documentation**: DOCS/epics/epic7/
 
 ---
 

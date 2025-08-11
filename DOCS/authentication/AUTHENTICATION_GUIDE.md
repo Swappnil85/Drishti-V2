@@ -87,13 +87,13 @@ sequenceDiagram
 
 ### Mobile App Authentication
 
-#### 1. AuthService (`apps/mobile/src/services/auth/AuthService.ts`)
+#### 1. AuthService (`apps/_archive/mobile-v1//src/services/auth/AuthService.ts`)
 - **Secure Storage**: SecureStore for tokens, AsyncStorage for user data
 - **State Management**: Real-time authentication state updates
 - **Network Handling**: Automatic token refresh, offline state management
 - **Device Security**: Device fingerprinting, biometric integration ready
 
-#### 2. AuthContext (`apps/mobile/src/contexts/AuthContext.tsx`)
+#### 2. AuthContext (`apps/_archive/mobile-v1//src/contexts/AuthContext.tsx`)
 - **React Context**: Global authentication state management
 - **Hooks**: `useAuth`, `useUser`, `useIsAuthenticated`
 - **Components**: `AuthGuard`, `withAuth` HOC for route protection
@@ -381,7 +381,7 @@ enum AuthError {
 - **Security Tests**: SQL injection, XSS, rate limiting
 - **Edge Cases**: Invalid inputs, network failures
 
-### Mobile Tests (`apps/mobile/src/tests/AuthService.test.ts`)
+### Mobile Tests (`apps/_archive/mobile-v1//src/tests/AuthService.test.ts`)
 - **Service Tests**: AuthService methods
 - **Storage Tests**: Secure token storage/retrieval
 - **State Tests**: Authentication state management

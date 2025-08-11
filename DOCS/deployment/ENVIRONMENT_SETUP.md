@@ -83,7 +83,7 @@ OPENAI_API_KEY=your-development-openai-key
 npm run dev --workspace=apps/api
 
 # Start mobile app (in another terminal)
-npm run dev --workspace=apps/mobile
+npm run dev --workspace=apps/_archive/mobile-v1/
 ```
 
 ### Mobile Development Setup
@@ -97,7 +97,7 @@ npm run dev --workspace=apps/mobile
 sudo gem install cocoapods
 
 # Install iOS dependencies
-cd apps/mobile/ios && pod install
+cd apps/_archive/mobile-v1//ios && pod install
 ```
 
 #### Android Development

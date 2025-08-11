@@ -18,7 +18,7 @@ This guide covers common issues and their solutions when developing with Drishti
 1. Check your Expo Go app version and supported SDK versions
 2. Upgrade your project to a compatible SDK version:
    ```bash
-   cd apps/mobile
+   cd apps/_archive/mobile-v1/
    npx expo install --fix
    ```
 3. Update package.json dependencies to match SDK version:
@@ -398,7 +398,7 @@ npm install -g react-native-debugger
 # Development
 npm run dev                              # Start all services
 npm run dev --workspace=apps/api         # API only
-npm run dev --workspace=apps/mobile      # Mobile only
+npm run dev --workspace=apps/_archive/mobile-v1/      # Mobile only
 
 # Testing
 npm run test                             # All tests

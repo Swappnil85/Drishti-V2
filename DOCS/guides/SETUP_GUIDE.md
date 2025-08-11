@@ -263,10 +263,10 @@ GOOGLE_VISION_API_KEY=your-google-vision-api-key-here
 ### Mobile Environment
 ```bash
 # Create mobile environment file (if needed)
-touch apps/mobile/.env
+touch apps/_archive/mobile-v1//.env
 
 # Add mobile-specific variables
-echo "EXPO_PUBLIC_API_URL=http://localhost:3000" >> apps/mobile/.env
+echo "EXPO_PUBLIC_API_URL=http://localhost:3000" >> apps/_archive/mobile-v1//.env
 ```
 
 ## Step 7: Start Development Servers
@@ -284,7 +284,7 @@ npm run dev --workspace=apps/api
 ### Terminal 2 - Mobile App
 ```bash
 # Start mobile development server
-npm run dev --workspace=apps/mobile
+npm run dev --workspace=apps/_archive/mobile-v1/
 
 # You should see Expo QR code and options:
 # › Press a │ open Android
@@ -331,7 +331,7 @@ Create `.vscode/settings.json`:
   "typescript.preferences.importModuleSpecifier": "relative",
   "eslint.workingDirectories": [
     "apps/api",
-    "apps/mobile",
+    "apps/_archive/mobile-v1/",
     "packages/shared"
   ],
   "files.exclude": {

@@ -23,7 +23,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **1. Core Encryption Service**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/encryption/EncryptionService.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/encryption/EncryptionService.ts`
 
 #### **Encryption Standards Compliance**
 - ✅ **Algorithm**: AES-256-GCM (NIST approved, FIPS 140-2 compliant)
@@ -41,7 +41,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **2. Key Management System**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/encryption/KeyManager.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/encryption/KeyManager.ts`
 
 #### **Key Storage Security**
 - ✅ **Hardware Security Module**: Utilizes device HSM when available
@@ -59,7 +59,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **3. Field-Level Encryption**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/encryption/EncryptedFieldManager.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/encryption/EncryptedFieldManager.ts`
 
 #### **Data Classification & Protection**
 - ✅ **Sensitive Field Identification**: Automatic sensitive data detection
@@ -78,7 +78,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **Automatic Key Rotation**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/encryption/KeyRotationService.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/encryption/KeyRotationService.ts`
 
 #### **Rotation Security Features**
 - ✅ **Scheduled Rotation**: Automatic 90-day rotation
@@ -97,7 +97,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **Security Audit Service**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/security/SecurityAuditService.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/security/SecurityAuditService.ts`
 
 #### **Comprehensive Event Logging**
 - ✅ **Data Access Events**: All sensitive data access logged
@@ -124,7 +124,7 @@ Epic 3 implements a comprehensive multi-layer security architecture:
 
 ### **Encryption Recovery Service**
 **Status**: ✅ **APPROVED**  
-**Implementation**: `apps/mobile/src/services/encryption/EncryptionRecoveryService.ts`
+**Implementation**: `apps/_archive/mobile-v1//src/services/encryption/EncryptionRecoveryService.ts`
 
 #### **Recovery Scenarios Covered**
 - ✅ **Key Corruption**: Corrupted encryption key recovery

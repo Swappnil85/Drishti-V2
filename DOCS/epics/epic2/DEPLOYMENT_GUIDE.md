@@ -230,18 +230,18 @@ const appleConfig = {
 
 ```bash
 # Install dependencies
-npm install --workspace=apps/mobile
+npm install --workspace=apps/_archive/mobile-v1/
 
 # Configure environment
 cp .env.production .env
 
 # Build for production
-npm run build:ios --workspace=apps/mobile
-npm run build:android --workspace=apps/mobile
+npm run build:ios --workspace=apps/_archive/mobile-v1/
+npm run build:android --workspace=apps/_archive/mobile-v1/
 
 # Deploy to app stores
-npm run deploy:ios --workspace=apps/mobile
-npm run deploy:android --workspace=apps/mobile
+npm run deploy:ios --workspace=apps/_archive/mobile-v1/
+npm run deploy:android --workspace=apps/_archive/mobile-v1/
 ```
 
 ## Security Configuration

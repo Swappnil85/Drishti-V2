@@ -1,3 +1,5 @@
+> This is the current Drishti V2 source of truth. Changes here govern implementation.
+
 # Frontend V2 – Epics (Draft Placeholder)
 
 ## V2-01 Foundations

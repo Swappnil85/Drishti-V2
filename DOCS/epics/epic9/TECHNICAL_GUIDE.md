@@ -598,7 +598,7 @@ export const handleScenarioError = (error: Error, context: any) => {
 ### Code Organization
 
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── services/
 │   ├── historical/HistoricalMarketDataService.ts
 │   ├── calculations/RealTimeCalculationService.ts

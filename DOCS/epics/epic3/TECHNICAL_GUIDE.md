@@ -105,7 +105,7 @@ KeyRotationService
 
 #### **Database Setup**
 ```typescript
-// apps/mobile/src/database/index.ts
+// apps/_archive/mobile-v1//src/database/index.ts
 import { Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import { schema } from './schema';
@@ -125,7 +125,7 @@ export const database = new Database({
 
 #### **Schema Definition**
 ```typescript
-// apps/mobile/src/database/schema.ts
+// apps/_archive/mobile-v1//src/database/schema.ts
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const schema = appSchema({
@@ -163,7 +163,7 @@ export const schema = appSchema({
 
 #### **Base Model with Encryption**
 ```typescript
-// apps/mobile/src/database/models/BaseModel.ts
+// apps/_archive/mobile-v1//src/database/models/BaseModel.ts
 import { Model } from '@nozbe/watermelondb';
 import { EncryptedFieldManager } from '../../services/encryption/EncryptedFieldManager';
 
@@ -206,7 +206,7 @@ export class BaseModel extends Model {
 
 #### **User Model**
 ```typescript
-// apps/mobile/src/database/models/User.ts
+// apps/_archive/mobile-v1//src/database/models/User.ts
 import { field, readonly, date } from '@nozbe/watermelondb/decorators';
 import { BaseModel } from './BaseModel';
 
@@ -239,7 +239,7 @@ export class User extends BaseModel {
 
 #### **Service Configuration**
 ```typescript
-// apps/mobile/src/services/encryption/EncryptionService.ts
+// apps/_archive/mobile-v1//src/services/encryption/EncryptionService.ts
 export class EncryptionService {
   private static instance: EncryptionService;
   private keyManager: KeyManager;
@@ -335,7 +335,7 @@ export class EncryptionService {
 
 #### **Secure Key Storage**
 ```typescript
-// apps/mobile/src/services/encryption/KeyManager.ts
+// apps/_archive/mobile-v1//src/services/encryption/KeyManager.ts
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 
@@ -434,7 +434,7 @@ export class KeyManager {
 
 #### **Encrypted Field Manager**
 ```typescript
-// apps/mobile/src/services/encryption/EncryptedFieldManager.ts
+// apps/_archive/mobile-v1//src/services/encryption/EncryptedFieldManager.ts
 export class EncryptedFieldManager {
   private encryptionService: EncryptionService;
   private sensitiveFields: Map<string, string[]>;
@@ -516,7 +516,7 @@ export class EncryptedFieldManager {
 
 #### **Sync Manager**
 ```typescript
-// apps/mobile/src/services/sync/SyncManager.ts
+// apps/_archive/mobile-v1//src/services/sync/SyncManager.ts
 export class SyncManager {
   private database: Database;
   private apiClient: ApiClient;
@@ -598,7 +598,7 @@ export class SyncManager {
 
 #### **Offline Queue**
 ```typescript
-// apps/mobile/src/services/sync/OfflineQueue.ts
+// apps/_archive/mobile-v1//src/services/sync/OfflineQueue.ts
 export class OfflineQueue {
   private database: Database;
   private queueTable = 'sync_queue';
@@ -655,7 +655,7 @@ export class OfflineQueue {
 
 #### **Encryption Service Tests**
 ```typescript
-// apps/mobile/src/tests/encryption.test.ts
+// apps/_archive/mobile-v1//src/tests/encryption.test.ts
 describe('EncryptionService', () => {
   let encryptionService: EncryptionService;
 
@@ -700,7 +700,7 @@ describe('EncryptionService', () => {
 
 #### **End-to-End User Flow Tests**
 ```typescript
-// apps/mobile/src/tests/integration/userFlow.test.ts
+// apps/_archive/mobile-v1//src/tests/integration/userFlow.test.ts
 describe('User Registration and Login Flow', () => {
   it('should complete full user registration and login', async () => {
     // 1. Register new user

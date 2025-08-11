@@ -39,7 +39,7 @@ Epic 1 has been successfully completed with all 5 user stories meeting their acc
 ✅ **Project initialized with expo-cli**
 - Expo SDK 49.0.0 properly configured
 - React Native 0.72.10 with TypeScript support
-- Proper project structure in `apps/mobile/`
+- Proper project structure in `apps/_archive/mobile-v1//`
 
 ✅ **TypeScript configured correctly**
 - `tsconfig.json` extends root configuration
@@ -279,7 +279,7 @@ Time: 0.144s
 ✅ All tests passing
 
 # Mobile Tests
-npm test --workspace=apps/mobile
+npm test --workspace=apps/_archive/mobile-v1/
 > @drishti/mobile@1.0.0 test
 > jest
 Test Suites: 1 passed, 1 total
@@ -340,7 +340,7 @@ curl http://localhost:3000/health/db
 └── Configuration files (tsconfig, eslint, etc.)
 
 ✅ Mobile App Structure:
-apps/mobile/
+apps/_archive/mobile-v1//
 ├── App.tsx           # Main app component
 ├── src/
 │   ├── components/   # UI components

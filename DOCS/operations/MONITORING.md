@@ -84,7 +84,7 @@ export { Sentry };
 
 #### Setup for Mobile (React Native)
 ```javascript
-// apps/mobile/src/config/monitoring.ts
+// apps/_archive/mobile-v1//src/config/monitoring.ts
 import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
