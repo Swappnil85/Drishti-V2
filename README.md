@@ -1,6 +1,8 @@
 # Drishti
 
 **AI-Powered Visual Assistance Application**
+Note: This repository is in Frontend V2 planning mode. See DOCS/RESET_NOTICE.md and DOCS/v2.
+
 
 Drishti is an innovative mobile application that leverages artificial intelligence to provide visual assistance and enhance accessibility for users. The application combines advanced computer vision, natural language processing, and mobile technology to deliver intelligent visual interpretation and assistance.
 
