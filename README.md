@@ -85,6 +85,10 @@ npm run dev --workspace=apps/api
 - Real-time object detection and recognition
 - Accessibility features for visual assistance
 
+### Frontend V2 (planning only)
+
+See DOCS/RESET_NOTICE.md and DOCS/v2 for planning artifacts. No new frontend code exists yet.
+
 ## 📱 Applications
 
 ### API Backend (`apps/api`)
