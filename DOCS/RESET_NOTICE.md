@@ -1,3 +1,7 @@
+**⚠️ Frontend V2 Coding Freeze**
+
+Frontend V2 scaffolding/coding must not begin until the new PRD, MVP Epics, and MVP User Stories have been approved in writing. This applies to all contributors and automation agents.
+
 # Frontend Reset Notice
 
 We are archiving the current frontend (V1) and preparing a clean Frontend V2. The backend and shared packages remain unchanged.
