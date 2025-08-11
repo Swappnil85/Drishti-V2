@@ -124,3 +124,14 @@ Desktop.ini
 tmp/
 temp/
 node_modules
+
+# Security hardening
+*.pem
+*.key
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.cer
+*.crt
+*.mobileprovision
