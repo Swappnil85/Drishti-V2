@@ -127,7 +127,7 @@ Financial Calculation Engine
 │   └── utils.ts (Extended)
 ├── API Layer (apps/api/src/)
 │   └── routes/calculations.ts
-└── Mobile Layer (apps/mobile/src/)
+└── Mobile Layer (apps/_archive/mobile-v1//src/)
     └── services/financial/CalculationService.ts
 ```
 

@@ -79,32 +79,32 @@ Epic 12 delivers comprehensive sync and offline functionality for the Drishti fi
 ## Files Created
 
 ### Services (7 files)
-- `apps/mobile/src/services/sync/OfflineService.ts` (Enhanced)
-- `apps/mobile/src/services/sync/EnhancedSyncManager.ts`
-- `apps/mobile/src/services/sync/AdvancedConflictResolutionService.ts`
-- `apps/mobile/src/services/sync/SyncNotificationService.ts`
-- `apps/mobile/src/services/sync/DeveloperConflictResolutionService.ts`
-- `apps/mobile/src/services/sync/BackgroundSyncPreparationService.ts`
-- `apps/mobile/src/services/help/OfflineHelpService.ts`
+- `apps/_archive/mobile-v1//src/services/sync/OfflineService.ts` (Enhanced)
+- `apps/_archive/mobile-v1//src/services/sync/EnhancedSyncManager.ts`
+- `apps/_archive/mobile-v1//src/services/sync/AdvancedConflictResolutionService.ts`
+- `apps/_archive/mobile-v1//src/services/sync/SyncNotificationService.ts`
+- `apps/_archive/mobile-v1//src/services/sync/DeveloperConflictResolutionService.ts`
+- `apps/_archive/mobile-v1//src/services/sync/BackgroundSyncPreparationService.ts`
+- `apps/_archive/mobile-v1//src/services/help/OfflineHelpService.ts`
 
 ### React Hooks (8 files)
-- `apps/mobile/src/hooks/useOfflineSync.ts` (Enhanced)
-- `apps/mobile/src/hooks/useEnhancedSync.ts`
-- `apps/mobile/src/hooks/useAdvancedConflictResolution.ts`
-- `apps/mobile/src/hooks/useSyncNotifications.ts`
-- `apps/mobile/src/hooks/useDeveloperConflictResolution.ts`
-- `apps/mobile/src/hooks/useOfflineHelp.ts`
-- `apps/mobile/src/hooks/useConflictResolutionStats.ts`
-- `apps/mobile/src/hooks/usePlaidIntegration.ts`
+- `apps/_archive/mobile-v1//src/hooks/useOfflineSync.ts` (Enhanced)
+- `apps/_archive/mobile-v1//src/hooks/useEnhancedSync.ts`
+- `apps/_archive/mobile-v1//src/hooks/useAdvancedConflictResolution.ts`
+- `apps/_archive/mobile-v1//src/hooks/useSyncNotifications.ts`
+- `apps/_archive/mobile-v1//src/hooks/useDeveloperConflictResolution.ts`
+- `apps/_archive/mobile-v1//src/hooks/useOfflineHelp.ts`
+- `apps/_archive/mobile-v1//src/hooks/useConflictResolutionStats.ts`
+- `apps/_archive/mobile-v1//src/hooks/usePlaidIntegration.ts`
 
 ### UI Components (4 files)
-- `apps/mobile/src/components/sync/OfflineIndicator.tsx` (Enhanced)
-- `apps/mobile/src/components/sync/EnhancedSyncIndicator.tsx`
-- `apps/mobile/src/components/sync/AdvancedConflictResolutionModal.tsx`
-- `apps/mobile/src/components/sync/SyncHealthDashboard.tsx`
+- `apps/_archive/mobile-v1//src/components/sync/OfflineIndicator.tsx` (Enhanced)
+- `apps/_archive/mobile-v1//src/components/sync/EnhancedSyncIndicator.tsx`
+- `apps/_archive/mobile-v1//src/components/sync/AdvancedConflictResolutionModal.tsx`
+- `apps/_archive/mobile-v1//src/components/sync/SyncHealthDashboard.tsx`
 
 ### Screen Enhancements (1 file)
-- `apps/mobile/src/screens/accounts/AccountsListScreen.tsx` (Enhanced with conflict resolution)
+- `apps/_archive/mobile-v1//src/screens/accounts/AccountsListScreen.tsx` (Enhanced with conflict resolution)
 
 ## Quality Assurance
 

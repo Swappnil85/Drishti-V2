@@ -101,14 +101,14 @@ This comprehensive document serves as the master record for both detailed user s
 
 #### 1. Project Initialization ✅
 
-- **Location**: `apps/mobile/`
+- **Location**: `apps/_archive/mobile-v1//`
 - **Expo Version**: 49.0.0
 - **React Native Version**: 0.72.10 (updated from 0.72.3)
 - **Main Entry**: `node_modules/expo/AppEntry.js`
 
 #### 2. TypeScript Configuration ✅
 
-- **Config File**: `apps/mobile/tsconfig.json`
+- **Config File**: `apps/_archive/mobile-v1//tsconfig.json`
 - **Extends**: Root monorepo TypeScript configuration
 - **Strict Mode**: Enabled (`"strict": true`)
 - **JSX**: Configured for React Native (`"jsx": "react-native"`)
@@ -161,7 +161,7 @@ This comprehensive document serves as the master record for both detailed user s
 #### 4. App Structure ✅
 
 ```
-apps/mobile/
+apps/_archive/mobile-v1//
 ├── App.tsx                 # Main app component
 ├── app.config.js          # Expo configuration
 ├── babel.config.js        # Babel configuration
@@ -173,7 +173,7 @@ apps/mobile/
 
 #### 5. Basic App Component ✅
 
-- **File**: `apps/mobile/App.tsx`
+- **File**: `apps/_archive/mobile-v1//App.tsx`
 - **Features**:
   - TypeScript implementation
   - Expo StatusBar integration
@@ -406,7 +406,7 @@ curl http://localhost:3000/health/db
 
 #### 2. Database Configuration ✅
 
-**Database Setup** (`apps/mobile/src/database/index.ts`):
+**Database Setup** (`apps/_archive/mobile-v1//src/database/index.ts`):
 
 - SQLiteAdapter configured with JSI for performance
 - Database name: `drishti.db`
@@ -421,7 +421,7 @@ curl http://localhost:3000/health/db
 
 #### 3. Database Schema Definition ✅
 
-**Schema Structure** (`apps/mobile/src/database/schemas/index.ts`):
+**Schema Structure** (`apps/_archive/mobile-v1//src/database/schemas/index.ts`):
 
 ```typescript
 // User table schema
@@ -442,7 +442,7 @@ curl http://localhost:3000/health/db
 
 #### 4. User Model Implementation ✅
 
-**Model Features** (`apps/mobile/src/database/models/User.ts`):
+**Model Features** (`apps/_archive/mobile-v1//src/database/models/User.ts`):
 
 - **Decorators**: @field, @date, @readonly for type-safe database mapping
 - **Computed Properties**: displayName, isOnline, preferences (JSON parsing)
@@ -463,7 +463,7 @@ interface UserPreferences {
 
 #### 5. Database Operations ✅
 
-**Service Layer** (`apps/mobile/src/database/services/UserService.ts`):
+**Service Layer** (`apps/_archive/mobile-v1//src/database/services/UserService.ts`):
 
 - **CRUD Operations**: Create, Read, Update, Delete users
 - **Query Methods**: getUserById, getUserByEmail, searchUsers
@@ -479,7 +479,7 @@ interface UserPreferences {
 
 #### 6. React Hooks Integration ✅
 
-**Custom Hooks** (`apps/mobile/src/hooks/useDatabase.ts`):
+**Custom Hooks** (`apps/_archive/mobile-v1//src/hooks/useDatabase.ts`):
 
 - **useUsers()** - Manage user collection with CRUD operations
 - **useUser()** - Manage single user by ID or email
@@ -494,7 +494,7 @@ interface UserPreferences {
 
 #### 7. UI Test Component ✅
 
-**Database Test Interface** (`apps/mobile/src/components/DatabaseTest.tsx`):
+**Database Test Interface** (`apps/_archive/mobile-v1//src/components/DatabaseTest.tsx`):
 
 - **User Creation Form**: Name and email input with validation
 - **User List Display**: Shows all users with details and actions
@@ -511,7 +511,7 @@ interface UserPreferences {
 
 #### 8. App Integration ✅
 
-**Main App Update** (`apps/mobile/App.tsx`):
+**Main App Update** (`apps/_archive/mobile-v1//App.tsx`):
 
 - DatabaseTest component integrated into main app
 - SafeAreaView for proper mobile display
@@ -668,7 +668,7 @@ npm start          # ✅ Expo server starts
 - Timestamp format validation
 - **6 tests passing** ✅
 
-**Mobile Tests** (`apps/mobile/src/__tests__/database.test.ts`):
+**Mobile Tests** (`apps/_archive/mobile-v1//src/__tests__/database.test.ts`):
 
 - User data validation testing
 - Email format validation
@@ -2507,21 +2507,21 @@ Successfully implemented comprehensive scenario creation and management system w
 
 **New Files**:
 
-- `apps/mobile/src/services/scenario/ScenarioService.ts`
-- `apps/mobile/src/hooks/useScenarios.ts`
-- `apps/mobile/src/screens/scenarios/wizard/TemplateSelectionStep.tsx`
-- `apps/mobile/src/screens/scenarios/wizard/BasicInfoStep.tsx`
-- `apps/mobile/src/screens/scenarios/wizard/AssumptionsStep.tsx`
-- `apps/mobile/src/screens/scenarios/wizard/ReviewStep.tsx`
-- `apps/mobile/src/services/scenario/__tests__/ScenarioService.test.ts`
-- `apps/mobile/src/utils/__tests__/validation.test.ts`
+- `apps/_archive/mobile-v1//src/services/scenario/ScenarioService.ts`
+- `apps/_archive/mobile-v1//src/hooks/useScenarios.ts`
+- `apps/_archive/mobile-v1//src/screens/scenarios/wizard/TemplateSelectionStep.tsx`
+- `apps/_archive/mobile-v1//src/screens/scenarios/wizard/BasicInfoStep.tsx`
+- `apps/_archive/mobile-v1//src/screens/scenarios/wizard/AssumptionsStep.tsx`
+- `apps/_archive/mobile-v1//src/screens/scenarios/wizard/ReviewStep.tsx`
+- `apps/_archive/mobile-v1//src/services/scenario/__tests__/ScenarioService.test.ts`
+- `apps/_archive/mobile-v1//src/utils/__tests__/validation.test.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/scenarios/CreateScenarioScreen.tsx`
-- `apps/mobile/src/screens/scenarios/ScenariosListScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/scenarios/CreateScenarioScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/scenarios/ScenariosListScreen.tsx`
 - `packages/shared/src/types/financial.ts`
-- `apps/mobile/src/utils/validation.ts`
+- `apps/_archive/mobile-v1//src/utils/validation.ts`
 
 ### Documentation Updated
 
@@ -2562,15 +2562,15 @@ Successfully implemented comprehensive scenario creation and management system w
 
 **New Files**:
 
-- `apps/mobile/src/services/market/HistoricalMarketDataService.ts`
-- `apps/mobile/src/services/calculations/RealTimeCalculationService.ts`
-- `apps/mobile/src/services/analysis/WhatIfAnalysisService.ts`
+- `apps/_archive/mobile-v1//src/services/market/HistoricalMarketDataService.ts`
+- `apps/_archive/mobile-v1//src/services/calculations/RealTimeCalculationService.ts`
+- `apps/_archive/mobile-v1//src/services/analysis/WhatIfAnalysisService.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/services/scenario/ScenarioService.ts` (added 11 new templates)
-- `apps/mobile/src/screens/scenarios/wizard/AssumptionsStep.tsx` (major enhancements)
-- `apps/mobile/src/utils/validation.ts` (enhanced security validation)
+- `apps/_archive/mobile-v1//src/services/scenario/ScenarioService.ts` (added 11 new templates)
+- `apps/_archive/mobile-v1//src/screens/scenarios/wizard/AssumptionsStep.tsx` (major enhancements)
+- `apps/_archive/mobile-v1//src/utils/validation.ts` (enhanced security validation)
 
 **Quality Rating**: A+ (Exceptional - Exceeded Original Requirements)
 **Completion Status**: ✅ **PRODUCTION READY AND DEPLOYED**
@@ -2655,11 +2655,11 @@ Successfully implemented comprehensive scenario comparison system with side-by-s
 
 **New Files**:
 
-- `apps/mobile/src/services/scenario/ScenarioComparisonService.ts`
+- `apps/_archive/mobile-v1//src/services/scenario/ScenarioComparisonService.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/scenarios/ScenarioComparisonScreen.tsx` (complete rewrite)
+- `apps/_archive/mobile-v1//src/screens/scenarios/ScenarioComparisonScreen.tsx` (complete rewrite)
 
 ### Documentation Updated
 
@@ -2759,8 +2759,8 @@ Successfully implemented comprehensive scenario versioning and management system
 
 **New Files**:
 
-- `apps/mobile/src/services/scenario/ScenarioVersioningService.ts`
-- `apps/mobile/src/screens/scenarios/ScenarioManagementScreen.tsx`
+- `apps/_archive/mobile-v1//src/services/scenario/ScenarioVersioningService.ts`
+- `apps/_archive/mobile-v1//src/screens/scenarios/ScenarioManagementScreen.tsx`
 
 ### Documentation Updated
 
@@ -2858,8 +2858,8 @@ Successfully implemented comprehensive year-by-year projections system with inte
 
 **New Files**:
 
-- `apps/mobile/src/services/projections/YearlyProjectionsService.ts`
-- `apps/mobile/src/screens/scenarios/YearlyProjectionsScreen.tsx`
+- `apps/_archive/mobile-v1//src/services/projections/YearlyProjectionsService.ts`
+- `apps/_archive/mobile-v1//src/screens/scenarios/YearlyProjectionsScreen.tsx`
 
 ### Documentation Updated
 
@@ -2957,8 +2957,8 @@ Successfully implemented comprehensive stress testing system with historical mar
 
 **New Files**:
 
-- `apps/mobile/src/services/stress/StressTestingService.ts`
-- `apps/mobile/src/screens/scenarios/StressTestingScreen.tsx`
+- `apps/_archive/mobile-v1//src/services/stress/StressTestingService.ts`
+- `apps/_archive/mobile-v1//src/screens/scenarios/StressTestingScreen.tsx`
 
 ### Documentation Updated
 
@@ -3130,7 +3130,7 @@ Successfully completed all 5 stories in Epic 9, delivering a comprehensive scena
 
 #### 4. Mobile Integration ✅
 
-**CalculationService** (`apps/mobile/src/services/financial/CalculationService.ts`):
+**CalculationService** (`apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`):
 
 - Mobile calculation service with offline capabilities and queue processing
 - Real-time updates with subscription-based calculation updates
@@ -3245,7 +3245,7 @@ Epic 7, Story 3 implemented a comprehensive savings rate calculation system that
 - Comprehensive input validation and error handling
 - OpenAPI 3.0 documentation with detailed schemas
 
-**Mobile Integration** (`apps/mobile/src/services/financial/CalculationService.ts`):
+**Mobile Integration** (`apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`):
 
 - `calculateRequiredSavingsRate()`: Mobile-optimized savings rate calculations with offline support
 - `calculateGoalBasedPlanning()`: Goal planning with queue-based processing and real-time updates
@@ -3305,7 +3305,7 @@ Epic 7, Story 4 implemented comprehensive Coast FIRE and Barista FIRE calculatio
 - Comprehensive input validation with age ranges, return rate limits, and scenario validation
 - OpenAPI 3.0 documentation with detailed parameter schemas
 
-**Mobile Integration** (`apps/mobile/src/services/financial/CalculationService.ts`):
+**Mobile Integration** (`apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`):
 
 - `calculateCoastFIRE()`: Mobile-optimized Coast FIRE calculations with offline support and priority queuing
 - `calculateBaristaFIRE()`: Barista FIRE analysis with AsyncStorage caching and timeout handling
@@ -3367,7 +3367,7 @@ Epic 7, Story 5 implemented comprehensive market volatility and downturn modelin
 - Extensive input validation with scenario type enums, return rate limits, and probability constraints
 - OpenAPI 3.0 documentation with detailed parameter schemas and response structures
 
-**Mobile Integration** (`apps/mobile/src/services/financial/CalculationService.ts`):
+**Mobile Integration** (`apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`):
 
 - `calculateMarketVolatility()`: Mobile-optimized volatility calculations with offline support and extended timeout (45s)
 - `calculateMarketStressTest()`: Stress testing with AsyncStorage caching and priority queuing
@@ -3446,7 +3446,7 @@ Epic 7, Story 6 implemented a comprehensive debt payoff strategy calculator that
 - Enhanced response metadata including analysis flags and recommendation counts
 - Error handling with proper HTTP status codes and descriptive error messages
 
-**Mobile Integration** (`apps/mobile/src/services/financial/CalculationService.ts`):
+**Mobile Integration** (`apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`):
 
 - `calculateEnhancedDebtPayoff()`: Mobile-optimized debt payoff calculations with 30s timeout and offline support
 - `calculateDebtConsolidation()`: Dedicated consolidation analysis with 20s timeout and intelligent caching
@@ -3546,15 +3546,15 @@ Successfully implemented the foundational FIRE goal creation and management syst
 
 **New Files**:
 
-- `apps/mobile/src/services/financial/FIREGoalService.ts`
-- `apps/mobile/src/services/financial/__tests__/FIREGoalService.test.ts`
-- `apps/mobile/src/screens/goals/__tests__/CreateGoalScreen.test.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/FIREGoalService.ts`
+- `apps/_archive/mobile-v1//src/services/financial/__tests__/FIREGoalService.test.ts`
+- `apps/_archive/mobile-v1//src/screens/goals/__tests__/CreateGoalScreen.test.tsx`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/goals/CreateGoalScreen.tsx`
-- `apps/mobile/src/screens/goals/GoalsListScreen.tsx`
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/CreateGoalScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalsListScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 - `packages/shared/src/types/financial.ts`
 
 ### Documentation Updated
@@ -3658,16 +3658,16 @@ Successfully implemented advanced progress tracking and visualization system wit
 
 **New Files**:
 
-- `apps/mobile/src/components/goals/ProgressVisualization.tsx`
-- `apps/mobile/src/components/goals/MilestoneCelebration.tsx`
-- `apps/mobile/src/services/financial/ProgressTrackingService.ts`
-- `apps/mobile/src/services/financial/__tests__/ProgressTrackingService.test.ts`
-- `apps/mobile/src/components/goals/__tests__/ProgressVisualization.test.tsx`
+- `apps/_archive/mobile-v1//src/components/goals/ProgressVisualization.tsx`
+- `apps/_archive/mobile-v1//src/components/goals/MilestoneCelebration.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/ProgressTrackingService.ts`
+- `apps/_archive/mobile-v1//src/services/financial/__tests__/ProgressTrackingService.test.ts`
+- `apps/_archive/mobile-v1//src/components/goals/__tests__/ProgressVisualization.test.tsx`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/services/financial/FIREGoalService.ts`
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/FIREGoalService.ts`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 
 ### Documentation Updated
 
@@ -3761,14 +3761,14 @@ Successfully implemented comprehensive goal adjustment and impact analysis syste
 
 **New Files**:
 
-- `apps/mobile/src/components/goals/GoalAdjustmentWizard.tsx`
-- `apps/mobile/src/components/goals/GoalSplittingWizard.tsx`
-- `apps/mobile/src/services/financial/GoalSuspensionService.ts`
-- `apps/mobile/src/components/goals/__tests__/GoalAdjustmentWizard.test.tsx`
+- `apps/_archive/mobile-v1//src/components/goals/GoalAdjustmentWizard.tsx`
+- `apps/_archive/mobile-v1//src/components/goals/GoalSplittingWizard.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/GoalSuspensionService.ts`
+- `apps/_archive/mobile-v1//src/components/goals/__tests__/GoalAdjustmentWizard.test.tsx`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 
 ### Documentation Updated
 
@@ -3854,14 +3854,14 @@ Successfully implemented advanced ML-based life event impact modeling and automa
 
 **New Files**:
 
-- `apps/mobile/src/services/financial/LifeEventImpactModelingService.ts`
-- `apps/mobile/src/services/financial/AutomatedAdjustmentService.ts`
-- `apps/mobile/src/components/goals/AutomatedSuggestionsPanel.tsx`
-- `apps/mobile/src/services/financial/__tests__/LifeEventImpactModelingService.test.ts`
+- `apps/_archive/mobile-v1//src/services/financial/LifeEventImpactModelingService.ts`
+- `apps/_archive/mobile-v1//src/services/financial/AutomatedAdjustmentService.ts`
+- `apps/_archive/mobile-v1//src/components/goals/AutomatedSuggestionsPanel.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/__tests__/LifeEventImpactModelingService.test.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 
 ### Documentation Updated
 
@@ -3911,8 +3911,8 @@ Goal milestones and celebrations functionality was successfully implemented as p
 
 **Existing Files**:
 
-- `apps/mobile/src/components/goals/MilestoneCelebration.tsx` (Previously created)
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx` (Integration completed)
+- `apps/_archive/mobile-v1//src/components/goals/MilestoneCelebration.tsx` (Previously created)
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx` (Integration completed)
 
 ### Documentation Updated
 
@@ -3998,13 +3998,13 @@ Successfully implemented comprehensive goal feasibility analysis system with adv
 
 **New Files**:
 
-- `apps/mobile/src/services/financial/EnhancedFeasibilityService.ts`
-- `apps/mobile/src/components/goals/EnhancedFeasibilityPanel.tsx`
-- `apps/mobile/src/services/financial/__tests__/EnhancedFeasibilityService.test.ts`
+- `apps/_archive/mobile-v1//src/services/financial/EnhancedFeasibilityService.ts`
+- `apps/_archive/mobile-v1//src/components/goals/EnhancedFeasibilityPanel.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/__tests__/EnhancedFeasibilityService.test.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 
 ### Documentation Updated
 
@@ -4055,13 +4055,13 @@ Successfully implemented comprehensive goal adjustment history tracking with tim
 
 **New Files**:
 
-- `apps/mobile/src/services/financial/GoalAdjustmentHistoryService.ts`
-- `apps/mobile/src/components/goals/GoalAdjustmentHistoryPanel.tsx`
-- `apps/mobile/src/services/financial/__tests__/GoalAdjustmentHistoryService.test.ts`
+- `apps/_archive/mobile-v1//src/services/financial/GoalAdjustmentHistoryService.ts`
+- `apps/_archive/mobile-v1//src/components/goals/GoalAdjustmentHistoryPanel.tsx`
+- `apps/_archive/mobile-v1//src/services/financial/__tests__/GoalAdjustmentHistoryService.test.ts`
 
 **Enhanced Files**:
 
-- `apps/mobile/src/screens/goals/GoalDetailsScreen.tsx`
+- `apps/_archive/mobile-v1//src/screens/goals/GoalDetailsScreen.tsx`
 
 ---
 
@@ -4199,12 +4199,12 @@ Epic 8 represents the culmination of advanced goal management capabilities, deli
 
 **Files Created/Modified**:
 
-- `apps/mobile/src/components/goals/ProgressVisualization.tsx` - Enhanced with Victory Native
-- `apps/mobile/src/components/charts/AchievementVisualization.tsx` - New milestone visualization
-- `apps/mobile/src/components/charts/Chart3D.tsx` - New 3D chart component
-- `apps/mobile/src/hooks/useChartHaptics.ts` - New haptic feedback system
-- `apps/mobile/src/components/charts/ChartCustomization.tsx` - New customization interface
-- `apps/mobile/package.json` - Added Victory Native dependency
+- `apps/_archive/mobile-v1//src/components/goals/ProgressVisualization.tsx` - Enhanced with Victory Native
+- `apps/_archive/mobile-v1//src/components/charts/AchievementVisualization.tsx` - New milestone visualization
+- `apps/_archive/mobile-v1//src/components/charts/Chart3D.tsx` - New 3D chart component
+- `apps/_archive/mobile-v1//src/hooks/useChartHaptics.ts` - New haptic feedback system
+- `apps/_archive/mobile-v1//src/components/charts/ChartCustomization.tsx` - New customization interface
+- `apps/_archive/mobile-v1//package.json` - Added Victory Native dependency
 
 **Quality Metrics**:
 
@@ -4239,9 +4239,9 @@ Epic 8 represents the culmination of advanced goal management capabilities, deli
 
 **Files Created/Modified**:
 
-- `apps/mobile/src/components/charts/InteractiveProjectionTimeline.tsx` - Main timeline component
-- `apps/mobile/src/components/charts/TimelineZoomController.tsx` - Zoom and pan controls
-- `apps/mobile/src/services/charts/ChartExportService.ts` - Export functionality
+- `apps/_archive/mobile-v1//src/components/charts/InteractiveProjectionTimeline.tsx` - Main timeline component
+- `apps/_archive/mobile-v1//src/components/charts/TimelineZoomController.tsx` - Zoom and pan controls
+- `apps/_archive/mobile-v1//src/services/charts/ChartExportService.ts` - Export functionality
 
 ### Story 4: Zoom and Pan for Long-term Projections ✅ COMPLETED
 
@@ -4280,9 +4280,9 @@ Epic 8 represents the culmination of advanced goal management capabilities, deli
 
 **Files Created/Modified**:
 
-- `apps/mobile/src/components/charts/ChartAccessibility.tsx` - Main accessibility component
-- `apps/mobile/src/services/accessibility/ScreenReaderService.ts` - Screen reader integration
-- `apps/mobile/src/contexts/HighContrastThemeContext.tsx` - High contrast theme support
+- `apps/_archive/mobile-v1//src/components/charts/ChartAccessibility.tsx` - Main accessibility component
+- `apps/_archive/mobile-v1//src/services/accessibility/ScreenReaderService.ts` - Screen reader integration
+- `apps/_archive/mobile-v1//src/contexts/HighContrastThemeContext.tsx` - High contrast theme support
 
 ### Story 5: Net Worth Growth Visualization ✅ COMPLETED
 
@@ -4309,7 +4309,7 @@ Epic 8 represents the culmination of advanced goal management capabilities, deli
 
 **Files Created/Modified**:
 
-- `apps/mobile/src/components/charts/NetWorthGrowthVisualization.tsx` - Main growth visualization
+- `apps/_archive/mobile-v1//src/components/charts/NetWorthGrowthVisualization.tsx` - Main growth visualization
 
 ### Story 6: Visual Scenario Comparison ✅ COMPLETED
 
@@ -4336,7 +4336,7 @@ Epic 8 represents the culmination of advanced goal management capabilities, deli
 
 **Files Created/Modified**:
 
-- `apps/mobile/src/components/charts/VisualScenarioComparison.tsx` - Main scenario comparison component
+- `apps/_archive/mobile-v1//src/components/charts/VisualScenarioComparison.tsx` - Main scenario comparison component
 
 ## EPIC 10 COMPLETION SUMMARY ✅
 

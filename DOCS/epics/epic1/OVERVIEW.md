@@ -276,7 +276,7 @@ Drishti/
 
 ### Technical Documentation ✅
 
-1. **<mcfile name="TECHNICAL_GUIDE.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** - Complete system design and implementation
+1. **<mcfile name="TECHNICAL_GUIDE.md" path="DOCS/epics/epic1/TECHNICAL_GUIDE.md"></mcfile>** - Complete system design and implementation
 2. **Database Schema** - Comprehensive database documentation
 3. **API Documentation** - Swagger-generated API docs
 4. **Mobile Architecture** - React Native app structure
@@ -284,8 +284,8 @@ Drishti/
 
 ### Process Documentation ✅
 
-1. **<mcfile name="QA_REPORT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/QA_REPORT.md"></mcfile>** - Testing strategy and validation results
-2. **<mcfile name="SECURITY_AUDIT.md" path="/Users/Swapnil/Programming/Drishti/DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** - Security review and recommendations
+1. **<mcfile name="QA_REPORT.md" path="DOCS/epics/epic1/QA_REPORT.md"></mcfile>** - Testing strategy and validation results
+2. **<mcfile name="SECURITY_AUDIT.md" path="DOCS/epics/epic1/SECURITY_AUDIT.md"></mcfile>** - Security review and recommendations
 3. **Technical Review** - Architecture and code quality review
 4. **Deployment Guide** - CI/CD and deployment procedures
 

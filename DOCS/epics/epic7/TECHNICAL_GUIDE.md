@@ -38,7 +38,7 @@ packages/shared/src/
 apps/api/src/routes/
 └── calculations.ts                  # API endpoints
 
-apps/mobile/src/services/financial/
+apps/_archive/mobile-v1//src/services/financial/
 └── CalculationService.ts           # Mobile calculation service
 ```
 
@@ -190,7 +190,7 @@ if (!request.body.monthlyExpenses && !request.body.annualExpenses) {
 
 ### 4. Mobile Integration
 
-**Location**: `apps/mobile/src/services/financial/CalculationService.ts`
+**Location**: `apps/_archive/mobile-v1//src/services/financial/CalculationService.ts`
 
 Mobile calculation service with offline capabilities and queue processing.
 

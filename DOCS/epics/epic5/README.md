@@ -82,7 +82,7 @@ SecurityEvent         → Security audit logging
 ## 📁 File Structure
 
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── services/profile/
 │   ├── OnboardingService.ts          # Multi-variant onboarding
 │   ├── ProfileService.ts             # Profile management

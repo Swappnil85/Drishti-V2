@@ -153,7 +153,7 @@ EPIC 10 is a frontend-only implementation that does not require database schema 
 
 ### New Directory Structure
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── components/charts/
 │   ├── AchievementVisualization.tsx
 │   ├── ChartAccessibility.tsx
@@ -207,7 +207,7 @@ git push origin v1.10.0
 ### Step 2: Dependency Installation
 ```bash
 # Install new dependencies
-cd apps/mobile
+cd apps/_archive/mobile-v1/
 npm install
 
 # Verify installation

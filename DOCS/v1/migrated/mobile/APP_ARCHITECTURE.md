@@ -38,7 +38,7 @@ This ensures proper component registration for both mobile and web platforms.
 ## Application Structure
 
 ```
-apps/mobile/
+apps/_archive/mobile-v1//
 ├── src/
 │   ├── components/          # Reusable UI components
 │   │   ├── common/         # Generic components

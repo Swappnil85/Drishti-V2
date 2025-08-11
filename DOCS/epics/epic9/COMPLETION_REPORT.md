@@ -148,11 +148,11 @@ Epic 9 is currently in the infrastructure development phase. The initial databas
 
 ### Files Modified/Created
 
-1. **apps/mobile/src/database/index.ts** - New web-compatible database implementation
-2. **apps/mobile/src/services/scenario/ScenarioService.ts** - Cross-platform compatibility fixes
-3. **apps/mobile/src/hooks/useScenarios.ts** - Hook stability improvements
-4. **apps/mobile/src/navigation/stacks/ScenariosNavigator.tsx** - Test screen integration
-5. **apps/mobile/src/screens/scenarios/TestScenariosScreen.tsx** - New test screen
+1. **apps/_archive/mobile-v1//src/database/index.ts** - New web-compatible database implementation
+2. **apps/_archive/mobile-v1//src/services/scenario/ScenarioService.ts** - Cross-platform compatibility fixes
+3. **apps/_archive/mobile-v1//src/hooks/useScenarios.ts** - Hook stability improvements
+4. **apps/_archive/mobile-v1//src/navigation/stacks/ScenariosNavigator.tsx** - Test screen integration
+5. **apps/_archive/mobile-v1//src/screens/scenarios/TestScenariosScreen.tsx** - New test screen
 
 ### Planned Services (Not Yet Created)
 

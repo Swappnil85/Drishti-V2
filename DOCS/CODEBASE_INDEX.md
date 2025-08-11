@@ -35,7 +35,7 @@ Drishti/
 - **Security**: Helmet, CORS, rate limiting
 - **Documentation**: OpenAPI 3.0 with Swagger UI
 
-**Mobile App (`apps/mobile`)**
+**Mobile App (`apps/_archive/mobile-v1/`)**
 
 - **Framework**: React Native with Expo SDK 53
 - **Language**: TypeScript (strict mode)
@@ -144,7 +144,7 @@ apps/api/src/
 ### Mobile App Structure
 
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── screens/                # Screen components
 │   ├── auth/              # Authentication screens
 │   ├── dashboard/         # Dashboard screens

@@ -33,11 +33,11 @@ Epic 9 aims to deliver a comprehensive scenario planning and projections system 
 
 **Technical Files Modified**:
 
-- `apps/mobile/src/database/index.ts` - Web-compatible database implementation
-- `apps/mobile/src/services/scenario/ScenarioService.ts` - Cross-platform compatibility fixes
-- `apps/mobile/src/hooks/useScenarios.ts` - Hook stability improvements
-- `apps/mobile/src/navigation/stacks/ScenariosNavigator.tsx` - Test screen integration
-- `apps/mobile/src/screens/scenarios/TestScenariosScreen.tsx` - New test screen
+- `apps/_archive/mobile-v1//src/database/index.ts` - Web-compatible database implementation
+- `apps/_archive/mobile-v1//src/services/scenario/ScenarioService.ts` - Cross-platform compatibility fixes
+- `apps/_archive/mobile-v1//src/hooks/useScenarios.ts` - Hook stability improvements
+- `apps/_archive/mobile-v1//src/navigation/stacks/ScenariosNavigator.tsx` - Test screen integration
+- `apps/_archive/mobile-v1//src/screens/scenarios/TestScenariosScreen.tsx` - New test screen
 
 ## Planned Stories (Not Yet Started)
 
@@ -162,25 +162,25 @@ Epic 9 aims to deliver a comprehensive scenario planning and projections system 
 ### New Files
 
 ```
-apps/mobile/src/services/historical/HistoricalMarketDataService.ts
-apps/mobile/src/services/calculations/RealTimeCalculationService.ts
-apps/mobile/src/services/analysis/WhatIfAnalysisService.ts
-apps/mobile/src/services/scenario/ScenarioComparisonService.ts
-apps/mobile/src/services/scenario/ScenarioVersioningService.ts
-apps/mobile/src/services/projections/YearlyProjectionsService.ts
-apps/mobile/src/services/stress/StressTestingService.ts
-apps/mobile/src/screens/scenarios/ScenarioComparisonScreen.tsx
-apps/mobile/src/screens/scenarios/ScenarioManagementScreen.tsx
-apps/mobile/src/screens/scenarios/YearlyProjectionsScreen.tsx
-apps/mobile/src/screens/scenarios/StressTestingScreen.tsx
+apps/_archive/mobile-v1//src/services/historical/HistoricalMarketDataService.ts
+apps/_archive/mobile-v1//src/services/calculations/RealTimeCalculationService.ts
+apps/_archive/mobile-v1//src/services/analysis/WhatIfAnalysisService.ts
+apps/_archive/mobile-v1//src/services/scenario/ScenarioComparisonService.ts
+apps/_archive/mobile-v1//src/services/scenario/ScenarioVersioningService.ts
+apps/_archive/mobile-v1//src/services/projections/YearlyProjectionsService.ts
+apps/_archive/mobile-v1//src/services/stress/StressTestingService.ts
+apps/_archive/mobile-v1//src/screens/scenarios/ScenarioComparisonScreen.tsx
+apps/_archive/mobile-v1//src/screens/scenarios/ScenarioManagementScreen.tsx
+apps/_archive/mobile-v1//src/screens/scenarios/YearlyProjectionsScreen.tsx
+apps/_archive/mobile-v1//src/screens/scenarios/StressTestingScreen.tsx
 ```
 
 ### Enhanced Files
 
 ```
-apps/mobile/src/screens/scenarios/wizard/AssumptionsStep.tsx
-apps/mobile/src/services/scenario/ScenarioService.ts
-apps/mobile/src/utils/validation.ts
+apps/_archive/mobile-v1//src/screens/scenarios/wizard/AssumptionsStep.tsx
+apps/_archive/mobile-v1//src/services/scenario/ScenarioService.ts
+apps/_archive/mobile-v1//src/utils/validation.ts
 ```
 
 ## Documentation

@@ -158,7 +158,7 @@ jobs:
         
       - name: Build mobile app
         run: |
-          cd apps/mobile
+          cd apps/_archive/mobile-v1/
           expo build:android --release-channel production
           expo build:ios --release-channel production
 ```
@@ -244,7 +244,7 @@ set -e
 
 echo "Starting mobile app deployment..."
 
-cd apps/mobile
+cd apps/_archive/mobile-v1/
 
 # Build for production
 expo build:android --release-channel production

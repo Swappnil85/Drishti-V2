@@ -26,7 +26,7 @@ Drishti follows a modern microservices architecture with a clear separation betw
 
 ## Component Architecture
 
-### 1. Mobile Application (`apps/mobile`)
+### 1. Mobile Application (`apps/_archive/mobile-v1/`)
 - **Framework**: React Native with Expo
 - **Language**: TypeScript
 - **State Management**: Zustand

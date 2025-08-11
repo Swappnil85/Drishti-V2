@@ -229,7 +229,7 @@ CREATE TABLE sessions (
 
 ### React Native Application Structure
 ```
-apps/mobile/src/
+apps/_archive/mobile-v1//src/
 ├── components/          # Reusable UI components
 ├── screens/            # Screen components
 ├── navigation/         # Navigation configuration

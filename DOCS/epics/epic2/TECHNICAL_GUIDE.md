@@ -135,7 +135,7 @@ interface SentryConfig {
 #### Dependencies to Install
 ```bash
 npm install --workspace=apps/api @sentry/node @sentry/profiling-node
-npm install --workspace=apps/mobile @sentry/react-native
+npm install --workspace=apps/_archive/mobile-v1/ @sentry/react-native
 ```
 
 ## Phase 2: Authentication Foundation (Week 2)
@@ -194,7 +194,7 @@ interface GoogleAuthConfig {
 
 #### Dependencies to Install
 ```bash
-npm install --workspace=apps/mobile expo-auth-session expo-web-browser
+npm install --workspace=apps/_archive/mobile-v1/ expo-auth-session expo-web-browser
 npm install --workspace=apps/api jsonwebtoken @types/jsonwebtoken
 npm install --workspace=apps/api bcryptjs @types/bcryptjs
 ```
@@ -265,7 +265,7 @@ enum BiometricType {
 
 #### Dependencies to Install
 ```bash
-npm install --workspace=apps/mobile expo-local-authentication
+npm install --workspace=apps/_archive/mobile-v1/ expo-local-authentication
 ```
 
 ### 3.2 PIN Authentication (US2.4)
@@ -375,8 +375,8 @@ interface SecurityScore {
 
 #### Implementation Libraries
 ```bash
-npm install --workspace=apps/mobile react-native-jailbreak-detector
-npm install --workspace=apps/mobile react-native-root-detection
+npm install --workspace=apps/_archive/mobile-v1/ react-native-jailbreak-detector
+npm install --workspace=apps/_archive/mobile-v1/ react-native-root-detection
 ```
 
 ### 5.2 Session Management (US2.6)

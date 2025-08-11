@@ -204,7 +204,7 @@ npm run health:check
 
 ```bash
 # Build mobile app
-cd apps/mobile
+cd apps/_archive/mobile-v1/
 npm run build:release
 
 # Deploy to app stores (if applicable)
