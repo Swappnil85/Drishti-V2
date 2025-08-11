@@ -62,6 +62,8 @@ npm run dev --workspace=apps/api
 # npm run dev --workspace=apps/mobile
 # See apps/_archive/mobile-v1/
 ```
+Note: Mobile V1 is archived under apps/_archive/mobile-v1/. V2 scaffolding will begin after PRD/Epics approval.
+
 
 ## 🚀 Development Status
 
