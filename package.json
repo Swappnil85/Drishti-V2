@@ -17,6 +17,8 @@
     "security:audit": "node scripts/security-audit.js",
     "security:scan": "npm audit && npm run security:audit",
     "security:pentest": "node scripts/penetration-test.js"
+  ,
+    "check:docs": "bash scripts/check-md-links.sh"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.21.0",
