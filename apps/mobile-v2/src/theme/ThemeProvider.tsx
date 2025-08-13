@@ -60,6 +60,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       return () => sub?.remove?.();
     } catch {
       // ignore in non-native test env
+      return () => undefined;
     }
   }, []);
 

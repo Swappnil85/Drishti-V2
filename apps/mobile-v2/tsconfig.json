@@ -8,7 +8,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowJs": false,
-    "types": ["jest"],
+    "types": ["jest", "react"],
     "baseUrl": ".",
     "paths": {
       "@drishti/shared/*": ["../../packages/shared/src/*"]
