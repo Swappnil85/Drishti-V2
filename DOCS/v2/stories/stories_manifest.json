@@ -1,0 +1,1005 @@
+{
+  "generatedAt": "2025-08-12 11:04:53 AET",
+  "stories": [
+    {
+      "id": "E4-S1",
+      "title": "Bottom Tab Navigation Shell",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S2",
+      "title": "Global Theming (Light/Dark + Tokens)",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S3",
+      "title": "Common Skeleton/Loading/Empty/Error Components",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S4",
+      "title": "Modal/Sheet & Toast System",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S5",
+      "title": "Haptics & Feedback",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S6",
+      "title": "Safe Area, Insets, and Keyboard Handling",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S7",
+      "title": "Global Date/Number/Currency Formatting",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S8",
+      "title": "Deep Link Routing (Basic)",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S9",
+      "title": "Error Boundary",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E4-S10",
+      "title": "Accessibility Baseline",
+      "epic": "E4",
+      "epicTitle": "Navigation & Core UI Framework",
+      "file": "E4-NAV_UI.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S1",
+      "title": "Onboarding Flow (5 steps + Resume)",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S2",
+      "title": "Currency & Locale Preference",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S3",
+      "title": "Privacy Mode Toggle (Local-Only)",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S4",
+      "title": "Theme Preference & Reduced Motion",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S5",
+      "title": "Security Settings (PIN/Biometrics enable)",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S6",
+      "title": "Manage Sample Data",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S7",
+      "title": "Settings Screen Information",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E5-S8",
+      "title": "First-Run Nudge to Add Account",
+      "epic": "E5",
+      "epicTitle": "Onboarding, Profile & Settings",
+      "file": "E5-ONBOARDING_SETTINGS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S1",
+      "title": "Create Account (Manual)",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S2",
+      "title": "Edit/Delete Account",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S3",
+      "title": "Accounts List w/ Empty & Error States",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S4",
+      "title": "Account Detail & Balance History",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S5",
+      "title": "CSV Import \u2014 File Picker & Preview",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S6",
+      "title": "CSV Import \u2014 Mapping & Validation",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S7",
+      "title": "CSV Import \u2014 Duplicate/Overlap Detection",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S8",
+      "title": "CSV Import \u2014 Commit & Report",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S9",
+      "title": "Saved Mapping Presets",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S10",
+      "title": "Multi-Currency Display",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S11",
+      "title": "Entitlement Checks for Free Tier",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E6-S12",
+      "title": "Accessibility & Performance",
+      "epic": "E6",
+      "epicTitle": "Accounts: Manual + CSV Import",
+      "file": "E6-ACCOUNTS_CSV.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S1",
+      "title": "Aggregate Current Net Worth",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S2",
+      "title": "Generate 12\u2011Month Baseline",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S3",
+      "title": "Reactivity & Caching",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S4",
+      "title": "Currency-Safe Math Utilities",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S5",
+      "title": "Delta Summary Card",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E7-S6",
+      "title": "Unit Test Suite",
+      "epic": "E7",
+      "epicTitle": "Net Worth & Calc Engine (12\u2011month)",
+      "file": "E7-NET_WORTH_ENGINE.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S1",
+      "title": "Create Goal",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S2",
+      "title": "Edit/Delete Goal & Recalc",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S3",
+      "title": "Goal Milestones & Badges",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S4",
+      "title": "Estimated Finish Date",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S5",
+      "title": "Entitlement Check (Free limit = 2)",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S6",
+      "title": "Notifications (Local)",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E8-S7",
+      "title": "A11y/Perf",
+      "epic": "E8",
+      "epicTitle": "Goals (Free tier: up to 2)",
+      "file": "E8-GOALS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S1",
+      "title": "Create One Active Scenario",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S2",
+      "title": "Projection vs Baseline (12\u2011mo)",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S3",
+      "title": "Quick Presets",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S4",
+      "title": "Apply / Revert",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S5",
+      "title": "Persistence",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S6",
+      "title": "Input Validation",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E9-S7",
+      "title": "A11y/Perf",
+      "epic": "E9",
+      "epicTitle": "Scenario Planner (Basic)",
+      "file": "E9-SCENARIOS_BASIC.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S1",
+      "title": "Net Worth Sparkline Component",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S2",
+      "title": "Goal Progress Visualization",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S3",
+      "title": "Accessible Tables",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S4",
+      "title": "Motion & Haptics Preferences",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S5",
+      "title": "Touch Targets & Gestures",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S6",
+      "title": "Color & Contrast",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E10-S7",
+      "title": "A11y Audit Pass",
+      "epic": "E10",
+      "epicTitle": "Data Visualization & Accessibility",
+      "file": "E10-DATA_VIZ_A11Y.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S1",
+      "title": "Paywall Screen",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S2",
+      "title": "IAP Purchase Flow (iOS/Android)",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S3",
+      "title": "Receipt Validation Endpoint (Backend Spec)",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S4",
+      "title": "Entitlement Middleware",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S5",
+      "title": "Restore Purchases",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S6",
+      "title": "Price/Copy Config",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E11-S7",
+      "title": "Paywall Trigger Points",
+      "epic": "E11",
+      "epicTitle": "Monetization & Entitlements",
+      "file": "E11-MONETIZATION.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S1",
+      "title": "Event Schema & Minimal PII Policy",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S2",
+      "title": "Client Event Queue & Retry",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S3",
+      "title": "Crash Reporting Integration",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S4",
+      "title": "Funnel & Key Events",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S5",
+      "title": "Health Check & Logging",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E12-S6",
+      "title": "Telemetry Dashboard (Internal)",
+      "epic": "E12",
+      "epicTitle": "Telemetry & Observability",
+      "file": "E12-TELEMETRY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S1",
+      "title": "Local DB Encryption",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S2",
+      "title": "App Lock (PIN/Biometrics)",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S3",
+      "title": "Certificate Pinning & TLS-Only",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S4",
+      "title": "Root/Jailbreak Detection",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S5",
+      "title": "Secrets Hygiene & CI Scan",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E13-S6",
+      "title": "Privacy Copy & Settings",
+      "epic": "E13",
+      "epicTitle": "Privacy & Security Hardening",
+      "file": "E13-PRIVACY_SECURITY.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E14-S1",
+      "title": "Export Accounts to CSV",
+      "epic": "E14",
+      "epicTitle": "Export & Sharing",
+      "file": "E14-EXPORT.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E14-S2",
+      "title": "Export Goals to CSV",
+      "epic": "E14",
+      "epicTitle": "Export & Sharing",
+      "file": "E14-EXPORT.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E14-S3",
+      "title": "System Share Sheet",
+      "epic": "E14",
+      "epicTitle": "Export & Sharing",
+      "file": "E14-EXPORT.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E14-S4",
+      "title": "Locale & File Naming",
+      "epic": "E14",
+      "epicTitle": "Export & Sharing",
+      "file": "E14-EXPORT.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E17-S1",
+      "title": "App Store Assets & Metadata",
+      "epic": "E17",
+      "epicTitle": "Store Readiness & Release Ops",
+      "file": "E17-STORE_RELEASE_OPS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E17-S2",
+      "title": "TestFlight / Internal Testing Setup",
+      "epic": "E17",
+      "epicTitle": "Store Readiness & Release Ops",
+      "file": "E17-STORE_RELEASE_OPS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E17-S3",
+      "title": "Phased Rollout Plan",
+      "epic": "E17",
+      "epicTitle": "Store Readiness & Release Ops",
+      "file": "E17-STORE_RELEASE_OPS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E17-S4",
+      "title": "Store Compliance Checklist",
+      "epic": "E17",
+      "epicTitle": "Store Readiness & Release Ops",
+      "file": "E17-STORE_RELEASE_OPS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E17-S5",
+      "title": "Post-Launch Observability",
+      "epic": "E17",
+      "epicTitle": "Store Readiness & Release Ops",
+      "file": "E17-STORE_RELEASE_OPS.md",
+      "tier": "MVP"
+    },
+    {
+      "id": "E15-S1",
+      "title": "Sync Opt\u2011in & Settings",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S2",
+      "title": "First\u2011Time Initialization (Encrypted Blob)",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S3",
+      "title": "Delta Upload",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S4",
+      "title": "Delta Download & Merge",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S5",
+      "title": "Conflict Resolution Policy",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S6",
+      "title": "Background Sync & Retry",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S7",
+      "title": "Manual \u201cSync Now\u201d & Status",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S8",
+      "title": "Device List & Last Sync",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S9",
+      "title": "Remote Copy Reset",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E15-S10",
+      "title": "Security Posture",
+      "epic": "E15",
+      "epicTitle": "Cloud Sync (Opt\u2011in Module, Pro add\u2011on)",
+      "file": "PRO-E15-CLOUD_SYNC.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S1",
+      "title": "Context Builder & Redaction",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S2",
+      "title": "Generate \u22643 Suggestions",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S3",
+      "title": "One\u2011Tap Apply & Undo",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S4",
+      "title": "Explainability",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S5",
+      "title": "Guardrails & Safety",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S6",
+      "title": "A/B Enablement & Telemetry",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E16-S7",
+      "title": "Offline/No\u2011AI Fallback",
+      "epic": "E16",
+      "epicTitle": "AI Goal Advisor (Pro)",
+      "file": "PRO-E16-AI_GOAL_ADVISOR.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S1",
+      "title": "Multi\u2011Scenario Library (CRUD)",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S2",
+      "title": "3\u20135 Year Projection Model",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S3",
+      "title": "Comparison Matrix & Overlay",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S4",
+      "title": "Export Scenario Summary (PDF/CSV)",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S5",
+      "title": "Performance on Large Ranges",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E18-S6",
+      "title": "Unit Tests & Edge Cases",
+      "epic": "E18",
+      "epicTitle": "Advanced Scenario Planner (Pro)",
+      "file": "PRO-E18-ADV_SCENARIOS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S1",
+      "title": "Monthly Aggregation Job",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S2",
+      "title": "Anomaly Detection",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S3",
+      "title": "Insight Cards (Templates)",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S4",
+      "title": "Monthly Digest (Shareable)",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S5",
+      "title": "Signal Quality & Feedback",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E19-S6",
+      "title": "Scheduling & Notifications",
+      "epic": "E19",
+      "epicTitle": "Premium Insights (Pro)",
+      "file": "PRO-E19-PREMIUM_INSIGHTS.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E20-S1",
+      "title": "Template Definitions",
+      "epic": "E20",
+      "epicTitle": "Goal Templates Pack (Add\u2011on)",
+      "file": "PRO-E20-GOAL_TEMPLATES.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E20-S2",
+      "title": "Catalog UI & Preview",
+      "epic": "E20",
+      "epicTitle": "Goal Templates Pack (Add\u2011on)",
+      "file": "PRO-E20-GOAL_TEMPLATES.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E20-S3",
+      "title": "One\u2011Tap Apply & Edit",
+      "epic": "E20",
+      "epicTitle": "Goal Templates Pack (Add\u2011on)",
+      "file": "PRO-E20-GOAL_TEMPLATES.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E20-S4",
+      "title": "Entitlement & Pricing",
+      "epic": "E20",
+      "epicTitle": "Goal Templates Pack (Add\u2011on)",
+      "file": "PRO-E20-GOAL_TEMPLATES.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E20-S5",
+      "title": "Localisation & Copy",
+      "epic": "E20",
+      "epicTitle": "Goal Templates Pack (Add\u2011on)",
+      "file": "PRO-E20-GOAL_TEMPLATES.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S1",
+      "title": "FAQ Content System",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S2",
+      "title": "Searchable Help",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S3",
+      "title": "Contact Form (Email/Webhook)",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S4",
+      "title": "Pro SLA Indicator",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S5",
+      "title": "Quick Feedback (Thumbs/Comment)",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    },
+    {
+      "id": "E21-S6",
+      "title": "Offline Help Fallback",
+      "epic": "E21",
+      "epicTitle": "Support & Help Center (Pro enablement)",
+      "file": "PRO-E21-SUPPORT_HELP.md",
+      "tier": "Pro/Add-on"
+    }
+  ]
+}

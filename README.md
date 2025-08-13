@@ -3,7 +3,7 @@
 
 **⚠️ Frontend V2 Coding Freeze**
 
-Frontend V2 scaffolding/coding must not begin until the new PRD, MVP Epics, and MVP User Stories have been approved in writing. This applies to all contributors and automation agents. See `DOCS/v2/PRD.md`.
+Frontend V2 scaffolding/coding must not begin until the new PRD, MVP Epics, and MVP User Stories have been approved in writing. This applies to all contributors and automation agents. See `DOCS/v2/README.md`.
 
 **AI-Powered Visual Assistance Application**
 Note: This repository is in Frontend V2 planning mode. See DOCS/RESET_NOTICE.md and DOCS/v2.
