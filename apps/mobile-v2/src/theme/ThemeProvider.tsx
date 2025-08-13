@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Appearance, AccessibilityInfo } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { darkTokens, lightTokens, Mode, SemanticTokens } from './tokens';
@@ -16,14 +22,14 @@ interface ThemeContextValue extends ThemePrefs {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-type ThemeProviderProps = { children: React.ReactNode };
-export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [mode, setModeState] = useState<Mode>('system');
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  // Load prefs (skip in Jest to avoid act warnings)
+  // Load prefs
   useEffect(() => {
-    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
     (async () => {
       try {
         const raw = await AsyncStorage.getItem('theme_prefs');
@@ -31,39 +37,21 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
           const parsed: ThemePrefs = JSON.parse(raw);
           setModeState(parsed.mode);
         }
-      } catch (e) {
-        // ignore persisted read error
-      }
+      } catch {}
     })();
   }, []);
 
-  // Reduced motion detection (skip in Jest; guard native calls)
+  // Reduced motion detection
   useEffect(() => {
-    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
-    try {
-      // Some test environments stub AccessibilityInfo
-      if (
-        typeof (AccessibilityInfo as any)?.isReduceMotionEnabled === 'function'
-      ) {
-        (AccessibilityInfo as any)
-          .isReduceMotionEnabled()
-          .then((v: boolean) => {
-            setReducedMotion(!!v);
-            logEvent('motion_pref_detected', { reducedMotion: !!v });
-          });
-      }
-      const sub = (AccessibilityInfo as any)?.addEventListener?.(
-        'reduceMotionChanged',
-        (v: boolean) => {
-          setReducedMotion(!!v);
-          logEvent('motion_pref_detected', { reducedMotion: !!v });
-        }
-      );
-      return () => sub?.remove?.();
-    } catch {
-      // ignore in non-native test env
-      return () => undefined;
-    }
+    AccessibilityInfo.isReduceMotionEnabled().then(v => {
+      setReducedMotion(v);
+      logEvent('motion_pref_detected', { reducedMotion: v });
+    });
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', v => {
+      setReducedMotion(v);
+      logEvent('motion_pref_detected', { reducedMotion: v });
+    });
+    return () => sub.remove();
   }, []);
 
   // Persist mode
@@ -76,13 +64,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     logEvent('theme_change', { mode: m });
   };
 
-  const systemIsDark = (() => {
-    try {
-      return Appearance.getColorScheme() === 'dark';
-    } catch {
-      return false;
-    }
-  })();
+  const systemIsDark = Appearance.getColorScheme() === 'dark';
   const effectiveMode =
     mode === 'system' ? (systemIsDark ? 'dark' : 'light') : mode;
 
