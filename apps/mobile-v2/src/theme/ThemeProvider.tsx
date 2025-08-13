@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Appearance, AccessibilityInfo } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { darkTokens, lightTokens, Mode, SemanticTokens } from './tokens';
@@ -22,9 +16,8 @@ interface ThemeContextValue extends ThemePrefs {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+type ThemeProviderProps = { children: React.ReactNode };
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [mode, setModeState] = useState<Mode>('system');
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -37,21 +30,37 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
           const parsed: ThemePrefs = JSON.parse(raw);
           setModeState(parsed.mode);
         }
-      } catch {}
+      } catch (e) {
+        // ignore persisted read error
+      }
     })();
   }, []);
 
-  // Reduced motion detection
+  // Reduced motion detection (guard native calls for test environment)
   useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then(v => {
-      setReducedMotion(v);
-      logEvent('motion_pref_detected', { reducedMotion: v });
-    });
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', v => {
-      setReducedMotion(v);
-      logEvent('motion_pref_detected', { reducedMotion: v });
-    });
-    return () => sub.remove();
+    try {
+      // Some test environments stub AccessibilityInfo
+      if (
+        typeof (AccessibilityInfo as any)?.isReduceMotionEnabled === 'function'
+      ) {
+        (AccessibilityInfo as any)
+          .isReduceMotionEnabled()
+          .then((v: boolean) => {
+            setReducedMotion(!!v);
+            logEvent('motion_pref_detected', { reducedMotion: !!v });
+          });
+      }
+      const sub = (AccessibilityInfo as any)?.addEventListener?.(
+        'reduceMotionChanged',
+        (v: boolean) => {
+          setReducedMotion(!!v);
+          logEvent('motion_pref_detected', { reducedMotion: !!v });
+        }
+      );
+      return () => sub?.remove?.();
+    } catch {
+      // ignore in non-native test env
+    }
   }, []);
 
   // Persist mode
@@ -64,7 +73,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     logEvent('theme_change', { mode: m });
   };
 
-  const systemIsDark = Appearance.getColorScheme() === 'dark';
+  const systemIsDark = (() => {
+    try {
+      return Appearance.getColorScheme() === 'dark';
+    } catch {
+      return false;
+    }
+  })();
   const effectiveMode =
     mode === 'system' ? (systemIsDark ? 'dark' : 'light') : mode;
 

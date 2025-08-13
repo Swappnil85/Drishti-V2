@@ -1,12 +1,13 @@
-import React from 'react';
+// React import not required with react-jsx runtime
 import { View, Text } from 'react-native';
 
-const PlanScreen: React.FC = () => {
+export default function PlanScreen() {
   return (
-    <View accessibilityRole="summary" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text accessibilityRole="header">Plan</Text>
+    <View
+      accessibilityRole='summary'
+      style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Text accessibilityRole='header'>Plan</Text>
     </View>
   );
-};
-export default PlanScreen;
-
+}

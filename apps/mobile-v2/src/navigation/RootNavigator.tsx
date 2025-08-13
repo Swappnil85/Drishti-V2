@@ -1,4 +1,5 @@
-import React from 'react';
+// React import not required with react-jsx runtime
+
 import { Appearance } from 'react-native';
 import {
   NavigationContainer,
@@ -17,7 +18,7 @@ export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 
 const Tab = createBottomTabNavigator();
 
-const RootNavigator: React.FC = () => {
+export default function RootNavigator(): JSX.Element {
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -41,6 +42,4 @@ const RootNavigator: React.FC = () => {
       </Tab.Navigator>
     </NavigationContainer>
   );
-};
-
-export default RootNavigator;
+}
