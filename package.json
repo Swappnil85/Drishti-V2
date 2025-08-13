@@ -17,8 +17,7 @@
     "type-check": "npm run type-check --workspaces",
     "security:audit": "node scripts/security-audit.js",
     "security:scan": "npm audit && npm run security:audit",
-    "security:pentest": "node scripts/penetration-test.js"
-  ,
+    "security:pentest": "node scripts/penetration-test.js",
     "check:docs": "bash scripts/check-md-links.sh"
   },
   "devDependencies": {
@@ -32,6 +31,12 @@
     "eslint-plugin-react-native": "^5.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.1.0"
+  },
+  "overrides": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-test-renderer": "19.1.1",
+    "@types/react": "19.1.9"
   },
   "engines": {
     "node": ">=20.0.0",

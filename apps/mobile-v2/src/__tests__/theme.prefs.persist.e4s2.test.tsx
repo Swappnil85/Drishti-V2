@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ThemeProvider, useThemeContext } from '../theme/ThemeProvider';
 
@@ -27,4 +26,3 @@ describe('E4-S2: ThemePrefs persistence', () => {
     expect(true).toBe(true);
   });
 });
-

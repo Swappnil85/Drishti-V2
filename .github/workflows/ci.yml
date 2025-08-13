@@ -74,27 +74,26 @@ jobs:
           CI: true
           NODE_ENV: test
 
-  # test-mobile intentionally disabled for MVP to stabilize CI. Re-enable after Epic 3.
-  # test-mobile:
-  #   name: Test Mobile App
-  #   runs-on: ubuntu-latest
-  #   needs: lint-and-type-check
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         cache: 'npm'
-  #     - name: Configure npm retry for network flakiness
-  #       run: npm config set fetch-retry-maxtimeout 60000 && npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retries 5
-  #     - name: Install dependencies
-  #       run: npm ci
-  #     - name: Run mobile tests
-  #       run: npm test --workspace=apps/mobile
-  #       env:
-  #         CI: true
+  test-mobile-v2:
+    name: Test Mobile App (mobile-v2)
+    runs-on: ubuntu-latest
+    needs: lint-and-type-check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - name: Configure npm retry for network flakiness
+        run: npm config set fetch-retry-maxtimeout 60000 && npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retries 5
+      - name: Install dependencies
+        run: npm ci
+      - name: Run mobile-v2 tests
+        run: npm test --workspace=apps/mobile-v2
+        env:
+          CI: true
 
   build:
     name: Build Applications
