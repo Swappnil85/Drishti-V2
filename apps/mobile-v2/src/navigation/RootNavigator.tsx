@@ -1,4 +1,3 @@
-import React from 'react';
 import { Appearance } from 'react-native';
 import {
   NavigationContainer,
@@ -17,7 +16,7 @@ export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 
 const Tab = createBottomTabNavigator();
 
-const RootNavigator: React.FC = () => {
+const RootNavigator = () => {
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
 

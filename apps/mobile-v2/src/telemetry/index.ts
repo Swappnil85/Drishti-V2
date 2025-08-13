@@ -1,4 +1,4 @@
-type EventProps = Record<string, any>;
+type EventProps = Record<string, unknown>;
 
 export function logEvent(name: string, props?: EventProps) {
   // MVP stub: console log only. Replace with real telemetry in E12.
@@ -6,4 +6,3 @@ export function logEvent(name: string, props?: EventProps) {
   // eslint-disable-next-line no-console
   console.log(`[telemetry] ${name}`, props ? JSON.stringify(props) : '');
 }
-

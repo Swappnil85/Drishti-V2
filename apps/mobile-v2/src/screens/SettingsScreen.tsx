@@ -1,12 +1,15 @@
-import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useThemeContext } from '../theme/ThemeProvider';
 
-const Btn: React.FC<{
+const Btn = ({
+  label,
+  onPress,
+  active,
+}: {
   label: string;
   onPress: () => void;
   active?: boolean;
-}> = ({ label, onPress, active }) => (
+}) => (
   <Pressable
     accessibilityRole='button'
     accessibilityLabel={label}
@@ -26,7 +29,7 @@ const Btn: React.FC<{
   </Pressable>
 );
 
-const SettingsScreen: React.FC = () => {
+const SettingsScreen = () => {
   const { mode, reducedMotion, setMode } = useThemeContext();
 
   return (

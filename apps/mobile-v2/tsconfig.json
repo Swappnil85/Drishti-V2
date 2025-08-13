@@ -8,7 +8,10 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "types": ["jest"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "types": ["jest-expo"],
+    "typeRoots": ["./node_modules/@types"],
     "baseUrl": ".",
     "paths": {
       "@drishti/shared/*": ["../../packages/shared/src/*"]

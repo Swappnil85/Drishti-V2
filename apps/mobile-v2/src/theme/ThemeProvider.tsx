@@ -37,7 +37,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
           const parsed: ThemePrefs = JSON.parse(raw);
           setModeState(parsed.mode);
         }
-      } catch {}
+      } catch (err) {
+        // ignore parse/storage errors in MVP
+      }
     })();
   }, []);
 
