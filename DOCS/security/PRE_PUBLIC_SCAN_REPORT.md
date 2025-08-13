@@ -64,3 +64,9 @@ Scope: Docs/infra only; no code scaffolding
 - Rotate any exposed credentials immediately.
 
 
+
+
+## Follow-up Actions Completed (2025-08-11)
+- .gitignore hardened with cert/key patterns (see .gitignore)
+- Drishti_App_fresh cleaned up (archived to `DOCS/v1/migrated/Drishti_App_fresh/` with `ARCHIVED.md`)
+- Safeguard notes added to `README.md` and `DOCS/RESET_NOTICE.md`
