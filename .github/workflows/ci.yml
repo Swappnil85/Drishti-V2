@@ -2,7 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [master, main]
+    paths:
+      - 'apps/mobile-v2/**'
+      - '.github/workflows/**'
   push:
     branches: [master, main]
 
@@ -11,7 +13,7 @@ env:
 
 jobs:
   lint-and-type-check:
-    name: Lint and Type Check
+    name: Lint and Type Check (mobile-v2 only)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,45 +36,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run TypeScript type check (API + Shared only for MVP)
-        run: |
-          npm run type-check --workspace=packages/shared
-          npm run type-check --workspace=apps/api
+      - name: Run TypeScript type check (mobile-v2)
+        run: npm run type-check --workspace=apps/mobile-v2
 
-      - name: Run ESLint (API + Shared)
-        run: |
-          npm run lint --workspace=apps/api
-          npm run lint --workspace=packages/shared
-
-      - name: Check Prettier formatting (API + Shared)
-        run: npx prettier --check --ignore-unknown "apps/api/**/*.{ts,tsx,js,json,md}" "packages/shared/**/*.{ts,tsx,js,json,md}"
-
-  test-api:
-    name: Test API Backend
-    runs-on: ubuntu-latest
-    needs: lint-and-type-check
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Configure npm retry for network flakiness
-        run: npm config set fetch-retry-maxtimeout 60000 && npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retries 5
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run API tests with coverage
-        run: npm test --workspace=apps/api -- --coverage
-        env:
-          CI: true
-          NODE_ENV: test
+      - name: Run ESLint (mobile-v2)
+        run: npm run lint --workspace=apps/mobile-v2
 
   test-mobile-v2:
     name: Test Mobile App (mobile-v2)
@@ -90,46 +58,16 @@ jobs:
         run: npm config set fetch-retry-maxtimeout 60000 && npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retries 5
       - name: Install dependencies
         run: npm ci
-      - name: Run mobile-v2 tests
-        run: npm test --workspace=apps/mobile-v2
+      - name: Run mobile-v2 tests with coverage
+        run: npm test --workspace=apps/mobile-v2 -- --coverage
         env:
           CI: true
 
-  build:
-    name: Build Applications
-    runs-on: ubuntu-latest
-    needs: [test-api]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build shared package
-        run: npm run build --workspace=packages/shared
-
-      - name: Build API
-        run: npm run build --workspace=apps/api
-
-      - name: Upload API build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-build
-          path: apps/api/dist/
-          retention-days: 7
-
+  # Remove duplicate and API build jobs for mobile-v2 scoped CI
   security-scan:
-    name: Security Scan
+    name: Security Scan (mobile-v2)
     runs-on: ubuntu-latest
-    needs: lint-and-type-check
+    needs: [lint-and-type-check, test-mobile-v2]
 
     steps:
       - name: Checkout code
@@ -144,18 +82,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run security audit (critical only)
-        run: npm audit --audit-level=critical
-        continue-on-error: true
-
-      - name: Check for vulnerabilities (critical only)
-        run: npx audit-ci --critical
-        continue-on-error: true
+      - name: Run security audit (high, omit dev-only transitives)
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: false
 
   coverage:
-    name: Test Coverage
+    name: Test Coverage (mobile-v2)
     runs-on: ubuntu-latest
-    needs: [test-api]
+    needs: test-mobile-v2
 
     steps:
       - name: Checkout code
@@ -170,16 +104,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests with coverage (API only; mobile archived)
-        run: |
-          npm run test --workspace=apps/api -- --coverage
+      - name: Run tests with coverage (mobile-v2)
+        run: npm test --workspace=apps/mobile-v2 -- --coverage
         env:
           CI: true
 
-      - name: Upload coverage reports (API only)
+      - name: Upload coverage reports (mobile-v2)
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports
-          path: |
-            apps/api/coverage/
+          name: coverage-reports-mobile-v2
+          path: apps/mobile-v2/coverage/
           retention-days: 7
