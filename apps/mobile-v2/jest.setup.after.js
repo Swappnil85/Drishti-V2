@@ -17,6 +17,11 @@ jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
   removeChangeListener: () => {},
 }));
 
+// Inform React 19 that we're in act-enabled test env
+// See https://react.dev/reference/react/act
+// Avoid TS syntax in JS file
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 // Mock NativePlatformConstantsIOS to avoid TurboModuleRegistry access
 jest.mock(
   'react-native/src/private/specs_DEPRECATED/modules/NativePlatformConstantsIOS',
@@ -102,6 +107,9 @@ jest.mock('@react-navigation/native', () => {
     NavigationContainer: ({ children }) => children,
   };
 });
+
+// RN Animated helper mock to avoid native driver errors with React 19 test renderer
+jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
 
 // Mock React Native UIManager to avoid TurboModule dependency for View
 jest.mock('react-native/Libraries/ReactNative/UIManager', () => ({
