@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useThemeContext } from '../theme/ThemeProvider';
+import { useHaptics } from '../utils/haptics';
 
 export type StateBaseProps = {
   title: string;
@@ -29,6 +30,7 @@ export const EmptyState = ({
   testID,
 }: StateBaseProps) => {
   const { tokens } = useThemeContext();
+  const haptics = useHaptics();
   return (
     <View
       style={container(tokens.bg)}
@@ -61,7 +63,13 @@ export const EmptyState = ({
       )}
       {!!actionLabel && (
         <Pressable
-          onPress={onAction}
+          onPress={() => {
+            // Light haptic on primary action per E4-S5; respects reduced-motion
+            try {
+              haptics.light();
+            } catch {}
+            onAction?.();
+          }}
           accessibilityRole='button'
           accessibilityLabel={actionLabel}
           style={({ pressed }) => ({
@@ -98,6 +106,7 @@ export const ErrorState = ({
       accessibilityRole='alert'
       accessibilityLabel={title}
       testID={testID}
+      onAccessibilityEscape={onAction}
     >
       {icon}
       <Text

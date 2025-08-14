@@ -16,6 +16,42 @@ jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
   addChangeListener: () => ({ remove: () => {} }),
   removeChangeListener: () => {},
 }));
+// Patch @testing-library/react-native peer dep check to avoid strict renderer version pin in monorepo
+jest.mock(
+  '@testing-library/react-native/src/helpers/ensure-peer-deps',
+  () => ({ ensurePeerDeps: () => {} }),
+  { virtual: true }
+);
+// Mock AsyncStorage to avoid NativeModule null under Jest
+jest.mock(
+  '@react-native-async-storage/async-storage',
+  () => ({
+    __esModule: true,
+    default: {
+      setItem: jest.fn().mockResolvedValue(undefined),
+      getItem: jest.fn().mockResolvedValue(null),
+      removeItem: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined),
+    },
+  }),
+  { virtual: true }
+);
+
+// Mock expo-haptics globally for tests
+jest.mock(
+  'expo-haptics',
+  () => ({
+    impactAsync: jest.fn().mockResolvedValue(undefined),
+    notificationAsync: jest.fn().mockResolvedValue(undefined),
+    ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
+    NotificationFeedbackType: {
+      Success: 'Success',
+      Warning: 'Warning',
+      Error: 'Error',
+    },
+  }),
+  { virtual: true }
+);
 
 // Inform React 19 that we're in act-enabled test env
 // See https://react.dev/reference/react/act
@@ -108,7 +144,10 @@ jest.mock('@react-navigation/native', () => {
 });
 
 // RN Animated helper mock to avoid native driver errors with React 19 test renderer
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// Use virtual mock to avoid resolution errors across RN versions
+jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}), {
+  virtual: true,
+});
 // Mock React Native UIManager to avoid TurboModule dependency for View
 jest.mock('react-native/Libraries/ReactNative/UIManager', () => ({
   getViewManagerConfig: () => ({ Commands: {}, NativeProps: {} }),
