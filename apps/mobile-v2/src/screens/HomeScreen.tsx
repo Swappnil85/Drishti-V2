@@ -1,6 +1,7 @@
+// React import not required with react-jsx runtime
 import { View, Text } from 'react-native';
 
-const HomeScreen: React.FC = () => {
+export default function HomeScreen() {
   return (
     <View
       accessibilityRole='summary'
@@ -9,5 +10,4 @@ const HomeScreen: React.FC = () => {
       <Text accessibilityRole='header'>Home Screen</Text>
     </View>
   );
-};
-export default HomeScreen;
+}

@@ -1,3 +1,5 @@
+// React import not required with react-jsx runtime
+
 import { Appearance } from 'react-native';
 import {
   NavigationContainer,
@@ -16,7 +18,7 @@ export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 
 const Tab = createBottomTabNavigator();
 
-const RootNavigator = () => {
+export default function RootNavigator() {
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -25,8 +27,10 @@ const RootNavigator = () => {
       <Tab.Navigator
         screenOptions={{ headerShown: false }}
         screenListeners={{
-          tabPress: e => {
-            const name = (e.target?.toString?.() || '').toLowerCase();
+          tabPress: (e: { target?: unknown }) => {
+            const name = (typeof e.target === 'string' ? e.target : '')
+              .toString()
+              .toLowerCase();
             // Fire telemetry per AC: nav_tab_click { tab }
             logEvent('nav_tab_click', { tab: name });
           },
@@ -40,6 +44,4 @@ const RootNavigator = () => {
       </Tab.Navigator>
     </NavigationContainer>
   );
-};
-
-export default RootNavigator;
+}

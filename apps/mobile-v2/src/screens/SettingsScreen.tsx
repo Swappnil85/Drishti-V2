@@ -1,15 +1,9 @@
+// React import not required with react-jsx runtime
 import { View, Text, Pressable } from 'react-native';
 import { useThemeContext } from '../theme/ThemeProvider';
 
-const Btn = ({
-  label,
-  onPress,
-  active,
-}: {
-  label: string;
-  onPress: () => void;
-  active?: boolean;
-}) => (
+type BtnProps = { label: string; onPress: () => void; active?: boolean };
+const Btn = ({ label, onPress, active }: BtnProps) => (
   <Pressable
     accessibilityRole='button'
     accessibilityLabel={label}
@@ -29,7 +23,7 @@ const Btn = ({
   </Pressable>
 );
 
-const SettingsScreen = () => {
+export default function SettingsScreen() {
   const { mode, reducedMotion, setMode } = useThemeContext();
 
   return (
@@ -71,5 +65,4 @@ const SettingsScreen = () => {
       />
     </View>
   );
-};
-export default SettingsScreen;
+}

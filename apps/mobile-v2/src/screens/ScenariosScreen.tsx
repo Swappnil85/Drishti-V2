@@ -1,6 +1,7 @@
+// React import not required with react-jsx runtime
 import { View, Text } from 'react-native';
 
-const ScenariosScreen = () => {
+export default function ScenariosScreen() {
   return (
     <View
       accessibilityRole='summary'
@@ -9,5 +10,4 @@ const ScenariosScreen = () => {
       <Text accessibilityRole='header'>Scenarios</Text>
     </View>
   );
-};
-export default ScenariosScreen;
+}
