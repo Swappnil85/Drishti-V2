@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { View, Text } from 'react-native';
 import { useThemeContext } from '../../theme/ThemeProvider';
+import { useHaptics } from '../../utils/haptics';
 
 export type Toast = { id: number; message: string; duration?: number };
 
@@ -20,12 +21,15 @@ const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
 export const useToast = () => {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
+  if (!ctx) {
+    throw new Error('useToast must be used within ToastProvider');
+  }
   return ctx;
 };
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const { tokens } = useThemeContext();
+  const { success: hSuccess } = useHaptics();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idRef = useRef(1);
   const timers = useRef<Record<number, any>>({});
@@ -45,9 +49,12 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
         timers.current[id] = setTimeout(() => hideToast(id), duration);
       }
+      // Trigger a light success haptic for user feedback on toast show
+      // (AC: success states). We use success pattern; honor reduced-motion in hook.
+      hSuccess();
       return id;
     },
-    [hideToast]
+    [hideToast, hSuccess]
   );
 
   const value = useMemo(

@@ -23,7 +23,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   // Load prefs (skip in Jest to avoid act warnings)
   useEffect(() => {
-    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
+    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+      return;
+    }
     (async () => {
       try {
         const raw = await AsyncStorage.getItem('theme_prefs');
@@ -31,7 +33,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
           const parsed: ThemePrefs = JSON.parse(raw);
           setModeState(parsed.mode);
         }
-      } catch (e) {
+      } catch {
         // ignore persisted read error
       }
     })();
@@ -39,7 +41,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   // Reduced motion detection (skip in Jest; guard native calls)
   useEffect(() => {
-    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
+    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+      return;
+    }
     try {
       // Some test environments stub AccessibilityInfo
       if (
@@ -50,7 +54,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
           .then((v: boolean) => {
             setReducedMotion(!!v);
             logEvent('motion_pref_detected', { reducedMotion: !!v });
-          });
+          })
+          .catch(() => {});
       }
       const sub = (AccessibilityInfo as any)?.addEventListener?.(
         'reduceMotionChanged',
@@ -72,7 +77,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     AsyncStorage.setItem(
       'theme_prefs',
       JSON.stringify({ mode: m, reducedMotion })
-    );
+    ).catch(() => {});
     logEvent('theme_change', { mode: m });
   };
 
@@ -93,7 +98,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   const value = useMemo(
     () => ({ mode, reducedMotion, tokens, setMode }),
-    [mode, reducedMotion, tokens]
+    [mode, reducedMotion, tokens, setMode]
   );
 
   return (
@@ -103,7 +108,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
 export const useThemeContext = () => {
   const ctx = useContext(ThemeContext);
-  if (!ctx)
+  if (!ctx) {
     throw new Error('useThemeContext must be used within ThemeProvider');
+  }
   return ctx;
 };

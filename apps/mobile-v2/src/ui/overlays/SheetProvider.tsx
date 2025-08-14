@@ -35,7 +35,9 @@ const SheetContext = createContext<SheetContextValue | undefined>(undefined);
 
 export const useSheet = () => {
   const ctx = useContext(SheetContext);
-  if (!ctx) throw new Error('useSheet must be used within SheetProvider');
+  if (!ctx) {
+    throw new Error('useSheet must be used within SheetProvider');
+  }
   return ctx;
 };
 

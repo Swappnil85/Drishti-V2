@@ -1,11 +1,28 @@
 {
+  "root": true,
   "extends": ["plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": ["./tsconfig.json"],
-    "tsconfigRootDir": ""
+    "project": ["./tsconfig.app.json"],
+    "tsconfigRootDir": "."
+  },
+  "env": {
+    "es2022": true,
+    "node": true,
+    "jest": true
   },
   "rules": {
-    "@typescript-eslint/no-unnecessary-type-assertion": "off"
+    "@typescript-eslint/no-unnecessary-type-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "no-empty": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "curly": ["warn", "all"],
+    "react-native/no-inline-styles": "off",
+    "react-native/no-color-literals": "off"
   }
 }

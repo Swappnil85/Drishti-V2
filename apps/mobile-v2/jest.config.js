@@ -12,5 +12,9 @@ module.exports = {
       '<rootDir>/src/test/__mocks__/react-native-assets-registry.js',
     '^react-native/Libraries/BatchedBridge/NativeModules$':
       '<rootDir>/src/test/__mocks__/react-native-NativeModules.js',
+    '^@testing-library/react-native/src/helpers/ensure-peer-deps(\\.ts|\\.js)?$':
+      '<rootDir>/src/test/__mocks__/atl-ensure-peer-deps.js',
+    '^@testing-library/react-native/dist/helpers/ensure-peer-deps(\\.js)?$':
+      '<rootDir>/src/test/__mocks__/atl-ensure-peer-deps.js',
   },
 };

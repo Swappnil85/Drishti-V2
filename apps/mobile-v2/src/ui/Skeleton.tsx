@@ -23,8 +23,9 @@ export const Skeleton = ({
 
   useEffect(() => {
     // Disable animation in tests or when user prefers reduced motion
-    if (reducedMotion || (globalThis as any)?.process?.env?.JEST_WORKER_ID)
+    if (reducedMotion || (globalThis as any)?.process?.env?.JEST_WORKER_ID) {
       return;
+    }
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(opacity, {

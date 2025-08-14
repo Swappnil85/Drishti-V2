@@ -23,10 +23,6 @@
 
 ### Testing Environment Notes
 
-## E4-S3: Common Skeleton/Empty/Error (Status: Done)
-
-## E4-S4: Modal/Sheet & Toast (Status: Done)
-
 - Expo SDK 53 (React Native 0.79) aligns with React 19.x.
 - Use Node 20.x to run jest-expo 53 tests; Node 22 triggers preset errors.
 - Commands:

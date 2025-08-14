@@ -6,7 +6,7 @@ import { useSheet } from '../ui/overlays/SheetProvider';
 
 export default function HomeScreen() {
   const { showToast } = useToast();
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet } = useSheet();
   return (
     <View
       accessibilityRole='summary'
