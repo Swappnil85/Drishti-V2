@@ -1,18 +1,8 @@
-import { render } from '@testing-library/react-native';
-import App from '../App';
-
-jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
-  getColorScheme: () => 'light',
-}));
-
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  setItem: jest.fn(),
-  getItem: jest.fn().mockResolvedValue(null),
-}));
+import { renderApp } from '../test/utils/appRender';
 
 describe('E4-S1: Bottom Tab Navigation Shell', () => {
   it('renders navigation container and does not crash', () => {
-    const tree = render(<App />);
+    const tree = renderApp();
     expect(tree.toJSON()).toBeTruthy();
   });
 });
