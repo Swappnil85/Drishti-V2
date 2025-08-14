@@ -9,20 +9,26 @@ export const useHaptics = () => {
   const { reducedMotion } = useThemeContext();
 
   const safeImpactLight = useCallback(() => {
-    if (reducedMotion) return;
+    if (reducedMotion) {
+      return;
+    }
     try {
-      Haptics.impactAsync?.(Haptics.ImpactFeedbackStyle.Light as any).catch?.(() => {});
+      Haptics.impactAsync?.(Haptics.ImpactFeedbackStyle.Light as any)?.catch?.(
+        () => {}
+      );
     } catch {
       // noop in non-native/test environments
     }
   }, [reducedMotion]);
 
   const safeSuccess = useCallback(() => {
-    if (reducedMotion) return;
+    if (reducedMotion) {
+      return;
+    }
     try {
       Haptics.notificationAsync?.(
         Haptics.NotificationFeedbackType.Success as any
-      ).catch?.(() => {});
+      )?.catch?.(() => {});
     } catch {
       // noop in non-native/test environments
     }
@@ -33,4 +39,3 @@ export const useHaptics = () => {
     success: safeSuccess,
   };
 };
-

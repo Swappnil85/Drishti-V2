@@ -6,4 +6,3 @@ export function logEvent(name: string, props?: EventProps) {
   // eslint-disable-next-line no-console
   console.log(`[telemetry] ${name}`, props ? JSON.stringify(props) : '');
 }
-

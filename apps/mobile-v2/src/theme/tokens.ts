@@ -25,4 +25,3 @@ export const darkTokens = {
 };
 
 export type SemanticTokens = typeof lightTokens;
-

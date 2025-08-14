@@ -21,19 +21,9 @@ export type SheetOptions = {
   onClose?: () => void;
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 export type OpenSheetArg =
   | React.ReactNode
   | ((close: () => void) => React.ReactNode);
-=======
-export type OpenSheetArg = React.ReactNode | ((close: () => void) => React.ReactNode);
->>>>>>> d00a182 (feat(e4-s4): add accessible Sheet and Toast providers; wire into App and Home; add RTL tests)
-=======
-export type OpenSheetArg =
-  | React.ReactNode
-  | ((close: () => void) => React.ReactNode);
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
 
 type SheetContextValue = {
   openSheet: (content: OpenSheetArg, opts?: SheetOptions) => void;
@@ -45,7 +35,9 @@ const SheetContext = createContext<SheetContextValue | undefined>(undefined);
 
 export const useSheet = () => {
   const ctx = useContext(SheetContext);
-  if (!ctx) throw new Error('useSheet must be used within SheetProvider');
+  if (!ctx) {
+    throw new Error('useSheet must be used within SheetProvider');
+  }
   return ctx;
 };
 
@@ -132,40 +124,20 @@ export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
     <SheetContext.Provider value={value}>
       {children}
       {isOpen && (
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
         <View
           style={{ position: 'absolute', inset: 0 }}
           pointerEvents='box-none'
         >
-<<<<<<< HEAD
-=======
-        <View style={{ position: 'absolute', inset: 0 }} pointerEvents='box-none'>
->>>>>>> d00a182 (feat(e4-s4): add accessible Sheet and Toast providers; wire into App and Home; add RTL tests)
-=======
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
           {/* backdrop */}
           <Pressable
             accessibilityLabel='Close sheet'
             accessibilityRole='button'
             onPress={closeSheet}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
             style={{
               position: 'absolute',
               inset: 0,
               backgroundColor: 'rgba(0,0,0,0.4)',
             }}
-<<<<<<< HEAD
-=======
-            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)' }}
->>>>>>> d00a182 (feat(e4-s4): add accessible Sheet and Toast providers; wire into App and Home; add RTL tests)
-=======
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
           />
           {/* sheet */}
           <Container
@@ -185,29 +157,12 @@ export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
             }}
             {...panResponder.panHandlers}
           >
-<<<<<<< HEAD
-<<<<<<< HEAD
             {typeof content === 'function'
               ? (content as any)(closeSheet)
               : content}
-=======
-            {typeof content === 'function' ? (content as any)(closeSheet) : content}
->>>>>>> d00a182 (feat(e4-s4): add accessible Sheet and Toast providers; wire into App and Home; add RTL tests)
-=======
-            {typeof content === 'function'
-              ? (content as any)(closeSheet)
-              : content}
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))
           </Container>
         </View>
       )}
     </SheetContext.Provider>
   );
 };
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> d00a182 (feat(e4-s4): add accessible Sheet and Toast providers; wire into App and Home; add RTL tests)
-=======
->>>>>>> dced404 (chore(ci-mobile): ensure app-only typecheck script (typecheck => tsconfig.app.json) and TS compatibility fixes (globalThis guards, RN gesture types))

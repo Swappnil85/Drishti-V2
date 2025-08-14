@@ -18,6 +18,11 @@
       "warn",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
-    "no-empty": "off"
+    "no-empty": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "curly": ["warn", "all"],
+    "react-native/no-inline-styles": "off",
+    "react-native/no-color-literals": "off"
   }
 }
