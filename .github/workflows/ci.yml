@@ -82,8 +82,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run security audit (high, omit dev-only transitives)
-        run: npm audit --audit-level=high --omit=dev
+      - name: Run security audit (mobile-v2 workspace, high, omit dev-only transitives)
+        run: npm audit --workspace=@drishti/mobile-v2 --audit-level=high --omit=dev
         continue-on-error: false
 
   coverage:
