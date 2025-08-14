@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
+    "start:clean": "watchman watch-del-all || true && expo start -c",
     "dev": "expo start --dev-client",
     "android": "expo start --android",
+    "android:dev": "expo start --dev-client --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "web:clean": "expo start --web --clear",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
@@ -16,23 +19,26 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@expo/metro-runtime": "~5.0.4",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^6.1.7",
     "expo": "~53.0.0",
-    "expo-haptics": "^13.0.1",
+    "expo-haptics": "14.1.4",
     "expo-status-bar": "~2.2.3",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "react-native": "^0.79.5",
-    "react-native-safe-area-context": "^5.6.0",
-    "react-native-screens": "~4.11.1"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.5",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.2.2",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.9",
+    "@types/react-native": "^0.72.8",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "eslint": "^8.57.0",
@@ -45,8 +51,5 @@
     "jest-expo": "~53.0.9",
     "react-test-renderer": "^19.0.0",
     "typescript": "~5.8.3"
-  },
-  "overrides": {
-    "react-test-renderer": "19.1.1"
   }
 }
