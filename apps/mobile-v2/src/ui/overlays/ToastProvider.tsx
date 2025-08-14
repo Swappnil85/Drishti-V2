@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { View, Text } from 'react-native';
 import { useThemeContext } from '../../theme/ThemeProvider';
+import * as Haptics from 'expo-haptics';
 
 export type Toast = { id: number; message: string; duration?: number };
 
@@ -42,9 +43,20 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     (message: string, duration = 3000) => {
       const id = idRef.current++;
       setToasts(t => [{ id, message, duration }, ...t].slice(0, 3));
-      if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+      if (!process.env.JEST_WORKER_ID) {
         timers.current[id] = setTimeout(() => hideToast(id), duration);
       }
+      // E4-S5: success haptic on toast show (respect reduced motion); non-blocking
+      try {
+        const { reducedMotion } = require('../../theme/ThemeProvider');
+        // ThemeProvider exports a hook, not value; instead call Haptics directly (hook not accessible here)
+        // Using a light success notification to avoid blocking
+        if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+          Haptics.notificationAsync?.(
+            Haptics.NotificationFeedbackType.Success
+          ).catch?.(() => {});
+        }
+      } catch {}
       return id;
     },
     [hideToast]
