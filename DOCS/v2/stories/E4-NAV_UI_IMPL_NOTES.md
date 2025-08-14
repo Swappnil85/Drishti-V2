@@ -1,6 +1,6 @@
 # E4 Implementation Notes (MVP)
 
-## E4-S1: Bottom Tab Navigation Shell
+## E4-S1: Bottom Tab Navigation Shell (Status: Done)
 
 - Implemented in apps/mobile-v2 using @react-navigation/bottom-tabs
 - Tabs: Home, Accounts, Plan, Scenarios, Settings
@@ -8,7 +8,7 @@
 - Dark mode: Navigation theme follows system (Appearance)
 - Telemetry: nav_tab_click stubbed via console log
 
-## E4-S2: Global Theming (Light/Dark + Tokens)
+## E4-S2: Global Theming (Light/Dark + Tokens) (Status: Done)
 
 - ThemeProvider with semantic tokens (bg/surface/primary/critical/success/warn/text/textMuted/border)
 - System detection; manual override persisted in AsyncStorage
