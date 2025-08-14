@@ -12,13 +12,14 @@ export type StateBaseProps = {
 };
 
 import type { ViewStyle } from 'react-native';
-const container = (bg: string): ViewStyle => ({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 24,
-  backgroundColor: bg,
-});
+const container = (bg: string): ViewStyle =>
+  ({
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: bg,
+  }) as ViewStyle;
 
 export const EmptyState = ({
   title,
