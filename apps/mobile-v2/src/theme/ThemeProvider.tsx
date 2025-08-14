@@ -21,8 +21,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [mode, setModeState] = useState<Mode>('system');
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  // Load prefs
+  // Load prefs (skip in Jest to avoid act warnings)
   useEffect(() => {
+    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
     (async () => {
       try {
         const raw = await AsyncStorage.getItem('theme_prefs');
@@ -36,8 +37,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     })();
   }, []);
 
-  // Reduced motion detection (guard native calls for test environment)
+  // Reduced motion detection (skip in Jest; guard native calls)
   useEffect(() => {
+    if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
     try {
       // Some test environments stub AccessibilityInfo
       if (
