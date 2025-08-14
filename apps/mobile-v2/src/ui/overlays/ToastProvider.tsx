@@ -43,20 +43,15 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     (message: string, duration = 3000) => {
       const id = idRef.current++;
       setToasts(t => [{ id, message, duration }, ...t].slice(0, 3));
-      if (!process.env.JEST_WORKER_ID) {
+      if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
         timers.current[id] = setTimeout(() => hideToast(id), duration);
-      }
-      // E4-S5: success haptic on toast show (respect reduced motion); non-blocking
-      try {
-        const { reducedMotion } = require('../../theme/ThemeProvider');
-        // ThemeProvider exports a hook, not value; instead call Haptics directly (hook not accessible here)
-        // Using a light success notification to avoid blocking
-        if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+        // E4-S5: success haptic on toast show (respect reduced motion); non-blocking
+        try {
           Haptics.notificationAsync?.(
             Haptics.NotificationFeedbackType.Success
           ).catch?.(() => {});
-        }
-      } catch {}
+        } catch {}
+      }
       return id;
     },
     [hideToast]
