@@ -85,7 +85,9 @@ export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
     // announcer for a11y
     try {
       AccessibilityInfo.announceForAccessibility?.('Sheet opened');
-    } catch {}
+    } catch {
+      // ignore
+    }
     animateTo(0);
   }, []);
 
@@ -107,8 +109,11 @@ export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
           _: GestureResponderEvent,
           g: PanResponderGestureState
         ) => {
-          if (g.dy > 80 || g.vy > 0.8) closeSheet();
-          else animateTo(0);
+          if (g.dy > 80 || g.vy > 0.8) {
+            closeSheet();
+          } else {
+            animateTo(0);
+          }
         },
       }),
     [closeSheet]
