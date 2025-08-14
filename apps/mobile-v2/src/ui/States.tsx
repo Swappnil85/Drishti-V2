@@ -11,19 +11,59 @@ export type StateBaseProps = {
   testID?: string;
 };
 
-const container = (bg: string) => ({ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: bg });
+import type { ViewStyle } from 'react-native';
+const container = (bg: string): ViewStyle =>
+  ({
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: bg,
+  }) as ViewStyle;
 
-export const EmptyState = ({ title, description, actionLabel, onAction, icon, testID }: StateBaseProps) => {
+export const EmptyState = ({
+  title,
+  description,
+  actionLabel,
+  onAction,
+  icon,
+  testID,
+}: StateBaseProps) => {
   const { tokens } = useThemeContext();
   return (
-    <View style={container(tokens.bg)} accessibilityRole="summary" accessibilityLabel={title} testID={testID}>
+    <View
+      style={container(tokens.bg)}
+      accessibilityRole='summary'
+      accessibilityLabel={title}
+      testID={testID}
+    >
       {icon}
-      <Text accessibilityRole="header" style={{ color: tokens.text, fontSize: 18, fontWeight: '600', marginBottom: 8 }}>{title}</Text>
-      {!!description && <Text style={{ color: tokens.textMuted, textAlign: 'center', marginBottom: actionLabel ? 16 : 0 }}>{description}</Text>}
+      <Text
+        accessibilityRole='header'
+        style={{
+          color: tokens.text,
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 8,
+        }}
+      >
+        {title}
+      </Text>
+      {!!description && (
+        <Text
+          style={{
+            color: tokens.textMuted,
+            textAlign: 'center',
+            marginBottom: actionLabel ? 16 : 0,
+          }}
+        >
+          {description}
+        </Text>
+      )}
       {!!actionLabel && (
         <Pressable
           onPress={onAction}
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityLabel={actionLabel}
           style={({ pressed }) => ({
             minWidth: 120,
@@ -35,24 +75,52 @@ export const EmptyState = ({ title, description, actionLabel, onAction, icon, te
             marginTop: 8,
           })}
         >
-          <Text style={{ color: 'white', textAlign: 'center' }}>{actionLabel}</Text>
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            {actionLabel}
+          </Text>
         </Pressable>
       )}
     </View>
   );
 };
 
-export const ErrorState = ({ title, description, actionLabel = 'Retry', onAction, icon, testID }: StateBaseProps) => {
+export const ErrorState = ({
+  title,
+  description,
+  actionLabel = 'Retry',
+  onAction,
+  icon,
+  testID,
+}: StateBaseProps) => {
   const { tokens } = useThemeContext();
   return (
-    <View style={container(tokens.bg)} accessibilityRole="alert" accessibilityLabel={title} testID={testID}>
+    <View
+      style={container(tokens.bg)}
+      accessibilityRole='alert'
+      accessibilityLabel={title}
+      testID={testID}
+    >
       {icon}
-      <Text accessibilityRole="header" style={{ color: tokens.critical, fontSize: 18, fontWeight: '600', marginBottom: 8 }}>{title}</Text>
-      {!!description && <Text style={{ color: tokens.textMuted, textAlign: 'center' }}>{description}</Text>}
+      <Text
+        accessibilityRole='header'
+        style={{
+          color: tokens.critical,
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 8,
+        }}
+      >
+        {title}
+      </Text>
+      {!!description && (
+        <Text style={{ color: tokens.textMuted, textAlign: 'center' }}>
+          {description}
+        </Text>
+      )}
       {!!actionLabel && (
         <Pressable
           onPress={onAction}
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityLabel={actionLabel}
           style={({ pressed }) => ({
             minWidth: 120,
@@ -64,10 +132,11 @@ export const ErrorState = ({ title, description, actionLabel = 'Retry', onAction
             marginTop: 12,
           })}
         >
-          <Text style={{ color: 'white', textAlign: 'center' }}>{actionLabel}</Text>
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            {actionLabel}
+          </Text>
         </Pressable>
       )}
     </View>
   );
 };
-
