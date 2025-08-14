@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { View, Text } from 'react-native';
 import { useThemeContext } from '../../theme/ThemeProvider';
 
@@ -24,33 +31,46 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const timers = useRef<Record<number, any>>({});
 
   const hideToast = useCallback((id: number) => {
-    setToasts((t) => t.filter((x) => x.id !== id));
+    setToasts(t => t.filter(x => x.id !== id));
     if (timers.current[id]) {
       clearTimeout(timers.current[id]);
       delete timers.current[id];
     }
   }, []);
 
-  const showToast = useCallback((message: string, duration = 3000) => {
-    const id = idRef.current++;
-    setToasts((t) => [{ id, message, duration }, ...t].slice(0, 3));
-    if (!process.env.JEST_WORKER_ID) {
-      timers.current[id] = setTimeout(() => hideToast(id), duration);
-    }
-    return id;
-  }, [hideToast]);
+  const showToast = useCallback(
+    (message: string, duration = 3000) => {
+      const id = idRef.current++;
+      setToasts(t => [{ id, message, duration }, ...t].slice(0, 3));
+      if (!(globalThis as any)?.process?.env?.JEST_WORKER_ID) {
+        timers.current[id] = setTimeout(() => hideToast(id), duration);
+      }
+      return id;
+    },
+    [hideToast]
+  );
 
-  const value = useMemo(() => ({ showToast, hideToast }), [showToast, hideToast]);
+  const value = useMemo(
+    () => ({ showToast, hideToast }),
+    [showToast, hideToast]
+  );
 
   return (
     <ToastContext.Provider value={value}>
       {children}
       <View
         accessibilityLiveRegion='polite'
-        style={{ position: 'absolute', bottom: 24, left: 0, right: 0, alignItems: 'center', paddingHorizontal: 16 }}
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          paddingHorizontal: 16,
+        }}
         pointerEvents='none'
       >
-        {toasts.map((t) => (
+        {toasts.map(t => (
           <View
             key={t.id}
             accessibilityRole='alert'
@@ -75,4 +95,3 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     </ToastContext.Provider>
   );
 };
-

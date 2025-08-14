@@ -37,14 +37,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     })();
   }, []);
 
-<<<<<<< HEAD
   // Reduced motion detection (skip in Jest; guard native calls)
   useEffect(() => {
     if ((globalThis as any)?.process?.env?.JEST_WORKER_ID) return;
-=======
-  // Reduced motion detection (guard native calls for test environment)
-  useEffect(() => {
->>>>>>> drishti-v2/main
     try {
       // Some test environments stub AccessibilityInfo
       if (
