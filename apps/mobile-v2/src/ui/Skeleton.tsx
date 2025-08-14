@@ -23,7 +23,8 @@ export const Skeleton = ({
 
   useEffect(() => {
     // Disable animation in tests or when user prefers reduced motion
-    if (reducedMotion || process.env.JEST_WORKER_ID) return;
+    if (reducedMotion || (globalThis as any)?.process?.env?.JEST_WORKER_ID)
+      return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(opacity, {
@@ -42,8 +43,12 @@ export const Skeleton = ({
     return () => loop.stop();
   }, [opacity, reducedMotion]);
 
-  const opacityStyle = process.env.JEST_WORKER_ID ? 0.8 : (opacity as any);
-  const Container: any = process.env.JEST_WORKER_ID ? View : Animated.View;
+  const opacityStyle = (globalThis as any)?.process?.env?.JEST_WORKER_ID
+    ? 0.8
+    : (opacity as any);
+  const Container: any = (globalThis as any)?.process?.env?.JEST_WORKER_ID
+    ? View
+    : Animated.View;
   return (
     <Container
       accessibilityRole='progressbar'
