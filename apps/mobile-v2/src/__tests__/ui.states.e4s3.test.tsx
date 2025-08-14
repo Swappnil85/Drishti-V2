@@ -10,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 describe('E4-S3: Skeleton / Empty / Error components', () => {
   it('renders Skeleton and SkeletonText with a11y roles', () => {
-    const { UNSAFE_getAllByType } = render(
+    const { getAllByA11yRole } = render(
       <ThemeProvider>
         <>
           <Skeleton />
@@ -18,23 +18,19 @@ describe('E4-S3: Skeleton / Empty / Error components', () => {
         </>
       </ThemeProvider>
     );
-    // Fallback to type query because getAllByA11yRole is not supported in RNTL 13
-    const bars = UNSAFE_getAllByType(Skeleton);
+    const bars = getAllByA11yRole('progressbar');
     expect(bars.length).toBeGreaterThan(0);
   });
 
   it('renders EmptyState with optional action', () => {
     const onPress = jest.fn();
-    const { getByText } = render(
+    const { getByA11yRole, getByText } = render(
       <ThemeProvider>
-        <EmptyState
-          title='No items'
-          description='Try adding one'
-          actionLabel='Add'
-          onAction={onPress}
-        />
+        <EmptyState title="No items" description="Try adding one" actionLabel="Add" onAction={onPress} />
       </ThemeProvider>
     );
+    const header = getByA11yRole('header');
+    expect(header).toBeTruthy();
     fireEvent.press(getByText('Add'));
     expect(onPress).toHaveBeenCalled();
   });
@@ -43,10 +39,11 @@ describe('E4-S3: Skeleton / Empty / Error components', () => {
     const onRetry = jest.fn();
     const { getByText } = render(
       <ThemeProvider>
-        <ErrorState title='Failed' description='Oops' onAction={onRetry} />
+        <ErrorState title="Failed" description="Oops" onAction={onRetry} />
       </ThemeProvider>
     );
     fireEvent.press(getByText('Retry'));
     expect(onRetry).toHaveBeenCalled();
   });
 });
+

@@ -1,5 +1,6 @@
 // React import not required with react-jsx runtime
 import { View, Text } from 'react-native';
+import { SkeletonText } from '../ui/Skeleton';
 
 export default function HomeScreen() {
   return (
@@ -7,7 +8,10 @@ export default function HomeScreen() {
       accessibilityRole='summary'
       style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
     >
-      <Text accessibilityRole='header'>Home Screen</Text>
+      <Text accessibilityRole='header' style={{ marginBottom: 12 }}>
+        Home Screen
+      </Text>
+      <SkeletonText lines={3} />
     </View>
   );
 }
