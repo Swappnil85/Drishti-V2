@@ -6,6 +6,9 @@ module.exports = {
     '<rootDir>/jest.setup.after.js',
   ],
   moduleNameMapper: {
+    '^react$': '<rootDir>/node_modules/react',
+    '^react-dom$': '<rootDir>/node_modules/react-dom',
+    '^react-test-renderer$': '<rootDir>/node_modules/react-test-renderer',
     '^react-native-safe-area-context$':
       '<rootDir>/src/test/__mocks__/react-native-safe-area-context.js',
     '^@react-native/assets-registry/registry$':

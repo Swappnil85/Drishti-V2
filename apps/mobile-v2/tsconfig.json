@@ -4,7 +4,7 @@
     "module": "ESNext",
     "jsx": "react-jsx",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowJs": false,
@@ -25,5 +25,6 @@
     "sourceMap": true
   },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "extends": "expo/tsconfig.base"
 }

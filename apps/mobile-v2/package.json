@@ -7,9 +7,9 @@
     "start": "expo start",
     "start:clean": "watchman watch-del-all || true && expo start -c",
     "dev": "expo start --dev-client",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "android:dev": "expo start --dev-client --android",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "web:clean": "expo start --web --clear",
     "test": "jest",
@@ -31,7 +31,8 @@
     "react-native": "0.79.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "~0.20.0",
+    "expo-dev-client": "~5.2.4"
   },
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
@@ -51,5 +52,11 @@
     "jest-expo": "~53.0.9",
     "react-test-renderer": "^19.0.0",
     "typescript": "~5.8.3"
+  },
+  "overrides": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-test-renderer": "19.0.0",
+    "react-native": "0.79.5"
   }
 }
