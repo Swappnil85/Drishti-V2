@@ -64,6 +64,10 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
+      - name: Create empty result if none
+        if: always()
+        run: echo '{}' > security-audit-empty.json
+
       - name: Upload security results
         uses: actions/upload-artifact@v4
         if: always()
@@ -73,6 +77,8 @@ jobs:
             security-audit-*.json
             semgrep-results.json
             gitleaks-report.json
+            security-audit-empty.json
+          if-no-files-found: ignore
 
       - name: Comment PR with security summary
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

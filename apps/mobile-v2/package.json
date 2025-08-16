@@ -19,7 +19,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@drishti/shared": "^1.0.0",
+    "@drishti/shared": "file:../../packages/shared",
     "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^6.5.8",
@@ -39,6 +39,7 @@
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.2.2",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.8",
     "@typescript-eslint/eslint-plugin": "^8.39.1",

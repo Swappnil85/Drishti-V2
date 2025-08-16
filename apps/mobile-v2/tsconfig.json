@@ -8,9 +8,10 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowJs": false,
-    "types": ["jest", "react"],
+    "types": ["jest", "react", "node"],
     "baseUrl": ".",
     "paths": {
+      "@drishti/shared": ["../../packages/shared/src/index.ts"],
       "@drishti/shared/*": ["../../packages/shared/src/*"]
     },
     "esModuleInterop": true,
@@ -24,7 +25,11 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  "include": ["src", "../../packages/shared/src"],
+  "exclude": [
+    "node_modules",
+    "../../packages/shared/src/__tests__",
+    "../../packages/shared/src/**/*.test.ts"
+  ],
   "extends": "expo/tsconfig.base"
 }
