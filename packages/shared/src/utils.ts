@@ -296,20 +296,35 @@ export const calculatePercentile = (
 
 /**
  * Format currency amount
+ * E4-S7: Updated to use AUD as default per requirements
  */
 export const formatCurrency = (
   amount: number,
-  currency: string = 'USD',
-  locale: string = 'en-US'
+  currency: string = 'AUD'
 ): string => {
   try {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency,
-      minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
-  } catch {
+  } catch (error) {
+    // Fallback for invalid currency codes or other errors
+    // Use AUD as fallback if the provided currency is invalid
+    if (currency !== 'AUD') {
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: 'AUD',
+          maximumFractionDigits: 2,
+        }).format(amount);
+      } catch {
+        // Ultimate fallback - basic formatting
+        return `$${amount.toFixed(2)}`;
+      }
+    }
+
+    // Ultimate fallback - basic formatting
     return `$${amount.toFixed(2)}`;
   }
 };

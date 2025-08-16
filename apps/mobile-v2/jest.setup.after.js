@@ -159,3 +159,16 @@ jest.mock('react-native/Libraries/ReactNative/NativeUIManager', () => ({
   __esModule: true,
   default: { getConstants: () => ({}) },
 }));
+
+// Mock KeyboardAvoidingView to avoid native keyboard module dependencies
+jest.mock(
+  'react-native/Libraries/Components/Keyboard/KeyboardAvoidingView',
+  () => {
+    const React = require('react');
+    return {
+      __esModule: true,
+      default: ({ children, ...props }) =>
+        React.createElement('View', props, children),
+    };
+  }
+);
