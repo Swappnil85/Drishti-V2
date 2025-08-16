@@ -11,12 +11,11 @@ on:
 
 jobs:
   security-audit:
-    continue-on-error: true
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       contents: read
-      pull-requests: write
-      issues: write
+      actions: read
 
     steps:
       - name: Checkout code
@@ -64,6 +63,10 @@ jobs:
             p/owasp-top-ten
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: Create empty result if none
+        if: always()
+        run: echo '{}' > security-audit-empty.json
 
       - name: Create empty result if none
         if: always()

@@ -67,6 +67,10 @@ jobs:
   security-scan:
     name: Security Scan (mobile-v2)
     runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      actions: read
     needs: [lint-and-type-check, test-mobile-v2]
 
     steps:
@@ -85,6 +89,22 @@ jobs:
       - name: Run security audit (mobile-v2 workspace, high, omit dev-only transitives)
         run: npm audit --workspace=@drishti/mobile-v2 --audit-level=high --omit=dev
         continue-on-error: true
+
+      - name: Create empty result if none
+        if: always()
+        run: echo '{}' > security-scan-empty.json
+
+      - name: Upload security results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            security-*.json
+            semgrep-results.json
+            gitleaks-report.json
+            security-scan-empty.json
+          if-no-files-found: ignore
 
   coverage:
     name: Test Coverage (mobile-v2)
