@@ -25,7 +25,7 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src", "../../packages/shared/src"],
+  "include": ["src", "jest.setup.after.js", "../../packages/shared/src/**/*"],
   "exclude": [
     "node_modules",
     "../../packages/shared/src/__tests__",

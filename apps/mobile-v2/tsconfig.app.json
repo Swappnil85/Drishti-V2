@@ -1,8 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["src/__tests__/**"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../packages/shared/src/**/*.ts"
+  ],
+  "exclude": [
+    "src/__tests__/**",
+    "../../packages/shared/src/__tests__/**",
+    "../../packages/shared/src/**/*.test.ts"
+  ]
 }
