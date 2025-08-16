@@ -15,7 +15,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
