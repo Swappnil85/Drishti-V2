@@ -15,15 +15,17 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@drishti/shared": "file:../../packages/shared",
     "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^6.1.7",
     "expo": "~53.0.0",
+    "expo-dev-client": "~5.2.4",
     "expo-haptics": "14.1.4",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
@@ -31,13 +33,13 @@
     "react-native": "0.79.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-web": "~0.20.0",
-    "expo-dev-client": "~5.2.4"
+    "react-native-web": "~0.20.0"
   },
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.2.2",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.8",
     "@typescript-eslint/eslint-plugin": "^8.39.1",

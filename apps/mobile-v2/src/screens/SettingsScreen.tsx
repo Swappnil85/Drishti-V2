@@ -1,5 +1,6 @@
 // React import not required with react-jsx runtime
 import { View, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../theme/ThemeProvider';
 
 type BtnProps = { label: string; onPress: () => void; active?: boolean };
@@ -25,6 +26,7 @@ const Btn = ({ label, onPress, active }: BtnProps) => (
 
 export default function SettingsScreen() {
   const { mode, reducedMotion, setMode } = useThemeContext();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -34,6 +36,10 @@ export default function SettingsScreen() {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
       }}
     >
       <Text

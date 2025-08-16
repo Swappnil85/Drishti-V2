@@ -8,9 +8,10 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowJs": false,
-    "types": ["jest", "react"],
+    "types": ["react", "react-native", "jest", "node"],
     "baseUrl": ".",
     "paths": {
+      "@drishti/shared": ["../../packages/shared/src/index.ts"],
       "@drishti/shared/*": ["../../packages/shared/src/*"]
     },
     "esModuleInterop": true,
@@ -24,7 +25,11 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  "include": ["src", "jest.setup.after.js", "../../packages/shared/src/**/*"],
+  "exclude": [
+    "node_modules",
+    "**/__tests__/**",
+    "../../packages/shared/**/__tests__/**"
+  ],
   "extends": "expo/tsconfig.base"
 }

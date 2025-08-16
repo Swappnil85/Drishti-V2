@@ -1,8 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "baseUrl": ".",
+    "paths": {
+      "@drishti/shared": ["../../packages/shared/src/index.ts"],
+      "@drishti/shared/*": ["../../packages/shared/src/*"]
+    },
+    "moduleResolution": "bundler",
+    "types": ["react", "react-native", "jest", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["src/__tests__/**"]
+  "include": ["src", "jest.setup.after.js", "../../packages/shared/src/**/*"],
+  "exclude": ["**/__tests__/**", "../../packages/shared/**/__tests__/**"]
 }

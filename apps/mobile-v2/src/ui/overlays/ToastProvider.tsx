@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../../theme/ThemeProvider';
 import { useHaptics } from '../../utils/haptics';
 
@@ -30,6 +31,7 @@ export const useToast = () => {
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const { tokens } = useThemeContext();
   const { success: hSuccess } = useHaptics();
+  const insets = useSafeAreaInsets();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idRef = useRef(1);
   const timers = useRef<Record<number, any>>({});
@@ -69,9 +71,9 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         accessibilityLiveRegion='polite'
         style={{
           position: 'absolute',
-          bottom: 24,
-          left: 0,
-          right: 0,
+          bottom: Math.max(24, insets.bottom + 8),
+          left: insets.left,
+          right: insets.right,
           alignItems: 'center',
           paddingHorizontal: 16,
         }}

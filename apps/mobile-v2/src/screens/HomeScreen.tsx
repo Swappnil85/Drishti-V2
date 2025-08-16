@@ -1,5 +1,6 @@
 // React import not required with react-jsx runtime
 import { View, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SkeletonText } from '../ui/Skeleton';
 import { useToast } from '../ui/overlays/ToastProvider';
 import { useSheet } from '../ui/overlays/SheetProvider';
@@ -7,6 +8,8 @@ import { useSheet } from '../ui/overlays/SheetProvider';
 export default function HomeScreen() {
   const { showToast } = useToast();
   const { openSheet } = useSheet();
+  const insets = useSafeAreaInsets();
+
   return (
     <View
       accessibilityRole='summary'
@@ -15,6 +18,10 @@ export default function HomeScreen() {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 12,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
       }}
     >
       <Text accessibilityRole='header' style={{ marginBottom: 12 }}>

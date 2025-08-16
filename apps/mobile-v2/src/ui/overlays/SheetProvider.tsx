@@ -14,7 +14,10 @@ import {
   AccessibilityInfo,
   PanResponderGestureState,
   GestureResponderEvent,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../../theme/ThemeProvider';
 
 export type SheetOptions = {
@@ -43,6 +46,7 @@ export const useSheet = () => {
 
 export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
   const { tokens, reducedMotion } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [isOpen, setOpen] = useState(false);
   const [content, setContent] = useState<OpenSheetArg | null>(null);
   const onCloseRef = useRef<(() => void) | undefined>(undefined);
@@ -139,28 +143,36 @@ export const SheetProvider = ({ children }: { children: React.ReactNode }) => {
               backgroundColor: 'rgba(0,0,0,0.4)',
             }}
           />
-          {/* sheet */}
-          <Container
-            accessibilityRole='dialog'
-            accessibilityViewIsModal
-            onAccessibilityEscape={closeSheet}
+          {/* sheet with keyboard avoidance */}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
             style={{
               position: 'absolute',
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: tokens.surface,
-              padding: 16,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              transform: [{ translateY }],
             }}
-            {...panResponder.panHandlers}
           >
-            {typeof content === 'function'
-              ? (content as any)(closeSheet)
-              : content}
-          </Container>
+            <Container
+              accessibilityRole='dialog'
+              accessibilityViewIsModal
+              onAccessibilityEscape={closeSheet}
+              style={{
+                backgroundColor: tokens.surface,
+                padding: 16,
+                paddingBottom: Math.max(16, insets.bottom),
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                transform: [{ translateY }],
+              }}
+              {...panResponder.panHandlers}
+            >
+              {typeof content === 'function'
+                ? (content as any)(closeSheet)
+                : content}
+            </Container>
+          </KeyboardAvoidingView>
         </View>
       )}
     </SheetContext.Provider>
