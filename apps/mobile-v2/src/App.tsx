@@ -7,6 +7,7 @@ import RootNavigator from './navigation/RootNavigator';
 import { SheetProvider } from './ui/overlays/SheetProvider';
 import { ToastProvider } from './ui/overlays/ToastProvider';
 import { OnboardingProvider } from './contexts/OnboardingContext';
+import { PreferencesProvider } from './contexts/PreferencesContext';
 
 export default function App() {
   useEffect(() => {
@@ -22,12 +23,14 @@ export default function App() {
     <SafeAreaProvider>
       <ThemeProvider>
         <OnboardingProvider>
-          <ToastProvider>
-            <SheetProvider>
-              <StatusBar style='auto' />
-              <RootNavigator />
-            </SheetProvider>
-          </ToastProvider>
+          <PreferencesProvider>
+            <ToastProvider>
+              <SheetProvider>
+                <StatusBar style='auto' />
+                <RootNavigator />
+              </SheetProvider>
+            </ToastProvider>
+          </PreferencesProvider>
         </OnboardingProvider>
       </ThemeProvider>
     </SafeAreaProvider>
