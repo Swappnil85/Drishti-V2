@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from '../navigation/RootNavigator';

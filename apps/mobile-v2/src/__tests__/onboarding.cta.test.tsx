@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import WelcomeScreen from '../screens/onboarding/WelcomeScreen';
@@ -37,9 +38,10 @@ describe('Onboarding CTA', () => {
   });
 
   it('welcome screen CTA logs telemetry', () => {
+    const mockOnNext = jest.fn();
     const { getByTestId } = render(
       <TestWrapper>
-        <WelcomeScreen />
+        <WelcomeScreen onNext={mockOnNext} />
       </TestWrapper>
     );
 
@@ -47,6 +49,7 @@ describe('Onboarding CTA', () => {
     fireEvent.press(getStartedButton);
 
     expect(mockLogEvent).toHaveBeenCalledWith('onboarding_step', { step: 'welcome_cta' });
+    expect(mockOnNext).toHaveBeenCalled();
   });
 
   it('step2 screen completion sets onboarding completed', async () => {
@@ -66,9 +69,10 @@ describe('Onboarding CTA', () => {
   });
 
   it('get started button has proper accessibility props', () => {
+    const mockOnNext = jest.fn();
     const { getByTestId } = render(
       <TestWrapper>
-        <WelcomeScreen />
+        <WelcomeScreen onNext={mockOnNext} />
       </TestWrapper>
     );
 
