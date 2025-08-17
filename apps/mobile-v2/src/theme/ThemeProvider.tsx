@@ -7,11 +7,13 @@ import { logEvent } from '../telemetry';
 export interface ThemePrefs {
   mode: Mode;
   reducedMotion: boolean;
+  reducedMotionOverride?: 'system' | 'on' | 'off';
 }
 
 interface ThemeContextValue extends ThemePrefs {
   tokens: SemanticTokens;
   setMode: (mode: Mode) => void;
+  setReducedMotionOverride: (override: 'system' | 'on' | 'off') => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -20,6 +22,9 @@ type ThemeProviderProps = { children: React.ReactNode };
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [mode, setModeState] = useState<Mode>('system');
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotionOverride, setReducedMotionOverrideState] = useState<
+    'system' | 'on' | 'off'
+  >('system');
 
   // Load prefs (skip in Jest to avoid act warnings)
   useEffect(() => {
@@ -32,6 +37,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
         if (raw) {
           const parsed: ThemePrefs = JSON.parse(raw);
           setModeState(parsed.mode);
+          if (parsed.reducedMotionOverride) {
+            setReducedMotionOverrideState(parsed.reducedMotionOverride);
+          }
         }
       } catch {
         // ignore persisted read error
@@ -76,9 +84,19 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     setModeState(m);
     AsyncStorage.setItem(
       'theme_prefs',
-      JSON.stringify({ mode: m, reducedMotion })
+      JSON.stringify({ mode: m, reducedMotion, reducedMotionOverride })
     ).catch(() => {});
     logEvent('theme_change', { mode: m });
+  };
+
+  // Persist reduced motion override
+  const setReducedMotionOverride = (override: 'system' | 'on' | 'off') => {
+    setReducedMotionOverrideState(override);
+    AsyncStorage.setItem(
+      'theme_prefs',
+      JSON.stringify({ mode, reducedMotion, reducedMotionOverride: override })
+    ).catch(() => {});
+    logEvent('motion_pref_changed', { reducedMotionOverride: override });
   };
 
   const systemIsDark = (() => {
@@ -96,9 +114,33 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     [effectiveMode]
   );
 
+  const effectiveReducedMotion = useMemo(() => {
+    if (reducedMotionOverride === 'on') {
+      return true;
+    }
+    if (reducedMotionOverride === 'off') {
+      return false;
+    }
+    return reducedMotion; // system default
+  }, [reducedMotionOverride, reducedMotion]);
+
   const value = useMemo(
-    () => ({ mode, reducedMotion, tokens, setMode }),
-    [mode, reducedMotion, tokens, setMode]
+    () => ({
+      mode,
+      reducedMotion: effectiveReducedMotion,
+      reducedMotionOverride,
+      tokens,
+      setMode,
+      setReducedMotionOverride,
+    }),
+    [
+      mode,
+      effectiveReducedMotion,
+      reducedMotionOverride,
+      tokens,
+      setMode,
+      setReducedMotionOverride,
+    ]
   );
 
   return (

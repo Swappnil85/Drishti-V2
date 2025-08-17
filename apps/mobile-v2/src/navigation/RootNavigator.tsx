@@ -1,7 +1,7 @@
 // React import not required with react-jsx runtime
 
-import { useEffect, useState, useRef } from 'react';
-import { Appearance } from 'react-native';
+import { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { Appearance, View, Text } from 'react-native';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -14,30 +14,131 @@ import PlanScreen from '../screens/PlanScreen';
 import ScenariosScreen from '../screens/ScenariosScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import OnboardingNavigator from '../screens/onboarding/OnboardingNavigator';
 import { logEvent } from '../telemetry';
 import { initializeDeepLinking } from '../utils/deepLinking';
+import { getOnboardingCompleted } from '../utils/storage';
+import { useThemeContext } from '../theme/ThemeProvider';
 
 export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
+type AppState = 'loading' | 'onboarding' | 'app';
 
 const Tab = createBottomTabNavigator();
 
+function TabNavigator() {
+  useEffect(() => {
+    const cleanup = initializeDeepLinking((_screen: string, _params?: any) => {
+      // Handle deep link navigation
+    });
+
+    return cleanup;
+  }, []);
+
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      screenListeners={{
+        tabPress: (e: { target?: unknown }) => {
+          const name = (typeof e.target === 'string' ? e.target : '')
+            .toString()
+            .toLowerCase();
+          // Fire telemetry per AC: nav_tab_click { tab }
+          logEvent('nav_tab_click', { tab: name });
+        },
+      }}
+    >
+      <Tab.Screen name='Home' component={HomeScreen} />
+      <Tab.Screen name='Accounts' component={AccountsScreen} />
+      <Tab.Screen name='Plan' component={PlanScreen} />
+      <Tab.Screen name='Scenarios' component={ScenariosScreen} />
+      <Tab.Screen name='Settings' component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+}
+
+function LoadingScreen() {
+  const { tokens } = useThemeContext();
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: tokens.bg,
+      }}
+    >
+      <Text style={{ color: tokens.text, fontSize: 18 }}>Loading...</Text>
+    </View>
+  );
+}
+
 export default function RootNavigator() {
   const [showPaywall, setShowPaywall] = useState(false);
-  const navigationRef = useRef<any>(null);
+  const [appState, setAppState] = useState<AppState>('loading');
+  const mountedRef = useRef(true);
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
 
+  useLayoutEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const isCompleted = await getOnboardingCompleted();
+        if (mountedRef.current) {
+          if (isCompleted) {
+            setAppState('app');
+          } else {
+            logEvent('onboarding_start');
+            setAppState('onboarding');
+          }
+        }
+      } catch {
+        if (mountedRef.current) {
+          logEvent('onboarding_start');
+          setAppState('onboarding');
+        }
+      }
+    };
+
+    checkOnboardingStatus();
+    
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
-    const cleanup = initializeDeepLinking((screen: string, params?: any) => {
+    const isTestEnv = typeof jest !== 'undefined' || process.env.NODE_ENV === 'test';
+    if (!isTestEnv) {
+      const checkOnboardingStatus = async () => {
+        try {
+          const isCompleted = await getOnboardingCompleted();
+          if (mountedRef.current) {
+            if (isCompleted) {
+              setAppState('app');
+            } else {
+              setAppState('onboarding');
+            }
+          }
+        } catch {
+          if (mountedRef.current) {
+            setAppState('onboarding');
+          }
+        }
+      };
+
+      const interval = setInterval(checkOnboardingStatus, 1000);
+      return () => clearInterval(interval);
+    }
+    
+    return undefined;
+  }, []);
+
+  useEffect(() => {
+    const cleanup = initializeDeepLinking((screen: string, _params?: any) => {
       // Handle deep link navigation
       if (screen === 'Paywall') {
         setShowPaywall(true);
-      } else if (screen === 'Accounts') {
-        setShowPaywall(false);
-        // Navigate to Accounts tab
-        if (navigationRef.current) {
-          navigationRef.current.navigate('Accounts', params);
-        }
       }
     });
 
@@ -54,25 +155,10 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer theme={navTheme} ref={navigationRef}>
-      <Tab.Navigator
-        screenOptions={{ headerShown: false }}
-        screenListeners={{
-          tabPress: (e: { target?: unknown }) => {
-            const name = (typeof e.target === 'string' ? e.target : '')
-              .toString()
-              .toLowerCase();
-            // Fire telemetry per AC: nav_tab_click { tab }
-            logEvent('nav_tab_click', { tab: name });
-          },
-        }}
-      >
-        <Tab.Screen name='Home' component={HomeScreen} />
-        <Tab.Screen name='Accounts' component={AccountsScreen} />
-        <Tab.Screen name='Plan' component={PlanScreen} />
-        <Tab.Screen name='Scenarios' component={ScenariosScreen} />
-        <Tab.Screen name='Settings' component={SettingsScreen} />
-      </Tab.Navigator>
+    <NavigationContainer theme={navTheme}>
+      {appState === 'loading' && <LoadingScreen />}
+      {appState === 'onboarding' && <OnboardingNavigator />}
+      {appState === 'app' && <TabNavigator />}
     </NavigationContainer>
   );
 }
