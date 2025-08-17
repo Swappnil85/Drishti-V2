@@ -5,26 +5,52 @@ import { useThemeContext } from '../theme/ThemeProvider';
 import { clearOnboardingState, clearAllPreferences } from '../utils/storage';
 import { logEvent } from '../telemetry';
 
-type BtnProps = { label: string; onPress: () => void; active?: boolean };
-const Btn = ({ label, onPress, active }: BtnProps) => (
-  <Pressable
-    accessibilityRole='button'
-    accessibilityLabel={label}
-    onPress={onPress}
-    style={{
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      marginVertical: 6,
-      minWidth: 200,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: active ? '#0D6EFD' : '#DFE3E8',
-      alignItems: 'center',
-    }}
-  >
-    <Text style={{ fontSize: 16 }}>{label}</Text>
-  </Pressable>
-);
+type BtnProps = { 
+  label: string; 
+  onPress: () => void; 
+  active?: boolean;
+  destructive?: boolean;
+};
+
+const Btn = ({ label, onPress, active, destructive }: BtnProps) => {
+  const { tokens } = useThemeContext();
+  
+  return (
+    <Pressable
+      accessibilityRole='button'
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={{
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginVertical: 6,
+        minWidth: 200,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: active 
+          ? tokens.primary 
+          : destructive 
+          ? tokens.critical 
+          : tokens.border,
+        backgroundColor: active ? tokens.surface : tokens.bg,
+        alignItems: 'center',
+      }}
+    >
+      <Text 
+        style={{ 
+          fontSize: 16, 
+          color: active 
+            ? tokens.primary 
+            : destructive 
+            ? tokens.critical 
+            : tokens.text 
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+};
 
 export default function SettingsScreen() {
   const {
@@ -33,6 +59,7 @@ export default function SettingsScreen() {
     reducedMotionOverride,
     setMode,
     setReducedMotionOverride,
+    tokens,
   } = useThemeContext();
   const insets = useSafeAreaInsets();
 
@@ -86,22 +113,41 @@ export default function SettingsScreen() {
         paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
+        backgroundColor: tokens.bg,
       }}
     >
       <Text
         accessibilityRole='header'
-        style={{ fontSize: 20, marginBottom: 12 }}
+        style={{ 
+          fontSize: 20, 
+          marginBottom: 12,
+          color: tokens.text,
+          fontWeight: '600',
+        }}
       >
         Settings
       </Text>
-      <Text accessibilityLabel='theme-mode-label'>Theme mode: {mode}</Text>
-      <Text accessibilityLabel='reduced-motion-label'>
+      <Text 
+        accessibilityLabel='theme-mode-label'
+        style={{ color: tokens.text }}
+      >
+        Theme mode: {mode}
+      </Text>
+      <Text 
+        accessibilityLabel='reduced-motion-label'
+        style={{ color: tokens.text }}
+      >
         Reduced motion: {reducedMotionOverride} ({reducedMotion ? 'on' : 'off'})
       </Text>
 
       <View style={{ height: 12 }} />
 
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+      <Text style={{ 
+        fontSize: 18, 
+        fontWeight: '600', 
+        marginBottom: 8,
+        color: tokens.text,
+      }}>
         Theme
       </Text>
       <Btn
@@ -122,7 +168,12 @@ export default function SettingsScreen() {
 
       <View style={{ height: 24 }} />
 
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+      <Text style={{ 
+        fontSize: 18, 
+        fontWeight: '600', 
+        marginBottom: 8,
+        color: tokens.text,
+      }}>
         Motion
       </Text>
       <Btn
@@ -143,13 +194,23 @@ export default function SettingsScreen() {
 
       <View style={{ height: 24 }} />
 
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+      <Text style={{ 
+        fontSize: 18, 
+        fontWeight: '600', 
+        marginBottom: 8,
+        color: tokens.text,
+      }}>
         QA Tools
       </Text>
-      <Btn label='Reset Onboarding (QA)' onPress={handleResetOnboarding} />
+      <Btn 
+        label='Reset Onboarding (QA)' 
+        onPress={handleResetOnboarding}
+        destructive
+      />
       <Btn
         label='Reset ALL Preferences (QA)'
         onPress={handleResetAllPreferences}
+        destructive
       />
     </View>
   );
