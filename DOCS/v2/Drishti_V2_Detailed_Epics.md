@@ -90,6 +90,22 @@ Definition of Done (DoD):
 • Dark/light parity, TalkBack/VoiceOver labels verified.
 KPIs / Telemetry:
 • Funnel drop-off on onboarding < 10%; UI crash-free sessions ≥ 99.5%.
+
+**Stories Status:**
+• ✅ E4-S1: Bottom Tab Navigation Shell - DONE (Baseline implementation)
+• ✅ E4-S2: Global Theming (Light/Dark + Tokens) - DONE (Baseline implementation)
+• ✅ E4-S3: Common Skeleton/Loading/Empty/Error Components - DONE (Baseline implementation)
+• ✅ E4-S4: Modal/Sheet & Toast System - DONE (Baseline implementation)
+• ✅ E4-S5: Haptics & Feedback - DONE (PR #27, 2025-08-14)
+• ✅ E4-S6: Safe Area, Insets, and Keyboard Handling - DONE (PR #30, 2025-08-16)
+• ✅ E4-S7: Global Date/Number/Currency Formatting - DONE (PR #30, 2025-08-16)
+• ✅ E4-S8: Deep Link Routing (Basic) - DONE (PR #31, 2025-08-17)
+• ✅ E4-S9: Error Boundary Enhancement - DONE (PR #31, 2025-08-17)
+• ✅ E4-S10: Accessibility Baseline - DONE (PR #31, 2025-08-17)
+
+**Release Tag:** [`mvp-e4-complete`](https://github.com/Swappnil85/Drishti-V2/releases/tag/mvp-e4-complete)
+**Documentation:** [E4-NAV_UI.md](./stories/E4-NAV_UI.md)
+
 Dependencies: E1
 Risks & Mitigations:
 • Design drift; mitigate with tokens and shared components.

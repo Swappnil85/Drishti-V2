@@ -1,15 +1,16 @@
 # E4 — Navigation & Core UI Framework
 
-### E4-S1: Bottom Tab Navigation Shell (Status: Done)
+### E4-S1: Bottom Tab Navigation Shell (Status: DONE)
 
-**Context:** Establish the app skeleton so all features can snap in consistently.  
+**Context:** Establish the app skeleton so all features can snap in consistently.
 **Acceptance Criteria**
 
 - **Given** the app is installed, **when** I open it, **then** I see a bottom tab bar with: Home, Accounts, Plan, Scenarios, Settings.
 - **Given** I tap a tab, **when** navigation occurs, **then** the target screen loads within 300ms p95 and the active tab is highlighted.
 - **Given** system is in dark mode, **then** tab bar and icons follow the theme.
 - **Given** VoiceOver/TalkBack is on, **then** each tab has a readable label and role.
-  **Data Contract**
+
+**Data Contract**
 
 ```ts
 type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
@@ -18,70 +19,91 @@ interface NavState {
 }
 ```
 
-**Telemetry:** `nav_tab_click {{ tab }}`.  
-**Perf/A11y:** p95 tab switch < 300ms; WCAG 2.1 AA color contrast.  
+**Telemetry:** `nav_tab_click {{ tab }}`.
+**Implementation:** Baseline implementation - 2025-08-17 03:45 AET
+**Perf/A11y:** p95 tab switch < 300ms; WCAG 2.1 AA color contrast.
 **Test Notes:** Snapshot nav structure; device tests on iOS/Android; screen reader pass.
 
-### E4-S2: Global Theming (Light/Dark + Tokens) (Status: Done)
+### E4-S2: Global Theming (Light/Dark + Tokens) (Status: DONE)
 
-**Context:** Provide consistent design tokens for colors, spacing, typography, and states.  
+**Context:** Provide consistent design tokens for colors, spacing, typography, and states.
 **Acceptance Criteria**
 
 - Token set exposes semantic roles (bg/surface/primary/critical/success/warn/text-muted, etc.).
 - System theme auto-detected; manual override persists.
 - Prefers-reduced-motion reduces animations >= 80%.
-  **Data Contract**
+
+**Data Contract**
 
 ```ts
-interface ThemePrefs {{ mode: "system"|"light"|"dark"; reducedMotion: boolean }}
+interface ThemePrefs {
+  mode: 'system' | 'light' | 'dark';
+  reducedMotion: boolean;
+}
 ```
 
-**Telemetry:** `theme_change {{ mode }}`, `motion_pref_detected`.  
-**Perf/A11y:** No jank on toggle; contrast AA+.  
+**Telemetry:** `theme_change {{ mode }}`, `motion_pref_detected`.
+**Implementation:** Baseline implementation - 2025-08-17 03:45 AET
+**Perf/A11y:** No jank on toggle; contrast AA+.
 **Test Notes:** Contrast checker; motion audit.
 
-### E4-S3: Common Skeleton/Loading/Empty/Error Components (Status: Done)
+### E4-S3: Common Skeleton/Loading/Empty/Error Components (Status: DONE)
 
-**Context:** Uniform UX for async states and empty data.  
+**Context:** Uniform UX for async states and empty data.
 **Acceptance Criteria**
 
 - Components: `<Skeleton>`, `<EmptyState>`, `<ErrorState>` reusable with icon/title/cta.
 - Used by Dashboard, Accounts, Goals, Scenarios.
-  **Telemetry:** `error_view_shown {{ screen, code }}`.  
-  **Test Notes:** Snapshot and RTL tests; integration usage checks.
 
-### E4-S4: Modal/Sheet & Toast System (Status: Done)
+**Telemetry:** `error_view_shown {{ screen, code }}`.
+**Implementation:** Baseline implementation - 2025-08-17 03:45 AET
+**Test Notes:** Snapshot and RTL tests; integration usage checks.
 
+### E4-S4: Modal/Sheet & Toast System (Status: DONE)
+
+**Context:** Provide consistent overlay patterns for modals, sheets, and notifications.
 **Acceptance Criteria**
 
 - Sheet supports drag-to-close and focus trapping.
 - Toasts stack, auto-dismiss, accessible live region.
-  **Telemetry:** `toast_shown {{ kind }}`.  
-  **A11y:** ARIA roles & escape to close.
 
-### E4-S5: Haptics & Feedback
+**Telemetry:** `toast_shown {{ kind }}`.
+**Implementation:** Baseline implementation - 2025-08-17 03:45 AET
+**A11y:** ARIA roles & escape to close.
 
+### E4-S5: Haptics & Feedback (Status: DONE)
+
+**Context:** Provide tactile feedback for user interactions while respecting accessibility preferences.
 **Acceptance Criteria**
 
 - Light haptics on primary actions and success states; none in reduced-motion.
-  **Test Notes:** Device-level verification.
 
-### E4-S6: Safe Area, Insets, and Keyboard Handling
+**Implementation:** PR #27 - Merged 2025-08-14
+**Test Notes:** Device-level verification.
 
+### E4-S6: Safe Area, Insets, and Keyboard Handling (Status: DONE)
+
+**Context:** Ensure proper layout on all device types and keyboard interaction handling.
 **Acceptance Criteria**
 
 - No clipped content on devices with notches; keyboard avoids inputs properly.
 
-### E4-S7: Global Date/Number/Currency Formatting
+**Implementation:** PR #30 - Merged 2025-08-16 09:15 UTC
 
+### E4-S7: Global Date/Number/Currency Formatting (Status: DONE)
+
+**Context:** Provide consistent formatting utilities for monetary values and numbers.
 **Acceptance Criteria**
 
 - AUD default; can display other currencies on Accounts.
-  **Data Contract**
+
+**Data Contract**
 
 ```ts
 formatCurrency(amount: number, currency: string="AUD"): string;
 ```
+
+**Implementation:** PR #30 - Merged 2025-08-16 09:15 UTC
 
 ### E4-S8: Deep Link Routing (Basic) (Status: DONE)
 
