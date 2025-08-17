@@ -102,7 +102,7 @@ type DeepLinkRoute = {
 ```
 
 **Telemetry:** `deeplink_open {{ path }}`.
-**Implementation:** PR #[TBD] - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - 2025-08-17 03:00 AET
 **Test Coverage:** 100% of parseDeepLink and handleDeepLink functions
 
 ### E4-S9: Error Boundary (Status: DONE)
@@ -116,7 +116,7 @@ type DeepLinkRoute = {
 - Retry button follows accessibility guidelines (44px touch target).
 
 **Telemetry:** `crash_report {{ errorId, message, stack, platform, timestamp }}`.
-**Implementation:** PR #[TBD] - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - 2025-08-17 03:00 AET
 **Test Coverage:** 100% of error boundary functionality including crash reporting
 
 ### E4-S10: Accessibility Baseline (Status: DONE)
@@ -141,7 +141,7 @@ interface A11yValidation {
 }
 ```
 
-**Implementation:** PR #[TBD] - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - 2025-08-17 03:00 AET
 **Test Coverage:** 100% of accessibility utility functions
 **Test Notes:** Screen reader checklist per screen; touch target validation.
 
