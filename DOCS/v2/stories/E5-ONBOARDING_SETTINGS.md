@@ -75,7 +75,7 @@ interface Profile {{ currency: string; theme: "system"|"light"|"dark"; privacyLo
 
 ### E5-S4: Theme Preference & Reduced Motion
 
-**Status**: DONE ✅
+**Status**: IN-PROGRESS ❌
 **Acceptance Criteria**
 
 - Manual override of system theme persists; motion reduced per OS setting.
