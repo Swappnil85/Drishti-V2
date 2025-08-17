@@ -102,7 +102,7 @@ type DeepLinkRoute = {
 ```
 
 **Telemetry:** `deeplink_open {{ path }}`.
-**Implementation:** PR #31 - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - Merged 2025-08-17 03:45 AET
 **Test Coverage:** 100% of parseDeepLink and handleDeepLink functions
 
 ### E4-S9: Error Boundary (Status: DONE)
@@ -116,7 +116,7 @@ type DeepLinkRoute = {
 - Retry button follows accessibility guidelines (44px touch target).
 
 **Telemetry:** `crash_report {{ errorId, message, stack, platform, timestamp }}`.
-**Implementation:** PR #31 - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - Merged 2025-08-17 03:45 AET
 **Test Coverage:** 100% of error boundary functionality including crash reporting
 
 ### E4-S10: Accessibility Baseline (Status: DONE)
@@ -141,8 +141,26 @@ interface A11yValidation {
 }
 ```
 
-**Implementation:** PR #31 - 2025-08-17 03:00 AET
+**Implementation:** PR #31 - Merged 2025-08-17 03:45 AET
 **Test Coverage:** 100% of accessibility utility functions
 **Test Notes:** Screen reader checklist per screen; touch target validation.
+
+---
+
+## 🎉 Epic 4 Complete - Navigation & Core UI Framework
+
+**Status:** ✅ CLOSED
+**Completion Date:** 2025-08-17 03:45 AET
+**Tag:** `mvp-e4-complete`
+**Merge Commit:** 4b8b8b8 (PR #31)
+
+**Summary:** All E4 stories (S8, S9, S10) successfully implemented with:
+
+- Deep link routing foundation (`drishti://` scheme)
+- Production-ready error boundary with crash reporting
+- WCAG 2.1 AA accessibility baseline and utilities
+- 71.76% test coverage, all CI checks passing
+
+**Next Epic:** E5 - Onboarding + Privacy
 
 ---

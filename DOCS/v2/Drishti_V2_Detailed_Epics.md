@@ -1,16 +1,27 @@
 Drishti_V2 — Detailed Epics (Final Planning Set)
 Last updated: 2025-08-12 (AET)
+
 # Purpose
+
 This document enumerates all Drishti_V2 epics with concise scope, outcomes, acceptance criteria, telemetry, and dependencies. It is the single source of truth for MVP build and Pro/post-MVP planning. User stories will be authored against these epics.
+
 # Legend
-Tier: MVP, Pro, Add-on.  Status: DONE, Planned.  DoD: Definition of Done.
+
+Tier: MVP, Pro, Add-on. Status: DONE, Planned. DoD: Definition of Done.
+
 # MVP Scope (High-Level)
+
 - Navigation & Core UI, Onboarding & Settings, Accounts (manual + CSV import), Net Worth & 12‑mo calc engine, Goals (up to 2),
   Basic Scenario (1 active), Data Viz & A11y, Telemetry, Privacy/Security hardening, Export/Sharing, Paywall/IAP, Store readiness.
+
 # Non-Goals (MVP)
+
 - Bank sync, money movement, advanced multi-year scenarios, cloud sync by default (opt-in post-MVP), PDF/JPG→Excel (separate experiment), B2B features, complex budgeting modules.
+
 # Epic Details
-## E1. Project Infrastructure & Tooling  —  Tier: - | Status: DONE
+
+## E1. Project Infrastructure & Tooling — Tier: - | Status: DONE
+
 Problem / Context: We need a fast, reliable development baseline to ship MVP in 6–8 weeks.
 Objectives / Outcomes:
 • Stable monorepo with CI checks (lint, type, tests).
@@ -28,7 +39,9 @@ KPIs / Telemetry:
 Dependencies: None
 Risks & Mitigations:
 • Tooling drift; mitigate with pinned versions and renovate.
-## E2. Core Security & Authentication  —  Tier: - | Status: DONE
+
+## E2. Core Security & Authentication — Tier: - | Status: DONE
+
 Problem / Context: Authenticate users securely on mobile with least friction.
 Objectives / Outcomes:
 • User can sign in/out and restore session securely.
@@ -44,7 +57,9 @@ KPIs / Telemetry:
 Dependencies: E1
 Risks & Mitigations:
 • Platform provider changes; mitigate with SDK version pinning.
-## E3. Core Data Models & Local DB  —  Tier: - | Status: DONE
+
+## E3. Core Data Models & Local DB — Tier: - | Status: DONE
+
 Problem / Context: We need reliable offline-first storage with simple sync readiness.
 Objectives / Outcomes:
 • Normalized models for User, Account, Balance, Goal, Scenario.
@@ -59,7 +74,9 @@ KPIs / Telemetry:
 Dependencies: E1
 Risks & Mitigations:
 • Schema churn; mitigate with story AC discipline and migrations.
-## E4. Navigation & Core UI Framework  —  Tier: MVP | Status: Planned
+
+## E4. Navigation & Core UI Framework — Tier: MVP | Status: ✅ COMPLETE (2025-08-17)
+
 Problem / Context: We need a predictable app shell so later features ‘snap in’.
 Objectives / Outcomes:
 • Bottom tabs (Home/Dashboard, Accounts, Plan/Goals, Scenarios, Settings).
@@ -76,7 +93,9 @@ KPIs / Telemetry:
 Dependencies: E1
 Risks & Mitigations:
 • Design drift; mitigate with tokens and shared components.
-## E5. Onboarding, Profile & Settings  —  Tier: MVP | Status: Planned
+
+## E5. Onboarding, Profile & Settings — Tier: MVP | Status: Planned
+
 Problem / Context: New users need a fast start and private-by-default configuration.
 Objectives / Outcomes:
 • Resumable 5-screen onboarding (intro, currency, privacy, sample data, done).
@@ -92,7 +111,9 @@ KPIs / Telemetry:
 Dependencies: E4, E2, E3
 Risks & Mitigations:
 • Too many steps; mitigate with skippable non-critical screens.
-## E6. Accounts: Manual + CSV Import  —  Tier: MVP | Status: Planned
+
+## E6. Accounts: Manual + CSV Import — Tier: MVP | Status: Planned
+
 Problem / Context: Users must load balances quickly without bank-sync complexity.
 Objectives / Outcomes:
 • Create/edit/delete accounts (cash/savings/debt/asset).
@@ -108,7 +129,9 @@ KPIs / Telemetry:
 Dependencies: E3, E4, E7, E10
 Risks & Mitigations:
 • CSV variants; mitigate with flexible mapping & saved presets.
-## E7. Net Worth & Calc Engine (12‑month)  —  Tier: MVP | Status: Planned
+
+## E7. Net Worth & Calc Engine (12‑month) — Tier: MVP | Status: Planned
+
 Problem / Context: Provide an at-a-glance picture and short‑term projection.
 Objectives / Outcomes:
 • Current net worth and 12‑month baseline projection.
@@ -124,7 +147,9 @@ KPIs / Telemetry:
 Dependencies: E3
 Risks & Mitigations:
 • Edge‑case rounding; mitigate with currency-safe math utilities.
-## E8. Goals (Free tier: up to 2)  —  Tier: MVP | Status: Planned
+
+## E8. Goals (Free tier: up to 2) — Tier: MVP | Status: Planned
+
 Problem / Context: Users need tangible targets to drive habit formation.
 Objectives / Outcomes:
 • Create goals with amount/date; progress %, milestones (25/50/75/100).
@@ -138,7 +163,9 @@ KPIs / Telemetry:
 Dependencies: E3, E4, E7, E10
 Risks & Mitigations:
 • Over‑notification; mitigate with frequency caps and user control.
-## E9. Scenario Planner (Basic)  —  Tier: MVP | Status: Planned
+
+## E9. Scenario Planner (Basic) — Tier: MVP | Status: Planned
+
 Problem / Context: Show impact of simple changes without overwhelming users.
 Objectives / Outcomes:
 • One active scenario with savings-rate/income/expense deltas and optional lump sum.
@@ -153,7 +180,9 @@ KPIs / Telemetry:
 Dependencies: E7, E4, E3
 Risks & Mitigations:
 • Model misunderstanding; mitigate with inline explanations.
-## E10. Data Visualization & Accessibility  —  Tier: MVP | Status: Planned
+
+## E10. Data Visualization & Accessibility — Tier: MVP | Status: Planned
+
 Problem / Context: Charts and tables must be legible, performant, and accessible.
 Objectives / Outcomes:
 • Net worth sparkline, goal progress visuals, accessible tooltips/tables.
@@ -167,7 +196,9 @@ KPIs / Telemetry:
 Dependencies: E4
 Risks & Mitigations:
 • Performance on low-end devices; mitigate with simplified rendering.
-## E11. Monetization & Entitlements  —  Tier: MVP | Status: Planned
+
+## E11. Monetization & Entitlements — Tier: MVP | Status: Planned
+
 Problem / Context: Convert value into revenue sustainably and ethically.
 Objectives / Outcomes:
 • Paywall with plans (monthly/yearly), restore purchases.
@@ -181,7 +212,9 @@ KPIs / Telemetry:
 Dependencies: E4, E3, E12
 Risks & Mitigations:
 • Store review delays; mitigate with phased rollout and clean receipts.
-## E12. Telemetry & Observability  —  Tier: MVP | Status: Planned
+
+## E12. Telemetry & Observability — Tier: MVP | Status: Planned
+
 Problem / Context: We need privacy-safe insights to tune conversion and reliability.
 Objectives / Outcomes:
 • Anon events for onboarding, paywall funnel, CSV import, crashes.
@@ -195,7 +228,9 @@ KPIs / Telemetry:
 Dependencies: E1, E4
 Risks & Mitigations:
 • Over-instrumentation; mitigate with schema review and sampling.
-## E13. Privacy & Security Hardening  —  Tier: MVP | Status: Planned
+
+## E13. Privacy & Security Hardening — Tier: MVP | Status: Planned
+
 Problem / Context: Finance data requires strong local protections and safe defaults.
 Objectives / Outcomes:
 • Local DB encryption, certificate pinning, secure storage routines.
@@ -209,7 +244,9 @@ KPIs / Telemetry:
 Dependencies: E2, E3, E1
 Risks & Mitigations:
 • Complexity on older devices; mitigate with capability checks.
-## E14. Export & Sharing  —  Tier: MVP | Status: Planned
+
+## E14. Export & Sharing — Tier: MVP | Status: Planned
+
 Problem / Context: Users need their data portable for spreadsheets and advice sessions.
 Objectives / Outcomes:
 • CSV export for accounts, goals; native share sheet integration.
@@ -222,7 +259,9 @@ KPIs / Telemetry:
 Dependencies: E3, E4
 Risks & Mitigations:
 • Timezone/locale edge cases; mitigate with consistent formatting rules.
-## E15. Cloud Sync (Opt-in Module)  —  Tier: Pro add-on | Status: Planned
+
+## E15. Cloud Sync (Opt-in Module) — Tier: Pro add-on | Status: Planned
+
 Problem / Context: Some users want multi-device continuity without compromising privacy.
 Objectives / Outcomes:
 • Encrypted blob push/pull with conflict resolution and background retry.
@@ -236,7 +275,9 @@ KPIs / Telemetry:
 Dependencies: E3, E13
 Risks & Mitigations:
 • Data consistency; mitigate with append-only log and checksums.
-## E16. AI Goal Advisor  —  Tier: Pro | Status: Planned
+
+## E16. AI Goal Advisor — Tier: Pro | Status: Planned
+
 Problem / Context: Users need nudges and scenario hints grounded in their context.
 Objectives / Outcomes:
 • 3 in-context suggestions with one‑tap apply/undo; safe prompt redaction.
@@ -250,7 +291,9 @@ KPIs / Telemetry:
 Dependencies: E8, E9, E7, E12, E13
 Risks & Mitigations:
 • Hallucinations; mitigate with deterministic data shaping + disclaimers.
-## E17. Store Readiness & Release Ops  —  Tier: MVP | Status: Planned
+
+## E17. Store Readiness & Release Ops — Tier: MVP | Status: Planned
+
 Problem / Context: We need a clean path to TestFlight/beta and GA with store approval.
 Objectives / Outcomes:
 • Store listings/screenshots, release notes, phased rollout plan.
@@ -264,7 +307,9 @@ KPIs / Telemetry:
 Dependencies: E11, E12, E13, E10
 Risks & Mitigations:
 • Rejection risk; mitigate with compliance checklist dry‑runs.
-## E18. Advanced Scenario Planner  —  Tier: Pro | Status: Planned
+
+## E18. Advanced Scenario Planner — Tier: Pro | Status: Planned
+
 Problem / Context: Power users want multi-year, multi-scenario what‑ifs.
 Objectives / Outcomes:
 • Multiple scenarios, 3–5 year horizon, inflation/compounding toggles.
@@ -277,7 +322,9 @@ KPIs / Telemetry:
 Dependencies: E9, E7, E10
 Risks & Mitigations:
 • Complexity creep; mitigate with progressive disclosure UI.
-## E19. Premium Insights  —  Tier: Pro | Status: Planned
+
+## E19. Premium Insights — Tier: Pro | Status: Planned
+
 Problem / Context: Users want plain-language summaries and trends without spreadsheets.
 Objectives / Outcomes:
 • Monthly digest: trends, anomalies, category breakdowns; shareable.
@@ -290,7 +337,9 @@ KPIs / Telemetry:
 Dependencies: E12, E7, E6, E8
 Risks & Mitigations:
 • False positives; mitigate with thresholds and user tuning.
-## E20. Goal Templates Pack  —  Tier: Add-on | Status: Planned
+
+## E20. Goal Templates Pack — Tier: Add-on | Status: Planned
+
 Problem / Context: Many users share common goal archetypes and want quick setup.
 Objectives / Outcomes:
 • Templates for FIRE, First Home, Debt Snowball, Travel with sensible defaults.
@@ -303,7 +352,9 @@ KPIs / Telemetry:
 Dependencies: E8, E7
 Risks & Mitigations:
 • Over‑opinionated defaults; mitigate with clear editing affordances.
-## E21. Support & Help Center  —  Tier: Pro enablement | Status: Planned
+
+## E21. Support & Help Center — Tier: Pro enablement | Status: Planned
+
 Problem / Context: Pro users expect timely help and basic self‑serve answers.
 Objectives / Outcomes:
 • In‑app FAQs and contact form; internal SLA tracking for Pro.
