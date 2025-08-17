@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [mvp-e5-batch1] - 2025-08-17
+
+### feat: E5 Batch-1 (S1 Onboarding, S2 Preferences) – gated onboarding, QA resets in Settings, reduced-motion tri-state, dark-mode contrast (PR #34)
+
+Epic 5 Batch-1 implements deterministic onboarding gating and enhanced Settings with QA tools. This release includes router-level first-run gate that blocks initial render until storage is read, ensuring fresh installs always show onboarding Step 1 without tabs flicker. Settings screen enhanced with QA tools section containing "Reset Onboarding (QA)" and "Reset ALL Preferences (QA)" buttons with immediate navigation. Tri-state reduced motion control allows user override of system setting (System/Force ON/Force OFF) with platform-specific detection (native AccessibilityInfo + web matchMedia). Web dark mode contrast fixed with explicit high-contrast colors (#FFFFFF on dark, #0A0A0A on light) for AA compliance. **Tag:** [`mvp-e5-batch1`](https://github.com/Swappnil85/Drishti-V2/releases/tag/mvp-e5-batch1) **PR:** [#34](https://github.com/Swappnil85/Drishti-V2/pull/34)
+
 ## [mvp-e4-complete] - 2025-08-17
 
 ### Epic 4: Navigation & Core UI Framework - COMPLETE
