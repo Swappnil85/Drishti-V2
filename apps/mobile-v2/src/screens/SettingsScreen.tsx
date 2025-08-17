@@ -333,6 +333,67 @@ export default function SettingsScreen() {
       >
         Settings
       </Text>
+      <Text
+        accessibilityLabel='theme-mode-label'
+        style={{ color: tokens.text }}
+      >
+        Theme mode: {mode}
+      </Text>
+      <Text
+        accessibilityLabel='reduced-motion-label'
+        style={{ color: tokens.text }}
+      >
+        Reduced motion: {reducedMotionOverride} ({reducedMotion ? 'on' : 'off'})
+      </Text>
+
+      {/* Theme Controls */}
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 8,
+          color: tokens.text,
+        }}
+      >
+        Theme
+      </Text>
+      <Btn
+        label='Light Mode'
+        onPress={() => setMode('light')}
+        active={mode === 'light'}
+      />
+      <Btn
+        label='Dark Mode'
+        onPress={() => setMode('dark')}
+        active={mode === 'dark'}
+      />
+
+      {/* Reduced Motion Controls */}
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 8,
+          color: tokens.text,
+        }}
+      >
+        Reduced Motion
+      </Text>
+      <Btn
+        label='Reduced Motion System'
+        onPress={() => setReducedMotionOverride('system')}
+        active={reducedMotionOverride === 'system'}
+      />
+      <Btn
+        label='Reduced Motion On'
+        onPress={() => setReducedMotionOverride('on')}
+        active={reducedMotionOverride === 'on'}
+      />
+      <Btn
+        label='Reduced Motion Off'
+        onPress={() => setReducedMotionOverride('off')}
+        active={reducedMotionOverride === 'off'}
+      />
 
       {/* Privacy & Security Section */}
       <View style={{ width: '100%', maxWidth: 400, marginBottom: 32 }}>
