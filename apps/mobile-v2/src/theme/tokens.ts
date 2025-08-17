@@ -14,14 +14,14 @@ export const lightTokens = {
 
 export const darkTokens = {
   bg: '#0B1221',
-  surface: '#111827',
-  primary: '#4C8DFF',
-  critical: '#FF6B6B',
-  success: '#3DDC97',
-  warn: '#FFD166',
+  surface: '#1F2937',
+  primary: '#60A5FA',
+  critical: '#F87171',
+  success: '#34D399',
+  warn: '#FBBF24',
   text: '#F9FAFB',
-  textMuted: '#A8B3BF',
-  border: '#2A3441',
+  textMuted: '#D1D5DB',
+  border: '#374151',
 };
 
 export type SemanticTokens = typeof lightTokens;
