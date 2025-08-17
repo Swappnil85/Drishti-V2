@@ -14,8 +14,10 @@ import PlanScreen from '../screens/PlanScreen';
 import ScenariosScreen from '../screens/ScenariosScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import { logEvent } from '../telemetry';
 import { initializeDeepLinking } from '../utils/deepLinking';
+import { useOnboarding } from '../contexts/OnboardingContext';
 
 export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 
@@ -26,6 +28,7 @@ export default function RootNavigator() {
   const navigationRef = useRef<any>(null);
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
+  const { hasCompletedOnboarding, isLoading } = useOnboarding();
 
   useEffect(() => {
     const cleanup = initializeDeepLinking((screen: string, params?: any) => {
@@ -43,6 +46,15 @@ export default function RootNavigator() {
 
     return cleanup;
   }, []);
+
+  // Show onboarding if not completed
+  if (!isLoading && !hasCompletedOnboarding) {
+    return (
+      <NavigationContainer theme={navTheme}>
+        <OnboardingScreen />
+      </NavigationContainer>
+    );
+  }
 
   // Show paywall as overlay when requested
   if (showPaywall) {

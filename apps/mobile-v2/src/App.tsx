@@ -6,6 +6,7 @@ import { ThemeProvider } from './theme/ThemeProvider';
 import RootNavigator from './navigation/RootNavigator';
 import { SheetProvider } from './ui/overlays/SheetProvider';
 import { ToastProvider } from './ui/overlays/ToastProvider';
+import { OnboardingProvider } from './contexts/OnboardingContext';
 
 export default function App() {
   useEffect(() => {
@@ -20,12 +21,14 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <ToastProvider>
-          <SheetProvider>
-            <StatusBar style='auto' />
-            <RootNavigator />
-          </SheetProvider>
-        </ToastProvider>
+        <OnboardingProvider>
+          <ToastProvider>
+            <SheetProvider>
+              <StatusBar style='auto' />
+              <RootNavigator />
+            </SheetProvider>
+          </ToastProvider>
+        </OnboardingProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

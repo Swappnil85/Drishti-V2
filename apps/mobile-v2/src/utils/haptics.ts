@@ -39,3 +39,20 @@ export const useHaptics = () => {
     success: safeSuccess,
   };
 };
+
+// Standalone haptic trigger for use outside React components
+export const triggerHaptic = (type: 'light' | 'success') => {
+  try {
+    if (type === 'light') {
+      Haptics.impactAsync?.(Haptics.ImpactFeedbackStyle.Light as any)?.catch?.(
+        () => {}
+      );
+    } else if (type === 'success') {
+      Haptics.notificationAsync?.(
+        Haptics.NotificationFeedbackType.Success as any
+      )?.catch?.(() => {});
+    }
+  } catch {
+    // noop in non-native/test environments
+  }
+};
