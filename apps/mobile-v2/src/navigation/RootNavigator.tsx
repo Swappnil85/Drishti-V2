@@ -1,5 +1,6 @@
 // React import not required with react-jsx runtime
 
+import { useEffect, useState, useRef } from 'react';
 import { Appearance } from 'react-native';
 import {
   NavigationContainer,
@@ -12,18 +13,48 @@ import AccountsScreen from '../screens/AccountsScreen';
 import PlanScreen from '../screens/PlanScreen';
 import ScenariosScreen from '../screens/ScenariosScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 import { logEvent } from '../telemetry';
+import { initializeDeepLinking } from '../utils/deepLinking';
 
 export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 
 const Tab = createBottomTabNavigator();
 
 export default function RootNavigator() {
+  const [showPaywall, setShowPaywall] = useState(false);
+  const navigationRef = useRef<any>(null);
   const isDark = Appearance.getColorScheme() === 'dark';
   const navTheme = isDark ? DarkTheme : DefaultTheme;
 
+  useEffect(() => {
+    const cleanup = initializeDeepLinking((screen: string, params?: any) => {
+      // Handle deep link navigation
+      if (screen === 'Paywall') {
+        setShowPaywall(true);
+      } else if (screen === 'Accounts') {
+        setShowPaywall(false);
+        // Navigate to Accounts tab
+        if (navigationRef.current) {
+          navigationRef.current.navigate('Accounts', params);
+        }
+      }
+    });
+
+    return cleanup;
+  }, []);
+
+  // Show paywall as overlay when requested
+  if (showPaywall) {
+    return (
+      <NavigationContainer theme={navTheme}>
+        <PaywallScreen />
+      </NavigationContainer>
+    );
+  }
+
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer theme={navTheme} ref={navigationRef}>
       <Tab.Navigator
         screenOptions={{ headerShown: false }}
         screenListeners={{
