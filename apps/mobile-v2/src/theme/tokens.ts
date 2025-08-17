@@ -9,6 +9,7 @@ export const lightTokens = {
   warn: '#FFC107',
   text: '#0B1221',
   textMuted: '#6C757D',
+  textSecondary: '#6C757D',
   border: '#DFE3E8',
 };
 
@@ -21,6 +22,7 @@ export const darkTokens = {
   warn: '#FBBF24',
   text: '#F9FAFB',
   textMuted: '#D1D5DB',
+  textSecondary: '#D1D5DB',
   border: '#374151',
 };
 

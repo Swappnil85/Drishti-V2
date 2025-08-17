@@ -5,6 +5,10 @@ module.exports = {
     '@testing-library/jest-native/extend-expect',
     '<rootDir>/jest.setup.after.js',
   ],
+  testEnvironment: 'jsdom',
+  transformIgnorePatterns: [
+    'node_modules/(?!(expo|expo-.*|react-native|@react-native|@expo|react-native-web|@react-navigation|expo-router)/)',
+  ],
   moduleNameMapper: {
     '^react$': '<rootDir>/node_modules/react',
     '^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -19,5 +23,7 @@ module.exports = {
       '<rootDir>/src/test/__mocks__/atl-ensure-peer-deps.js',
     '^@testing-library/react-native/dist/helpers/ensure-peer-deps(\\.js)?$':
       '<rootDir>/src/test/__mocks__/atl-ensure-peer-deps.js',
+    '^react-native/Libraries/AppState/AppState$':
+      '<rootDir>/src/test/__mocks__/AppState.js',
   },
 };

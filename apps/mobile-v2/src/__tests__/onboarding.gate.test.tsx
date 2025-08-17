@@ -3,6 +3,8 @@ import { render, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from '../navigation/RootNavigator';
 import { ThemeProvider } from '../theme/ThemeProvider';
+import { ToastProvider } from '../ui/overlays/ToastProvider';
+import { SheetProvider } from '../ui/overlays/SheetProvider';
 import { getOnboardingCompleted } from '../utils/storage';
 import { logEvent } from '../telemetry';
 
@@ -20,14 +22,17 @@ jest.mock('../telemetry', () => ({
   logEvent: jest.fn(),
 }));
 
-const mockGetOnboardingCompleted = getOnboardingCompleted as jest.MockedFunction<typeof getOnboardingCompleted>;
+const mockGetOnboardingCompleted =
+  getOnboardingCompleted as jest.MockedFunction<typeof getOnboardingCompleted>;
 const mockLogEvent = logEvent as jest.MockedFunction<typeof logEvent>;
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>
-    <NavigationContainer>
-      {children}
-    </NavigationContainer>
+    <ToastProvider>
+      <SheetProvider>
+        <NavigationContainer>{children}</NavigationContainer>
+      </SheetProvider>
+    </ToastProvider>
   </ThemeProvider>
 );
 
