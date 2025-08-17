@@ -65,6 +65,11 @@ export function handleDeepLink(
 export function initializeDeepLinking(
   navigate: (screen: string, params?: any) => void
 ): () => void {
+  // Skip deep linking initialization in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return () => {};
+  }
+
   // Handle initial URL (app opened via deep link)
   Linking.getInitialURL()
     .then(url => {
