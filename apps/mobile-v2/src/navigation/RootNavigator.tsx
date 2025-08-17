@@ -8,7 +8,6 @@ import {
   DarkTheme,
 } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import AccountsScreen from '../screens/AccountsScreen';
 import PlanScreen from '../screens/PlanScreen';
@@ -25,7 +24,6 @@ export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
 type AppState = 'loading' | 'onboarding' | 'app';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
 function TabNavigator() {
   const navigationRef = useRef<any>(null);
@@ -134,17 +132,9 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {appState === 'loading' && (
-          <Stack.Screen name="Loading" component={LoadingScreen} />
-        )}
-        {appState === 'onboarding' && (
-          <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-        )}
-        {appState === 'app' && (
-          <Stack.Screen name="Main" component={TabNavigator} />
-        )}
-      </Stack.Navigator>
+      {appState === 'loading' && <LoadingScreen />}
+      {appState === 'onboarding' && <OnboardingNavigator />}
+      {appState === 'app' && <TabNavigator />}
     </NavigationContainer>
   );
 }

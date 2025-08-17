@@ -1,29 +1,24 @@
 import { View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { useThemeContext } from '../../theme/ThemeProvider';
 import { logEvent } from '../../telemetry';
-import { OnboardingStackParamList } from './OnboardingNavigator';
 import {
   touchTargetStyle,
   headerA11yProps,
   buttonA11yProps,
 } from '../../utils/accessibility';
 
-type WelcomeScreenNavigationProp = StackNavigationProp<
-  OnboardingStackParamList,
-  'Welcome'
->;
+interface WelcomeScreenProps {
+  onNext: () => void;
+}
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ onNext }: WelcomeScreenProps) {
   const insets = useSafeAreaInsets();
   const { tokens } = useThemeContext();
-  const navigation = useNavigation<WelcomeScreenNavigationProp>();
 
   const handleGetStarted = () => {
     logEvent('onboarding_step', { step: 'welcome_cta' });
-    navigation.navigate('Step2');
+    onNext();
   };
 
   return (
