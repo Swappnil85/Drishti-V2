@@ -77,18 +77,21 @@ jest.mock(
   { virtual: true }
 );
 
-// Mock AppState directly without touching the main RN export
-jest.mock('react-native', () => {
-  const RN = jest.requireActual('react-native');
-  return {
-    ...RN,
-    AppState: {
-      addEventListener: jest.fn(() => ({ remove: jest.fn() })),
-      removeEventListener: jest.fn(),
-      currentState: 'active',
-    },
-  };
-});
+// Mock AppState directly - avoid full RN mock to prevent Linking issues
+jest.doMock('react-native/Libraries/AppState/AppState', () => ({
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  removeEventListener: jest.fn(),
+  currentState: 'active',
+}));
+
+// Add global AppState mock for components that import from 'react-native'
+global.AppState = {
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  removeEventListener: jest.fn(),
+  currentState: 'active',
+};
+
+// Remove global security service mock - let individual tests handle their own mocking
 
 // Mock TurboModuleRegistry to handle native module resolution
 jest.doMock('react-native/Libraries/TurboModule/TurboModuleRegistry', () => ({
