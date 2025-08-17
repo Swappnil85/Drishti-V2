@@ -42,7 +42,7 @@ export default function Step2Screen() {
             alignItems: 'center',
             gap: 16,
           }}
-          pointerEvents="none"
+          pointerEvents='none'
         >
           <Text
             {...headerA11yProps}
@@ -64,7 +64,8 @@ export default function Step2Screen() {
               maxWidth: 300,
             }}
           >
-            Monitor your accounts, plan scenarios, and make informed financial decisions
+            Monitor your accounts, plan scenarios, and make informed financial
+            decisions
           </Text>
         </View>
 
@@ -77,7 +78,7 @@ export default function Step2Screen() {
             justifyContent: 'center',
             alignItems: 'center',
           }}
-          pointerEvents="none"
+          pointerEvents='none'
         >
           <Text
             style={{
@@ -92,8 +93,8 @@ export default function Step2Screen() {
         <Pressable
           onPress={handleComplete}
           {...buttonA11yProps}
-          accessibilityLabel="Complete onboarding"
-          accessibilityHint="Finishes the onboarding process and enters the main app"
+          accessibilityLabel='Complete onboarding'
+          accessibilityHint='Finishes the onboarding process and enters the main app'
           style={{
             backgroundColor: tokens.success,
             paddingVertical: 16,

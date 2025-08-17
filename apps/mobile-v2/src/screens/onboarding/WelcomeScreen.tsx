@@ -45,7 +45,7 @@ export default function WelcomeScreen({ onNext }: WelcomeScreenProps) {
             alignItems: 'center',
             gap: 16,
           }}
-          pointerEvents="none"
+          pointerEvents='none'
         >
           <Text
             {...headerA11yProps}
@@ -80,7 +80,7 @@ export default function WelcomeScreen({ onNext }: WelcomeScreenProps) {
             justifyContent: 'center',
             alignItems: 'center',
           }}
-          pointerEvents="none"
+          pointerEvents='none'
         >
           <Text
             style={{
@@ -93,11 +93,11 @@ export default function WelcomeScreen({ onNext }: WelcomeScreenProps) {
         </View>
 
         <Pressable
-          testID="onboarding-get-started"
+          testID='onboarding-get-started'
           onPress={handleGetStarted}
           {...buttonA11yProps}
-          accessibilityLabel="Get Started with Drishti"
-          accessibilityHint="Begins the onboarding process"
+          accessibilityLabel='Get Started with Drishti'
+          accessibilityHint='Begins the onboarding process'
           style={{
             backgroundColor: tokens.primary,
             paddingVertical: 16,

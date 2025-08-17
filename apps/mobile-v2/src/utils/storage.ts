@@ -15,14 +15,15 @@ export async function getOnboardingCompleted(): Promise<boolean> {
   }
 }
 
-export async function setOnboardingCompleted(completed: boolean): Promise<void> {
+export async function setOnboardingCompleted(
+  completed: boolean
+): Promise<void> {
   try {
     await AsyncStorage.setItem(
       STORAGE_KEYS.ONBOARDING_COMPLETED,
       completed ? '1' : '0'
     );
-  } catch {
-  }
+  } catch {}
 }
 
 export async function clearOnboardingState(): Promise<void> {
@@ -31,8 +32,7 @@ export async function clearOnboardingState(): Promise<void> {
       STORAGE_KEYS.ONBOARDING_COMPLETED,
       STORAGE_KEYS.ONBOARDING_PROGRESS,
     ]);
-  } catch {
-  }
+  } catch {}
 }
 
 export async function clearAllPreferences(): Promise<void> {
@@ -42,6 +42,5 @@ export async function clearAllPreferences(): Promise<void> {
       STORAGE_KEYS.ONBOARDING_PROGRESS,
       STORAGE_KEYS.THEME_PREFS,
     ]);
-  } catch {
-  }
+  } catch {}
 }

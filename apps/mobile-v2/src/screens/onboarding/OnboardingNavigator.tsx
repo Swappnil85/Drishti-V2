@@ -8,7 +8,9 @@ export type OnboardingStackParamList = {
 };
 
 export default function OnboardingNavigator() {
-  const [currentStep, setCurrentStep] = useState<'Welcome' | 'Step2'>('Welcome');
+  const [currentStep, setCurrentStep] = useState<'Welcome' | 'Step2'>(
+    'Welcome'
+  );
 
   const navigateToStep2 = () => setCurrentStep('Step2');
 

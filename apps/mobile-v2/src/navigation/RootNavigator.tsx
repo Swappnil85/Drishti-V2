@@ -1,6 +1,6 @@
 // React import not required with react-jsx runtime
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Appearance, View, Text } from 'react-native';
 import {
   NavigationContainer,
@@ -26,17 +26,9 @@ type AppState = 'loading' | 'onboarding' | 'app';
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
-  const navigationRef = useRef<any>(null);
-
   useEffect(() => {
-    const cleanup = initializeDeepLinking((screen: string, params?: any) => {
+    const cleanup = initializeDeepLinking((_screen: string, _params?: any) => {
       // Handle deep link navigation
-      if (screen === 'Accounts') {
-        // Navigate to Accounts tab
-        if (navigationRef.current) {
-          navigationRef.current.navigate('Accounts', params);
-        }
-      }
     });
 
     return cleanup;
@@ -44,7 +36,6 @@ function TabNavigator() {
 
   return (
     <Tab.Navigator
-      ref={navigationRef}
       screenOptions={{ headerShown: false }}
       screenListeners={{
         tabPress: (e: { target?: unknown }) => {
@@ -67,7 +58,7 @@ function TabNavigator() {
 
 function LoadingScreen() {
   const { tokens } = useThemeContext();
-  
+
   return (
     <View
       style={{
@@ -111,7 +102,7 @@ export default function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    const cleanup = initializeDeepLinking((screen: string, params?: any) => {
+    const cleanup = initializeDeepLinking((screen: string, _params?: any) => {
       // Handle deep link navigation
       if (screen === 'Paywall') {
         setShowPaywall(true);

@@ -22,7 +22,9 @@ type ThemeProviderProps = { children: React.ReactNode };
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [mode, setModeState] = useState<Mode>('system');
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [reducedMotionOverride, setReducedMotionOverrideState] = useState<'system' | 'on' | 'off'>('system');
+  const [reducedMotionOverride, setReducedMotionOverrideState] = useState<
+    'system' | 'on' | 'off'
+  >('system');
 
   // Load prefs (skip in Jest to avoid act warnings)
   useEffect(() => {
@@ -113,21 +115,32 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   );
 
   const effectiveReducedMotion = useMemo(() => {
-    if (reducedMotionOverride === 'on') return true;
-    if (reducedMotionOverride === 'off') return false;
+    if (reducedMotionOverride === 'on') {
+      return true;
+    }
+    if (reducedMotionOverride === 'off') {
+      return false;
+    }
     return reducedMotion; // system default
   }, [reducedMotionOverride, reducedMotion]);
 
   const value = useMemo(
-    () => ({ 
-      mode, 
-      reducedMotion: effectiveReducedMotion, 
+    () => ({
+      mode,
+      reducedMotion: effectiveReducedMotion,
       reducedMotionOverride,
-      tokens, 
-      setMode, 
-      setReducedMotionOverride 
+      tokens,
+      setMode,
+      setReducedMotionOverride,
     }),
-    [mode, effectiveReducedMotion, reducedMotionOverride, tokens, setMode, setReducedMotionOverride]
+    [
+      mode,
+      effectiveReducedMotion,
+      reducedMotionOverride,
+      tokens,
+      setMode,
+      setReducedMotionOverride,
+    ]
   );
 
   return (

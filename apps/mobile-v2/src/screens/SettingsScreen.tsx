@@ -27,7 +27,13 @@ const Btn = ({ label, onPress, active }: BtnProps) => (
 );
 
 export default function SettingsScreen() {
-  const { mode, reducedMotion, reducedMotionOverride, setMode, setReducedMotionOverride } = useThemeContext();
+  const {
+    mode,
+    reducedMotion,
+    reducedMotionOverride,
+    setMode,
+    setReducedMotionOverride,
+  } = useThemeContext();
   const insets = useSafeAreaInsets();
 
   const handleResetOnboarding = () => {
@@ -94,8 +100,10 @@ export default function SettingsScreen() {
       </Text>
 
       <View style={{ height: 12 }} />
-      
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>Theme</Text>
+
+      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+        Theme
+      </Text>
       <Btn
         label='Use System'
         onPress={() => setMode('system')}
@@ -113,8 +121,10 @@ export default function SettingsScreen() {
       />
 
       <View style={{ height: 24 }} />
-      
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>Motion</Text>
+
+      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+        Motion
+      </Text>
       <Btn
         label='System Default'
         onPress={() => setReducedMotionOverride('system')}
@@ -132,12 +142,11 @@ export default function SettingsScreen() {
       />
 
       <View style={{ height: 24 }} />
-      
-      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>QA Tools</Text>
-      <Btn
-        label='Reset Onboarding (QA)'
-        onPress={handleResetOnboarding}
-      />
+
+      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+        QA Tools
+      </Text>
+      <Btn label='Reset Onboarding (QA)' onPress={handleResetOnboarding} />
       <Btn
         label='Reset ALL Preferences (QA)'
         onPress={handleResetAllPreferences}
