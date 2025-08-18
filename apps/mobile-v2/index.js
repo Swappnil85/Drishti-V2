@@ -1,3 +1,4 @@
+import 'react-native-reanimated'; // must be first for Reanimated
 import { registerRootComponent } from 'expo';
 import App from './src/App';
 import ErrorBoundary from './src/ErrorBoundary';
