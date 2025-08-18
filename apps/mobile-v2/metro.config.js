@@ -1,4 +1,5 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
 /**
  * Metro configuration for Expo SDK 53 in apps/mobile-v2.
@@ -15,5 +16,10 @@ config.resolver.disableHierarchicalLookup = true;
 // Ensure blockList exists even if not used, to make future guards easy
 config.resolver.blockList = config.resolver.blockList || [];
 
-module.exports = config;
+// Add Node.js polyfills for buffer/process resolution (Android compatibility)
+config.resolver.extraNodeModules = {
+  buffer: path.resolve(__dirname, 'node_modules/buffer'),
+  process: path.resolve(__dirname, 'node_modules/process'),
+};
 
+module.exports = config;

@@ -1,3 +1,14 @@
+// Node.js polyfills for Android compatibility (must be first)
+import 'react-native-url-polyfill/auto';
+import { Buffer } from 'buffer';
+import process from 'process';
+
+// Make polyfills globally available
+if (typeof global !== 'undefined') {
+  global.Buffer = Buffer;
+  global.process = process;
+}
+
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +31,9 @@ export default function RootLayout() {
         setBoot('onboarding');
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (boot === 'loading') {
@@ -32,10 +45,9 @@ export default function RootLayout() {
   }
 
   if (boot === 'onboarding') {
-    return <Redirect href="/onboarding/welcome" />;
+    return <Redirect href='/onboarding/welcome' />;
   }
 
   // boot === 'app'
   return <Slot />;
 }
-
