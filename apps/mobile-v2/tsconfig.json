@@ -7,6 +7,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "noErrorTruncation": true,
     "allowJs": false,
     "types": ["react", "react-native", "jest", "node"],
     "baseUrl": ".",
