@@ -1,4 +1,5 @@
 // E5-S6: Reduced Motion Tri-State & Dark Mode Contrast Support
+// Trigger CI checks for PR #39
 export type Mode = 'system' | 'light' | 'dark';
 
 export const lightTokens = {
