@@ -1,3 +1,4 @@
+// E5-S6: Reduced Motion Tri-State & Dark Mode Contrast Support
 export type Mode = 'system' | 'light' | 'dark';
 
 export const lightTokens = {
