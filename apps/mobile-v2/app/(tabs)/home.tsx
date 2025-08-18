@@ -7,14 +7,8 @@ import {
   Appearance,
   useWindowDimensions,
 } from 'react-native';
-import { useThemeContext } from '../theme/ThemeProvider';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { LucideProps } from 'lucide-react-native';
-// lazily require icons to avoid type mismatch between React 18/19 typings in CI
-// use any to sidestep JSX component type mismatch while keeping runtime intact
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const {
+import { useThemeContext } from '../../src/theme/ThemeProvider';
+import {
   Wifi,
   WifiOff,
   Moon,
@@ -23,12 +17,16 @@ const {
   Trophy,
   Plus,
   GitBranch,
-}: any = require('lucide-react-native');
-// Use untyped requires to avoid React 18/19 type mismatch in CI
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Svg: any = require('react-native-svg').default;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Path, Circle }: any = require('react-native-svg');
+} from 'lucide-react-native';
+import {
+  VictoryChart,
+  VictoryLine,
+  VictoryTheme,
+  VictoryAxis,
+  VictoryVoronoiContainer,
+  VictoryTooltip,
+  VictoryLegend,
+} from 'victory-native';
 
 const MONTHS = [
   'Jan',
@@ -63,20 +61,17 @@ function buildSeries12m(actual9: number[]) {
   let prev = actual9[actual9.length - 1];
   for (let i = 0; i < total; i++) {
     let value: number | null;
-    if (i < actual9.length) {
-      value = actual9[i];
-    } else if (i < 11) {
+    if (i < actual9.length) value = actual9[i];
+    else if (i < 11) {
       prev = prev + avgDelta;
       value = Math.round(prev);
-    } else {
-      value = null;
-    }
+    } else value = null;
     out.push({ m: i, month: MONTHS[i], value, target: Math.round(step * i) });
   }
   return out;
 }
 
-export default function HomeScreen() {
+export default function Home() {
   const { tokens, mode } = useThemeContext();
   const sysDark = Appearance.getColorScheme() === 'dark';
   const dark = mode === 'dark' || (mode === 'system' && sysDark);
@@ -84,6 +79,7 @@ export default function HomeScreen() {
   const series12m = useMemo(() => buildSeries12m(APP_ACTUAL_9M), []);
   const { width } = useWindowDimensions();
 
+  // Simple wrappers to match design primitives
   const Section = ({
     title,
     right,
@@ -183,7 +179,7 @@ export default function HomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => {
-              /* Theme via Settings */
+              /* Theme handled in Settings */
             }}
             accessibilityLabel='Theme'
             style={{
@@ -262,96 +258,102 @@ export default function HomeScreen() {
               </View>
             </View>
             <View style={{ marginTop: 10 }}>
-              {/* Lightweight SVG chart to avoid native Skia dependency */}
-              {(() => {
-                const h = 220;
-                const w = width - 48;
-                const pad = 24;
-                const innerW = Math.max(1, w - pad * 2);
-                const innerH = Math.max(1, h - pad * 2);
-                const maxV = Math.max(
-                  ...series12m.map(p => Math.max(p.target, p.value ?? 0)),
-                  TARGET_DEC
-                );
-                const minV = 0;
-                const xAt = (i: number) =>
-                  pad + (i / (series12m.length - 1)) * innerW;
-                const yAt = (v: number) =>
-                  pad + innerH - ((v - minV) / (maxV - minV)) * innerH;
-
-                const pathFor = (arr: Array<number | null>) => {
-                  let d = '';
-                  let penUp = true;
-                  arr.forEach((v, i) => {
-                    if (v === null) {
-                      penUp = true;
-                    } else {
-                      const x = xAt(i);
-                      const y = yAt(v);
-                      d += `${penUp ? 'M' : 'L'}${x},${y} `;
-                      penUp = false;
-                    }
-                  });
-                  return d.trim();
-                };
-
-                const targetPath = pathFor(series12m.map(p => p.target));
-                const actualPath = pathFor(series12m.map(p => p.value));
-
-                return (
-                  <Svg width={w} height={h}>
-                    {/* Grid lines */}
-                    {[0.25, 0.5, 0.75].map((g, idx) => (
-                      <Path
-                        key={idx}
-                        d={`M${pad},${pad + innerH * g} L${pad + innerW},${pad + innerH * g}`}
-                        stroke={chartGrid}
-                        strokeWidth={1}
+              <VictoryChart
+                width={width - 48}
+                height={220}
+                theme={VictoryTheme.material}
+                containerComponent={
+                  <VictoryVoronoiContainer
+                    voronoiDimension='x'
+                    labels={({ datum }) => {
+                      const p: any = datum;
+                      const value = p.value;
+                      const target = p.target;
+                      const month = p.month;
+                      const prev = p.m > 0 ? series12m[p.m - 1]?.value : null;
+                      const delta =
+                        prev == null || value == null
+                          ? null
+                          : value - (prev as number);
+                      const sign = delta == null ? '' : delta >= 0 ? '+' : '−';
+                      const fmt = (n: number) =>
+                        new Intl.NumberFormat('en-AU', {
+                          style: 'currency',
+                          currency: 'AUD',
+                        }).format(n);
+                      const line1 = `${month}`;
+                      const line2 = `Target: ${fmt(target)}`;
+                      const line3 =
+                        value == null
+                          ? 'Actual: —'
+                          : `Actual: ${fmt(value)}${delta == null ? '' : ` (${sign}${fmt(Math.abs(delta))} m/m)`}`;
+                      const gap =
+                        value == null
+                          ? ''
+                          : `${value - target >= 0 ? 'Above' : 'Below'} by ${fmt(Math.abs(value - target))}`;
+                      return `${line1}\n${line2}\n${line3}${gap ? `\n${gap}` : ''}`;
+                    }}
+                    labelComponent={
+                      <VictoryTooltip
+                        flyoutStyle={{
+                          fill: dark
+                            ? 'rgba(31,41,55,0.95)'
+                            : 'rgba(255,255,255,0.95)',
+                        }}
+                        style={{
+                          fontSize: 10,
+                          fill: dark ? '#E5E7EB' : '#111827',
+                        }}
                       />
-                    ))}
-                    {/* Axes (x baseline and y axis) */}
-                    <Path
-                      d={`M${pad},${pad + innerH} L${pad + innerW},${pad + innerH}`}
-                      stroke={chartColorAxis}
-                      strokeWidth={1}
-                    />
-                    <Path
-                      d={`M${pad},${pad} L${pad},${pad + innerH}`}
-                      stroke={chartColorAxis}
-                      strokeWidth={1}
-                    />
-
-                    {/* Target dashed */}
-                    <Path
-                      d={targetPath}
-                      stroke={targetStroke}
-                      strokeDasharray='4 4'
-                      strokeWidth={1.5}
-                      fill='none'
-                    />
-                    {/* Actual line */}
-                    <Path
-                      d={actualPath}
-                      stroke={tokens.primary}
-                      strokeWidth={2}
-                      fill='none'
-                    />
-                    {/* Actual points */}
-                    {series12m.map((p, i) =>
-                      p.value === null ? null : (
-                        <Circle
-                          key={i}
-                          cx={xAt(i)}
-                          cy={yAt(p.value)}
-                          r={3}
-                          fill={tokens.primary}
-                        />
-                      )
-                    )}
-                  </Svg>
-                );
-              })()}
-
+                    }
+                  />
+                }
+              >
+                <VictoryAxis
+                  style={{
+                    tickLabels: { fill: chartColorAxis, fontSize: 10 },
+                    grid: { stroke: 'transparent' },
+                  }}
+                  tickValues={MONTHS}
+                  tickFormat={(t, i) => MONTHS[i]}
+                />
+                <VictoryAxis
+                  dependentAxis
+                  style={{
+                    tickLabels: { fill: chartColorAxis, fontSize: 10 },
+                    grid: { stroke: chartGrid },
+                  }}
+                  tickFormat={(v: number) =>
+                    new Intl.NumberFormat('en-AU', {
+                      notation: 'compact',
+                    }).format(v)
+                  }
+                />
+                <VictoryLegend
+                  x={width - 220}
+                  y={0}
+                  orientation='horizontal'
+                  gutter={12}
+                  style={{ labels: { fill: chartColorAxis, fontSize: 10 } }}
+                  data={[{ name: 'Target' }, { name: 'Actual' }]}
+                />
+                <VictoryLine
+                  name='Target'
+                  data={series12m as any}
+                  x='month'
+                  y='target'
+                  style={{
+                    data: { stroke: targetStroke, strokeDasharray: '4,4' },
+                  }}
+                />
+                <VictoryLine
+                  name='Actual'
+                  data={series12m as any}
+                  x='month'
+                  y='value'
+                  style={{ data: { stroke: tokens.primary, strokeWidth: 2 } }}
+                />
+              </VictoryChart>
               <Text
                 style={{
                   marginTop: 4,

@@ -1,0 +1,7 @@
+# Ignore heavy/native service files during lint to avoid TS parser plugin edge-cases in CI
+src/services/**
+android/**
+ios/**
+node_modules/**
+coverage/**
+

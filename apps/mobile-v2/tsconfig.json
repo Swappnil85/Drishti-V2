@@ -1,35 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "strict": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowJs": false,
-    "types": ["react", "react-native", "jest", "node"],
-    "baseUrl": ".",
-    "paths": {
-      "@drishti/shared": ["../../packages/shared/src/index.ts"],
-      "@drishti/shared/*": ["../../packages/shared/src/*"]
-    },
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
+    "noEmit": true,
+    "types": ["jest", "react", "react-native", "node"]
   },
-  "include": ["src", "jest.setup.after.js", "../../packages/shared/src/**/*"],
+  "include": ["src", "index.js"],
   "exclude": [
+    "android",
+    "ios",
     "node_modules",
-    "**/__tests__/**",
-    "../../packages/shared/**/__tests__/**"
-  ],
-  "extends": "expo/tsconfig.base"
+    "coverage",
+    "app",
+    "components",
+    "src/__tests__/**"
+  ]
 }

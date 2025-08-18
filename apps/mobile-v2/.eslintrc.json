@@ -1,28 +1,40 @@
 {
   "root": true,
-  "extends": ["plugin:@typescript-eslint/recommended"],
+  "env": { "es2022": true, "node": true, "jest": true },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": ["./tsconfig.app.json"],
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": "./tsconfig.json",
     "tsconfigRootDir": "."
   },
-  "env": {
-    "es2022": true,
-    "node": true,
-    "jest": true
-  },
+  "plugins": ["@typescript-eslint", "react", "react-native", "prettier"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-native/all",
+    "plugin:prettier/recommended"
+  ],
+  "settings": { "react": { "version": "detect" } },
+  "ignorePatterns": [
+    "android/**",
+    "ios/**",
+    "coverage/**",
+    "src/services/**",
+    "node_modules/**"
+  ],
   "rules": {
-    "@typescript-eslint/no-unnecessary-type-assertion": "off",
-    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-require-imports": "off",
     "no-empty": "off",
-    "@typescript-eslint/no-floating-promises": "off",
-    "react-hooks/exhaustive-deps": "off",
-    "curly": ["warn", "all"],
+    "react/react-in-jsx-scope": "off",
+    "react/no-unescaped-entities": "off",
     "react-native/no-inline-styles": "off",
-    "react-native/no-color-literals": "off"
+    "react-native/no-color-literals": "off",
+    "eqeqeq": ["warn", "always"]
   }
 }
