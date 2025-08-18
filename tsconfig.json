@@ -52,9 +52,6 @@
       "path": "./apps/api"
     },
     {
-      "path": "./apps/mobile-v2"
-    },
-    {
       "path": "./packages/shared"
     }
   ],
