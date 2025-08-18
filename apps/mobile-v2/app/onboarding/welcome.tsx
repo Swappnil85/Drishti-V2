@@ -16,14 +16,47 @@ export default function Welcome() {
   }
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 8 }}>Welcome</Text>
-      <Text style={{ fontSize: 16, marginBottom: 24 }}>Step {step} of 5</Text>
-      <Pressable onPress={next}
-        style={{ padding: 14, borderRadius: 12, backgroundColor: '#1565C0' }}>
-        <Text style={{ color: '#FFFFFF' }}>{step < 5 ? 'Get Started' : 'Finish'}</Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: '600',
+          marginBottom: 8,
+          color: '#0B1221',
+        }}
+      >
+        Welcome
+      </Text>
+      <Text style={{ fontSize: 16, marginBottom: 24, color: '#6C757D' }}>
+        Step {step} of 5
+      </Text>
+      <Pressable
+        onPress={next}
+        accessibilityRole='button'
+        accessibilityLabel={
+          step < 5 ? 'Continue to next step' : 'Complete onboarding'
+        }
+        style={{
+          padding: 16,
+          borderRadius: 12,
+          backgroundColor: '#1565C0',
+          minHeight: 44, // WCAG AA touch target
+          minWidth: 120,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>
+          {step < 5 ? 'Get Started' : 'Finish'}
+        </Text>
       </Pressable>
     </View>
   );
 }
-
