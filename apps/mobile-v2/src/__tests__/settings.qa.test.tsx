@@ -126,13 +126,13 @@ describe('Settings QA Tools', () => {
   });
 
   it('reset onboarding calls clearOnboardingState and logs telemetry', async () => {
-    const { getByText } = render(
+    const { findByText } = render(
       <TestWrapper>
         <SettingsScreen />
       </TestWrapper>
     );
 
-    fireEvent.press(getByText('Reset Onboarding (QA)'));
+    fireEvent.press(await findByText('Reset Onboarding (QA)'));
 
     await waitFor(() => {
       expect(mockClearOnboardingState).toHaveBeenCalled();
@@ -141,13 +141,13 @@ describe('Settings QA Tools', () => {
   });
 
   it('reset all preferences calls clearAllPreferences and logs telemetry', async () => {
-    const { getByText } = render(
+    const { findByText } = render(
       <TestWrapper>
         <SettingsScreen />
       </TestWrapper>
     );
 
-    fireEvent.press(getByText('Reset ALL Preferences (QA)'));
+    fireEvent.press(await findByText('Reset ALL Preferences (QA)'));
 
     await waitFor(() => {
       expect(mockClearAllPreferences).toHaveBeenCalled();
@@ -155,16 +155,20 @@ describe('Settings QA Tools', () => {
     });
   });
 
-  it('renders tri-state reduced motion options', () => {
-    const { getByText, getAllByText } = render(
+  it('renders tri-state reduced motion options', async () => {
+    const { findByText, findAllByText } = render(
       <TestWrapper>
         <SettingsScreen />
       </TestWrapper>
     );
 
-    expect(getByText('Motion')).toBeTruthy();
-    expect(getAllByText('System Default').length).toBeGreaterThan(0);
-    expect(getAllByText('Reduced Motion On').length).toBeGreaterThan(0);
-    expect(getAllByText('Reduced Motion Off').length).toBeGreaterThan(0);
+    expect(await findByText('Motion')).toBeTruthy();
+    expect((await findAllByText('System Default')).length).toBeGreaterThan(0);
+    expect((await findAllByText('Reduced Motion On')).length).toBeGreaterThan(
+      0
+    );
+    expect((await findAllByText('Reduced Motion Off')).length).toBeGreaterThan(
+      0
+    );
   });
 });
