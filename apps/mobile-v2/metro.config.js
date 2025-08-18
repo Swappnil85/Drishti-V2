@@ -12,8 +12,13 @@ const config = getDefaultConfig(__dirname);
 // Prevent hoisted/upper-level module pickup that breaks TurboModules
 config.resolver.disableHierarchicalLookup = true;
 
+// Node.js polyfill resolution for Android compatibility
+config.resolver.extraNodeModules = {
+  buffer: require.resolve('buffer'),
+  process: require.resolve('process'),
+};
+
 // Ensure blockList exists even if not used, to make future guards easy
 config.resolver.blockList = config.resolver.blockList || [];
 
 module.exports = config;
-

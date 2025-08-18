@@ -1,3 +1,11 @@
+// Node.js polyfills for Expo Android compatibility
+import 'react-native-get-random-values';
+import 'react-native-url-polyfill/auto';
+import { Buffer } from 'buffer';
+(global as any).Buffer = (global as any).Buffer || Buffer;
+import process from 'process';
+(global as any).process = (global as any).process || process;
+
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +28,9 @@ export default function RootLayout() {
         setBoot('onboarding');
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (boot === 'loading') {
@@ -32,10 +42,9 @@ export default function RootLayout() {
   }
 
   if (boot === 'onboarding') {
-    return <Redirect href="/onboarding/welcome" />;
+    return <Redirect href='/onboarding/welcome' />;
   }
 
   // boot === 'app'
   return <Slot />;
 }
-
