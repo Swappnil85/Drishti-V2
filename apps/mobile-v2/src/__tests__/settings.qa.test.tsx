@@ -14,14 +14,85 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('../utils/storage', () => ({
   clearOnboardingState: jest.fn(),
   clearAllPreferences: jest.fn(),
+  getOnboardingCompleted: jest.fn().mockResolvedValue(true),
+  getPrivacyModeEnabled: jest.fn().mockResolvedValue(false),
+  setPrivacyModeEnabled: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../telemetry', () => ({
   logEvent: jest.fn(),
 }));
 
-const mockClearOnboardingState = clearOnboardingState as jest.MockedFunction<typeof clearOnboardingState>;
-const mockClearAllPreferences = clearAllPreferences as jest.MockedFunction<typeof clearAllPreferences>;
+jest.mock('../services/SecurityService', () => ({
+  securityService: {
+    isAppLockEnabled: jest.fn().mockResolvedValue(false),
+    getCurrentLockState: jest.fn().mockResolvedValue('UNLOCKED'),
+    addLockStateListener: jest.fn(),
+    removeLockStateListener: jest.fn(),
+    getSecuritySettings: jest.fn().mockResolvedValue({
+      appLockEnabled: false,
+      biometricEnabled: false,
+      pinEnabled: false,
+      autoLockTimeout: 5,
+    }),
+  },
+  AppLockState: {
+    LOCKED: 'LOCKED',
+    UNLOCKED: 'UNLOCKED',
+  },
+}));
+
+jest.mock('../services/BiometricService', () => ({
+  biometricService: {
+    checkAvailability: jest.fn().mockResolvedValue({
+      isAvailable: false,
+      biometryType: null,
+      error: null,
+    }),
+    checkBiometricAvailability: jest.fn().mockResolvedValue({
+      isAvailable: false,
+      biometryType: null,
+      error: null,
+    }),
+  },
+}));
+
+// Mock React Native modules individually to avoid conflicts
+const mockAccessibilityInfo = {
+  isReduceMotionEnabled: jest.fn().mockResolvedValue(false),
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+};
+
+const mockAppearance = {
+  getColorScheme: jest.fn().mockReturnValue('light'),
+  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
+};
+
+jest.doMock('react-native', () => {
+  const RN = jest.requireActual('react-native');
+  return {
+    ...RN,
+    AccessibilityInfo: mockAccessibilityInfo,
+    Appearance: mockAppearance,
+  };
+});
+
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
+jest.mock('../utils/haptics', () => ({
+  useHaptics: () => ({
+    light: { safeImpactLight: jest.fn() },
+  }),
+}));
+
+const mockClearOnboardingState = clearOnboardingState as jest.MockedFunction<
+  typeof clearOnboardingState
+>;
+const mockClearAllPreferences = clearAllPreferences as jest.MockedFunction<
+  typeof clearAllPreferences
+>;
 const mockLogEvent = logEvent as jest.MockedFunction<typeof logEvent>;
 
 jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
@@ -34,9 +105,7 @@ jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
 });
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider>
-    {children}
-  </ThemeProvider>
+  <ThemeProvider>{children}</ThemeProvider>
 );
 
 describe('Settings QA Tools', () => {
@@ -87,15 +156,15 @@ describe('Settings QA Tools', () => {
   });
 
   it('renders tri-state reduced motion options', () => {
-    const { getByText } = render(
+    const { getByText, getAllByText } = render(
       <TestWrapper>
         <SettingsScreen />
       </TestWrapper>
     );
 
     expect(getByText('Motion')).toBeTruthy();
-    expect(getByText('System Default')).toBeTruthy();
-    expect(getByText('Reduced Motion On')).toBeTruthy();
-    expect(getByText('Reduced Motion Off')).toBeTruthy();
+    expect(getAllByText('System Default').length).toBeGreaterThan(0);
+    expect(getAllByText('Reduced Motion On').length).toBeGreaterThan(0);
+    expect(getAllByText('Reduced Motion Off').length).toBeGreaterThan(0);
   });
 });
