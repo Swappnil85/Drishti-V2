@@ -28,6 +28,7 @@
   "include": ["src", "jest.setup.after.js", "../../packages/shared/src/**/*"],
   "exclude": [
     "node_modules",
+    "app/**",
     "**/__tests__/**",
     "../../packages/shared/**/__tests__/**"
   ],

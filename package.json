@@ -4,8 +4,7 @@
   "description": "Drishti - AI-powered visual assistance application",
   "private": true,
   "workspaces": [
-    "apps/api",
-    "apps/mobile-v2",
+    "apps/*",
     "packages/*"
   ],
   "scripts": {

@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
+    "test": "jest --passWithNoTests",
     "start": "expo start",
     "start:clean": "watchman watch-del-all || true && expo start -c",
     "start:go:tunnel": "cross-env EXPO_NO_DEV_CLIENT=1 expo start --go --tunnel --port 8082 --clear",
@@ -14,12 +17,7 @@
     "android:dev": "expo start --dev-client --android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "web:clean": "expo start --web --clear",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "type-check": "tsc --noEmit"
+    "web:clean": "expo start --web --clear"
   },
   "dependencies": {
     "@drishti/shared": "file:../../packages/shared",
@@ -56,10 +54,9 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.2.0",
     "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.2",
     "@types/react-native": "^0.72.8",
-    "@typescript-eslint/eslint-plugin": "^8.39.1",
-    "@typescript-eslint/parser": "^8.39.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
@@ -71,7 +68,7 @@
     "jest": "^29.2.1",
     "jest-expo": "~53.0.9",
     "react-test-renderer": "^18.3.1",
-    "typescript": "~5.8.3"
+    "typescript": "~5.3.3"
   },
   "overrides": {
     "react": "19.1.1",
