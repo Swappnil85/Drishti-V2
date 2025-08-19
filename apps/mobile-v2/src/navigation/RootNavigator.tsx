@@ -25,7 +25,24 @@ import { useThemeContext } from '../theme/ThemeProvider';
 import { securityService, AppLockState } from '../services/SecurityService';
 
 export type TabKey = 'home' | 'accounts' | 'plan' | 'scenarios' | 'settings';
-type AppNavigationState = 'loading' | 'onboarding' | 'app' | 'locked';
+export type BootState = 'onboarding' | 'app' | 'locked';
+type AppNavigationState = 'loading' | BootState;
+
+// Pure boot resolver (unit-testable)
+export function resolveBootState(params: {
+  onboardingCompleted: boolean;
+  appLockEnabled: boolean;
+  currentLockState: AppLockState;
+}): BootState {
+  if (!params.onboardingCompleted) return 'onboarding';
+  if (
+    params.appLockEnabled &&
+    params.currentLockState === AppLockState.LOCKED
+  ) {
+    return 'locked';
+  }
+  return 'app';
+}
 
 const Tab = createBottomTabNavigator();
 
@@ -90,35 +107,34 @@ export default function RootNavigator() {
   useLayoutEffect(() => {
     const initializeApp = async () => {
       try {
-        // Check onboarding status first
-        const isCompleted = await getOnboardingCompleted();
+        const [onboardingCompleted, appLockEnabled, currentLockState] =
+          await Promise.all([
+            getOnboardingCompleted(),
+            securityService.isAppLockEnabled(),
+            securityService.getCurrentLockState(),
+          ]);
 
-        if (!isCompleted) {
-          if (mountedRef.current) {
-            logEvent('onboarding_start');
-            setAppState('onboarding');
-          }
-          return;
-        }
-
-        // Check if app should be locked
-        const isAppLockEnabled = await securityService.isAppLockEnabled();
-        const currentLockState = await securityService.getCurrentLockState();
+        const next = resolveBootState({
+          onboardingCompleted,
+          appLockEnabled,
+          currentLockState,
+        });
 
         if (mountedRef.current) {
-          if (isAppLockEnabled && currentLockState === AppLockState.LOCKED) {
-            setAppState('locked');
-            setLockState(AppLockState.LOCKED);
-          } else {
-            setAppState('app');
-            setLockState(AppLockState.UNLOCKED);
+          if (next === 'onboarding') {
+            logEvent('onboarding_start');
           }
+          setAppState(next);
+          setLockState(
+            next === 'locked' ? AppLockState.LOCKED : AppLockState.UNLOCKED
+          );
         }
       } catch (error) {
         console.error('Error initializing app:', error);
         if (mountedRef.current) {
           logEvent('onboarding_start');
           setAppState('onboarding');
+          setLockState(AppLockState.UNLOCKED);
         }
       }
     };
