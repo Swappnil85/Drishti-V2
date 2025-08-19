@@ -8,7 +8,12 @@ export type ButtonProps = PressableProps & {
   style?: ViewStyle | ViewStyle[];
 };
 
-export const Button = ({ label, variant = 'primary', style, ...rest }: ButtonProps) => {
+export const Button = ({
+  label,
+  variant = 'primary',
+  style,
+  ...rest
+}: ButtonProps) => {
   const { tokens } = useThemeContext();
   const base: ViewStyle = {
     paddingVertical: 14,
@@ -32,7 +37,7 @@ export const Button = ({ label, variant = 'primary', style, ...rest }: ButtonPro
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole='button'
       style={({ pressed }) => [
         base,
         variant === 'primary' ? primary : outline,
@@ -47,4 +52,3 @@ export const Button = ({ label, variant = 'primary', style, ...rest }: ButtonPro
 };
 
 export default Button;
-

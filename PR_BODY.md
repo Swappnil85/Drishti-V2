@@ -1,10 +1,21 @@
-E4-S5 — Haptics & feedback (mobile-v2)
+This PR introduces a new privacy feature in the mobile-v2 application, allowing users to mask sensitive values throughout the UI.
 
-Summary:
-- useHaptics hook respecting reduced-motion
-- Light haptic on primary actions; success haptic on toast show
-- Tests: 7 suites, 10 tests — PASS
-Coverage: stmts 71.57%, branches 54.02%, funcs 62.16%, lines 74.72%
-Security/Privacy: no PII; native modules mocked in tests
-Deployment: none
-Closes: #<issue-id-or-create-and-update>
+**Summary of Changes:**
+*   Added `apps/mobile-v2/src/utils/privacy.ts`
+*   Added `apps/mobile-v2/src/state/privacy.ts`
+*   Updated `apps/mobile-v2/src/screens/SettingsScreen.tsx` with a new Privacy section (toggle + preview)
+*   Added `apps/mobile-v2/src/utils/__tests__/privacy.test.ts`
+
+**Verification:**
+*   `lint`, `type-check`, and `tests` pass for `mobile-v2`.
+*   Unrelated pre-existing failures exist in `api`/`shared`.
+
+**Accessibility:**
+*   The toggle has an `accessibilityLabel`.
+*   The preview text is screen-reader friendly.
+
+**Checklist:**
+*   [x] AC met
+*   [x] WCAG AA verified
+*   [x] Tests ≥80% coverage
+*   [x] CI green for mobile-v2

@@ -1,16 +1,27 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["jest", "react", "react-native", "node"]
+    "types": [
+      "jest",
+      "react",
+      "react-native",
+      "node"
+    ]
   },
-  "include": ["src", "index.js"],
+  "include": [
+    "src",
+    "index.js"
+  ],
   "exclude": [
     "android",
     "ios",
@@ -19,5 +30,6 @@
     "app",
     "components",
     "src/__tests__/**"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

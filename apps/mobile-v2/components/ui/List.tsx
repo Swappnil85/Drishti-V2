@@ -16,13 +16,39 @@ export type ListProps = ViewProps & {
 export const List = ({ items, style, ...rest }: ListProps) => {
   const { tokens } = useThemeContext();
   return (
-    <View style={[{ borderRadius: 12, borderWidth: 1, borderColor: tokens.border, overflow: 'hidden' }, style]} {...rest}>
+    <View
+      style={[
+        {
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: tokens.border,
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+      {...rest}
+    >
       {items.map((it, idx) => (
-        <View key={it.id} style={{ padding: 14, backgroundColor: tokens.bg, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: tokens.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View
+          key={it.id}
+          style={{
+            padding: 14,
+            backgroundColor: tokens.bg,
+            borderTopWidth: idx === 0 ? 0 : 1,
+            borderTopColor: tokens.border,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <View>
-            <Text style={{ color: tokens.text, fontWeight: '600' }}>{it.title}</Text>
+            <Text style={{ color: tokens.text, fontWeight: '600' }}>
+              {it.title}
+            </Text>
             {it.subtitle ? (
-              <Text style={{ color: tokens.textSecondary, marginTop: 2 }}>{it.subtitle}</Text>
+              <Text style={{ color: tokens.textSecondary, marginTop: 2 }}>
+                {it.subtitle}
+              </Text>
             ) : null}
           </View>
           {it.right ?? null}
@@ -33,4 +59,3 @@ export const List = ({ items, style, ...rest }: ListProps) => {
 };
 
 export default List;
-

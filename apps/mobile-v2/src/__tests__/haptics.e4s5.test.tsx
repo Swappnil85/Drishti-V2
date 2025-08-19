@@ -19,7 +19,11 @@ jest.mock('expo-haptics', () => ({
 }));
 
 const DemoPrimary = ({ label = 'primary' }) => (
-  <Pressable accessibilityRole='button' accessibilityLabel={label} onPress={() => {}}>
+  <Pressable
+    accessibilityRole='button'
+    accessibilityLabel={label}
+    onPress={() => {}}
+  >
     <Text>{label}</Text>
   </Pressable>
 );
@@ -51,4 +55,3 @@ describe('E4-S5: Haptics & Feedback', () => {
     expect(getByText('ok')).toBeTruthy();
   });
 });
-
