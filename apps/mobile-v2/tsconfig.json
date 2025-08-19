@@ -1,16 +1,34 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "jsx": "react-jsx",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["jest", "react", "react-native", "node"]
+    "types": [
+      "jest",
+      "react",
+      "react-native",
+      "node"
+    ]
   },
-  "include": ["src", "app", "index.js"],
+  "include": [
+    "src",
+    "app",
+    "index.js"
+  ],
   "exclude": [
     "android",
     "ios",
