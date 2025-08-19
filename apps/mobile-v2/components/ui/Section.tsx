@@ -7,17 +7,33 @@ export type SectionProps = ViewProps & {
   description?: string;
 };
 
-export const Section = ({ title, description, style, children, ...rest }: SectionProps) => {
+export const Section = ({
+  title,
+  description,
+  style,
+  children,
+  ...rest
+}: SectionProps) => {
   const { tokens } = useThemeContext();
   return (
     <View style={[{ marginBottom: 16 }, style]} {...rest}>
       {title ? (
-        <Text accessibilityRole="header" style={{ fontSize: 18, color: tokens.text, fontWeight: '600', marginBottom: 4 }}>
+        <Text
+          accessibilityRole='header'
+          style={{
+            fontSize: 18,
+            color: tokens.text,
+            fontWeight: '600',
+            marginBottom: 4,
+          }}
+        >
           {title}
         </Text>
       ) : null}
       {description ? (
-        <Text style={{ color: tokens.textSecondary, marginBottom: 8 }}>{description}</Text>
+        <Text style={{ color: tokens.textSecondary, marginBottom: 8 }}>
+          {description}
+        </Text>
       ) : null}
       {children}
     </View>
@@ -25,4 +41,3 @@ export const Section = ({ title, description, style, children, ...rest }: Sectio
 };
 
 export default Section;
-

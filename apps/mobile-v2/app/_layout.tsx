@@ -13,10 +13,39 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Slot, Redirect } from 'expo-router';
+import { SecurityProvider, useSecurityState } from '../src/state/security';
+import { ThemeProvider } from '../src/theme/ThemeProvider';
+import LockScreen from '../src/screens/LockScreen';
 
 type Boot = 'loading' | 'onboarding' | 'app';
 
-export default function RootLayout() {
+function Loading() {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator />
+    </View>
+  );
+}
+
+function AppContent() {
+  const { settings, isLocked, isLoaded } = useSecurityState();
+
+  // Show loading while security settings are being loaded
+  if (!isLoaded) {
+    return <Loading />;
+  }
+
+  // Show LockScreen only when app lock is enabled AND the app is locked
+  if (settings.appLockEnabled && isLocked) {
+    return <LockScreen />;
+  }
+
+  // Always render Slot when onboarding is complete AND
+  // (!appLockEnabled || (appLockEnabled && !isLocked))
+  return <Slot />;
+}
+
+function BootLoader() {
   const [boot, setBoot] = useState<Boot>('loading');
 
   useEffect(() => {
@@ -37,17 +66,23 @@ export default function RootLayout() {
   }, []);
 
   if (boot === 'loading') {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <Loading />;
   }
 
   if (boot === 'onboarding') {
     return <Redirect href='/onboarding/welcome' />;
   }
 
-  // boot === 'app'
-  return <Slot />;
+  // boot === 'app' - render app with security context
+  return <AppContent />;
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <SecurityProvider>
+        <BootLoader />
+      </SecurityProvider>
+    </ThemeProvider>
+  );
 }

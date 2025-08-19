@@ -16,14 +16,26 @@ export default function Welcome() {
   }
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 8 }}>Welcome</Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 8 }}>
+        Welcome
+      </Text>
       <Text style={{ fontSize: 16, marginBottom: 24 }}>Step {step} of 5</Text>
-      <Pressable onPress={next}
-        style={{ padding: 14, borderRadius: 12, backgroundColor: '#1565C0' }}>
-        <Text style={{ color: '#FFFFFF' }}>{step < 5 ? 'Get Started' : 'Finish'}</Text>
+      <Pressable
+        onPress={next}
+        style={{ padding: 14, borderRadius: 12, backgroundColor: '#1565C0' }}
+      >
+        <Text style={{ color: '#FFFFFF' }}>
+          {step < 5 ? 'Get Started' : 'Finish'}
+        </Text>
       </Pressable>
     </View>
   );
 }
-

@@ -15,7 +15,7 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      initialRouteName="home"
+      initialRouteName='home'
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: tokens.primary,
@@ -31,7 +31,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name='home'
         options={{
           title: 'Home',
           href: '/(tabs)/home',
@@ -39,26 +39,25 @@ export default function TabsLayout() {
         listeners={{ tabPress: () => handleTabPress('home') }}
       />
       <Tabs.Screen
-        name="accounts"
+        name='accounts'
         options={{ title: 'Accounts', href: '/(tabs)/accounts' }}
         listeners={{ tabPress: () => handleTabPress('accounts') }}
       />
       <Tabs.Screen
-        name="plan"
+        name='plan'
         options={{ title: 'Plan', href: '/(tabs)/plan' }}
         listeners={{ tabPress: () => handleTabPress('plan') }}
       />
       <Tabs.Screen
-        name="scenarios"
+        name='scenarios'
         options={{ title: 'Scenarios', href: '/(tabs)/scenarios' }}
         listeners={{ tabPress: () => handleTabPress('scenarios') }}
       />
       <Tabs.Screen
-        name="settings"
+        name='settings'
         options={{ title: 'Settings', href: '/(tabs)/settings' }}
         listeners={{ tabPress: () => handleTabPress('settings') }}
       />
     </Tabs>
   );
 }
-

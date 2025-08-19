@@ -6,4 +6,3 @@ module.exports = {
   },
   ignorePatterns: ['src/__tests__/**'],
 };
-

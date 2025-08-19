@@ -3,15 +3,16 @@ import { render, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from '../navigation/RootNavigator';
 import { ThemeProvider } from '../theme/ThemeProvider';
+import { SecurityProvider } from '../state/security';
 import { ToastProvider } from '../ui/overlays/ToastProvider';
 import { SheetProvider } from '../ui/overlays/SheetProvider';
 import { getOnboardingCompleted } from '../utils/storage';
 import { logEvent } from '../telemetry';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  multiRemove: jest.fn(),
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  multiRemove: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../utils/storage', () => ({
@@ -28,11 +29,13 @@ const mockLogEvent = logEvent as jest.MockedFunction<typeof logEvent>;
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>
-    <ToastProvider>
-      <SheetProvider>
-        <NavigationContainer>{children}</NavigationContainer>
-      </SheetProvider>
-    </ToastProvider>
+    <SecurityProvider>
+      <ToastProvider>
+        <SheetProvider>
+          <NavigationContainer>{children}</NavigationContainer>
+        </SheetProvider>
+      </ToastProvider>
+    </SecurityProvider>
   </ThemeProvider>
 );
 

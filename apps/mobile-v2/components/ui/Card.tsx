@@ -30,4 +30,7 @@ export const Card = ({ style, elevated = false, ...rest }: CardProps) => {
 };
 
 export default Card;
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main

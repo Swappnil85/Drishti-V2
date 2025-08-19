@@ -22,13 +22,12 @@ jest.mock('../utils/storage', () => ({
 }));
 
 const mockLogEvent = logEvent as jest.MockedFunction<typeof logEvent>;
-const mockSetOnboardingCompleted = setOnboardingCompleted as jest.MockedFunction<typeof setOnboardingCompleted>;
+const mockSetOnboardingCompleted =
+  setOnboardingCompleted as jest.MockedFunction<typeof setOnboardingCompleted>;
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>
-    <NavigationContainer>
-      {children}
-    </NavigationContainer>
+    <NavigationContainer>{children}</NavigationContainer>
   </ThemeProvider>
 );
 
@@ -48,7 +47,9 @@ describe('Onboarding CTA', () => {
     const getStartedButton = getByTestId('onboarding-get-started');
     fireEvent.press(getStartedButton);
 
-    expect(mockLogEvent).toHaveBeenCalledWith('onboarding_step', { step: 'welcome_cta' });
+    expect(mockLogEvent).toHaveBeenCalledWith('onboarding_step', {
+      step: 'welcome_cta',
+    });
     expect(mockOnNext).toHaveBeenCalled();
   });
 
@@ -77,7 +78,11 @@ describe('Onboarding CTA', () => {
     );
 
     const getStartedButton = getByTestId('onboarding-get-started');
-    expect(getStartedButton.props.accessibilityLabel).toBe('Get Started with Drishti');
-    expect(getStartedButton.props.accessibilityHint).toBe('Begins the onboarding process');
+    expect(getStartedButton.props.accessibilityLabel).toBe(
+      'Get Started with Drishti'
+    );
+    expect(getStartedButton.props.accessibilityHint).toBe(
+      'Begins the onboarding process'
+    );
   });
 });

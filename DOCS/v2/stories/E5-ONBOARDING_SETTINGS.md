@@ -157,3 +157,4 @@ interface Profile {{ currency: string; theme: "system"|"light"|"dark"; privacyLo
   **Telemetry:** `nudge_add_account_shown/clicked`.
 
 ---
+
