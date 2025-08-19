@@ -20,6 +20,7 @@ import {
   isBiometricAvailable,
   authenticateWithBiometrics,
 } from '../utils/secureLock';
+import { getPrivacyEnabled, setPrivacyEnabled } from '../state/privacy';
 
 type BtnProps = {
   label: string;
@@ -97,6 +98,7 @@ export default function SettingsScreen() {
   const [isPinModalVisible, setPinModalVisible] = useState(false);
   const [pinInput, setPinInput] = useState(''); // Renamed to avoid conflict with setPin from context
   const [confirmPinInput, setConfirmPinInput] = useState(''); // Renamed to avoid conflict
+  const [privacyEnabled, setPrivacyEnabledState] = useState(false);
 
   useEffect(() => {
     const checkBiometrics = async () => {
@@ -107,7 +109,18 @@ export default function SettingsScreen() {
         setBiometricAvailable(false);
       }
     };
+
+    const loadPrivacyState = async () => {
+      try {
+        const enabled = await getPrivacyEnabled();
+        setPrivacyEnabledState(enabled);
+      } catch {
+        setPrivacyEnabledState(false);
+      }
+    };
+
     void checkBiometrics();
+    void loadPrivacyState();
   }, []);
 
   const handleBiometricToggle = async (enabled: boolean) => {
@@ -162,6 +175,24 @@ export default function SettingsScreen() {
       'Success',
       enabled ? 'App lock has been enabled' : 'App lock has been disabled'
     );
+  };
+
+  const handlePrivacyToggle = async (enabled: boolean) => {
+    safeImpactLight();
+    try {
+      await setPrivacyEnabled(enabled);
+      setPrivacyEnabledState(enabled);
+      logEvent('privacy_mode_toggled', { enabled });
+      Alert.alert(
+        'Success',
+        enabled
+          ? 'Privacy mode has been enabled. Sensitive data will be masked.'
+          : 'Privacy mode has been disabled. Data will be shown normally.'
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update privacy setting');
+      console.error('[SettingsScreen] Error toggling privacy:', error);
+    }
   };
 
   const handleAutoLockTimeoutChange = () => {
@@ -491,7 +522,69 @@ export default function SettingsScreen() {
             </Pressable>
           )}
         </View>
+
+        {/* Privacy Settings */}
+        <View
+          style={{
+            backgroundColor: tokens.surface,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: tokens.border,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: '600',
+              color: tokens.text,
+              marginBottom: 16,
+            }}
+          >
+            Privacy Settings
+          </Text>
+
+          {/* Privacy Mode Toggle */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: tokens.text,
+                  marginBottom: 4,
+                }}
+              >
+                Privacy Mode
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: tokens.textSecondary,
+                  lineHeight: 18,
+                }}
+              >
+                Mask sensitive data like account balances and transaction
+                amounts
+              </Text>
+            </View>
+            <Switch
+              value={privacyEnabled}
+              onValueChange={handlePrivacyToggle}
+              accessibilityLabel='Privacy Mode toggle'
+              accessibilityHint='Masks sensitive financial data when enabled'
+            />
+          </View>
+        </View>
       </View>
+
       <Modal
         visible={isPinModalVisible}
         transparent
