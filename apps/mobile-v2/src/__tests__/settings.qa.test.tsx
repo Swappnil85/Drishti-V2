@@ -2,13 +2,14 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import SettingsScreen from '../screens/SettingsScreen';
 import { ThemeProvider } from '../theme/ThemeProvider';
+import { SecurityProvider } from '../state/security';
 import { clearOnboardingState, clearAllPreferences } from '../utils/storage';
 import { logEvent } from '../telemetry';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  multiRemove: jest.fn(),
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  multiRemove: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../utils/storage', () => ({
@@ -105,7 +106,9 @@ jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
 });
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider>{children}</ThemeProvider>
+  <ThemeProvider>
+    <SecurityProvider>{children}</SecurityProvider>
+  </ThemeProvider>
 );
 
 describe('Settings QA Tools', () => {

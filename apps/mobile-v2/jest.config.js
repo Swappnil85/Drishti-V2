@@ -13,6 +13,11 @@ module.exports = {
     '^react$': '<rootDir>/node_modules/react',
     '^react-dom$': '<rootDir>/node_modules/react-dom',
     '^react-test-renderer$': '<rootDir>/node_modules/react-test-renderer',
+
+    '^expo-local-authentication$':
+      '<rootDir>/__mocks__/expo-local-authentication.js',
+    '^react-native-gesture-handler/jestSetup$':
+      '<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js',
     '^react-native-safe-area-context$':
       '<rootDir>/src/test/__mocks__/react-native-safe-area-context.js',
     '^@react-native/assets-registry/registry$':

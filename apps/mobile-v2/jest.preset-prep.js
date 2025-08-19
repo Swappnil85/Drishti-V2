@@ -32,6 +32,24 @@ try {
     }));
   }
 } catch {}
+
+// Mock Modal to prevent Linking dependency issues
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const jestRef = require('jest-mock');
+  if (jestRef && typeof jest !== 'undefined') {
+    // Mock Linking first
+    jest.mock('react-native/Libraries/Linking/Linking', () => ({
+      openURL: jest.fn(),
+      canOpenURL: jest.fn(() => Promise.resolve(true)),
+      getInitialURL: jest.fn(() => Promise.resolve(null)),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }));
+
+    // Modal is now mocked in jest.setup.js
+  }
+} catch {}
 // Patch @testing-library/react-native peer dep check before anything imports it
 try {
   const jestRef = require('jest-mock');

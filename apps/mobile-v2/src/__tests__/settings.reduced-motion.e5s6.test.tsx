@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccessibilityInfo } from 'react-native';
 import SettingsScreen from '../screens/SettingsScreen';
 import { ThemeProvider } from '../theme/ThemeProvider';
+import { SecurityProvider } from '../state/security';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -84,7 +85,9 @@ describe('E5-S6: Settings Screen Reduced Motion Controls', () => {
   const renderSettingsScreen = () => {
     return render(
       <ThemeProvider>
-        <SettingsScreen />
+        <SecurityProvider>
+          <SettingsScreen />
+        </SecurityProvider>
       </ThemeProvider>
     );
   };

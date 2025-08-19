@@ -79,6 +79,9 @@ export default function SettingsScreen() {
   } = useThemeContext();
   const insets = useSafeAreaInsets();
   const { light: safeImpactLight } = useHaptics();
+  // Always call the hook - it should handle its own error states
+  const securityState = useSecurityState();
+
   const {
     settings,
     setPin,
@@ -86,7 +89,7 @@ export default function SettingsScreen() {
     setBiometricEnabled,
     setAppLockEnabled,
     setAutoLockTimeout,
-  } = useSecurityState(); // Use the new context hook
+  } = securityState;
 
   const [biometricAvailable, setBiometricAvailable] = useState<boolean | null>(
     null
