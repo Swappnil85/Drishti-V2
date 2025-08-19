@@ -19,16 +19,20 @@ import LockScreen from '../src/screens/LockScreen';
 
 type Boot = 'loading' | 'onboarding' | 'app';
 
+function Loading() {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator />
+    </View>
+  );
+}
+
 function AppContent() {
   const { settings, isLocked, isLoaded } = useSecurityState();
 
   // Show loading while security settings are being loaded
   if (!isLoaded) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <Loading />;
   }
 
   // Show LockScreen only when app lock is enabled AND the app is locked
@@ -36,7 +40,8 @@ function AppContent() {
     return <LockScreen />;
   }
 
-  // Normal app flow
+  // Always render Slot when onboarding is complete AND
+  // (!appLockEnabled || (appLockEnabled && !isLocked))
   return <Slot />;
 }
 
@@ -61,11 +66,7 @@ function BootLoader() {
   }, []);
 
   if (boot === 'loading') {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <Loading />;
   }
 
   if (boot === 'onboarding') {

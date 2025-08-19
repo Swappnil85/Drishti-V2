@@ -88,15 +88,21 @@ export default function SettingsScreen() {
     setAutoLockTimeout,
   } = useSecurityState(); // Use the new context hook
 
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState<boolean | null>(
+    null
+  );
   const [isPinModalVisible, setPinModalVisible] = useState(false);
   const [pinInput, setPinInput] = useState(''); // Renamed to avoid conflict with setPin from context
   const [confirmPinInput, setConfirmPinInput] = useState(''); // Renamed to avoid conflict
 
   useEffect(() => {
     const checkBiometrics = async () => {
-      const available = await isBiometricAvailable();
-      setBiometricAvailable(available);
+      try {
+        const available = await isBiometricAvailable();
+        setBiometricAvailable(available);
+      } catch {
+        setBiometricAvailable(false);
+      }
     };
     void checkBiometrics();
   }, []);
@@ -105,7 +111,7 @@ export default function SettingsScreen() {
     safeImpactLight();
     if (enabled) {
       // Check if biometrics are available
-      if (!biometricAvailable) {
+      if (biometricAvailable !== true) {
         Alert.alert(
           'Error',
           'Biometric authentication is not available on this device'
@@ -374,7 +380,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Biometric Authentication */}
-          {biometricAvailable && settings.pin && (
+          {biometricAvailable === true && settings.pin && (
             <View
               style={{
                 flexDirection: 'row',
@@ -402,7 +408,7 @@ export default function SettingsScreen() {
           )}
 
           {/* Biometric Helper Text */}
-          {biometricAvailable && !settings.pin && (
+          {biometricAvailable === true && !settings.pin && (
             <Text
               style={{
                 fontSize: 13,

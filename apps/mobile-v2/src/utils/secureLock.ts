@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import * as LocalAuthentication from 'expo-local-authentication';
 
 export const verifyPin = async (
   pin: string,
@@ -15,6 +14,8 @@ export const isBiometricAvailable = async (): Promise<boolean> => {
   }
 
   try {
+    // Dynamic import to avoid top-level native API calls
+    const LocalAuthentication = await import('expo-local-authentication');
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
     const isEnrolled = await LocalAuthentication.isEnrolledAsync();
     return hasHardware && isEnrolled;
@@ -32,6 +33,8 @@ export const authenticateWithBiometrics = async (): Promise<{
   }
 
   try {
+    // Dynamic import to avoid top-level native API calls
+    const LocalAuthentication = await import('expo-local-authentication');
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Unlock Drishti',
       disableDeviceFallback: true,
