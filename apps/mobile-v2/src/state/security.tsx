@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import { logEvent } from '../telemetry';
 
+// Security state management for E5-S5: PIN, biometrics, auto-lock
+
 const STORAGE_KEY = 'drishti.security.settings';
 
 export type SecuritySettings = {
