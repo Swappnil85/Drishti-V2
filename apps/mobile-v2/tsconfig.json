@@ -10,13 +10,12 @@
     "noEmit": true,
     "types": ["jest", "react", "react-native", "node"]
   },
-  "include": ["src", "index.js"],
+  "include": ["src", "app", "index.js"],
   "exclude": [
     "android",
     "ios",
     "node_modules",
     "coverage",
-    "app",
     "components",
     "src/__tests__/**"
   ],
