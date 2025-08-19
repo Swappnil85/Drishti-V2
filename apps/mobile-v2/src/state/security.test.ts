@@ -11,6 +11,12 @@ jest.mock('../telemetry', () => ({
   logEvent: jest.fn(),
 }));
 
+jest.mock('expo-local-authentication', () => ({
+  hasHardwareAsync: jest.fn().mockResolvedValue(true),
+  isEnrolledAsync: jest.fn().mockResolvedValue(true),
+  authenticateAsync: jest.fn().mockResolvedValue({ success: true }),
+}));
+
 describe('security state', () => {
   beforeEach(() => {
     // Reset AsyncStorage mock before each test
@@ -90,12 +96,14 @@ describe('security state', () => {
     );
   });
 
-  it('should not lock the app if app lock is disabled', () => {
+  it('should not lock the app if app lock is disabled', async () => {
     const { result } = renderHook(() => useSecurityState(), {
       wrapper: SecurityProvider,
     });
+    await act(async () => {
+      await result.current.setAppLockEnabled(false);
+    });
     act(() => {
-      result.current.setAppLockEnabled(false);
       result.current.lock();
     });
     expect(result.current.isLocked).toBe(false);
@@ -132,14 +140,14 @@ describe('security state', () => {
     const { result } = renderHook(() => useSecurityState(), {
       wrapper: SecurityProvider,
     });
-    act(() => {
-      // Record 5 failed attempts one by one
-      result.current.recordFailedPinAttempt();
-      result.current.recordFailedPinAttempt();
-      result.current.recordFailedPinAttempt();
-      result.current.recordFailedPinAttempt();
-      result.current.recordFailedPinAttempt();
-    });
+
+    // Record 5 failed attempts one by one
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+
     expect(result.current.failedPinAttempts).toBe(5);
     expect(result.current.lockoutUntil).toBeGreaterThan(Date.now());
   });
@@ -202,5 +210,38 @@ describe('security state', () => {
       'security_autolock_changed',
       { minutes: 10 }
     );
+  });
+
+  it('should handle lockout timer with fake timers', () => {
+    jest.useFakeTimers();
+
+    const { result } = renderHook(() => useSecurityState(), {
+      wrapper: SecurityProvider,
+    });
+
+    // Trigger lockout with 5 failed attempts one by one
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+    act(() => result.current.recordFailedPinAttempt());
+
+    expect(result.current.failedPinAttempts).toBe(5);
+    expect(result.current.lockoutUntil).toBeGreaterThan(Date.now());
+
+    // Fast-forward time by 30 seconds (lockout duration)
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+
+    // Reset failed attempts should clear lockout
+    act(() => {
+      result.current.resetFailedPinAttempts();
+    });
+
+    expect(result.current.failedPinAttempts).toBe(0);
+    expect(result.current.lockoutUntil).toBe(null);
+
+    jest.useRealTimers();
   });
 });

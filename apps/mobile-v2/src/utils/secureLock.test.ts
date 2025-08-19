@@ -1,5 +1,11 @@
 import { verifyPin, getLockoutRemainingTime } from './secureLock';
 
+jest.mock('expo-local-authentication', () => ({
+  hasHardwareAsync: jest.fn().mockResolvedValue(true),
+  isEnrolledAsync: jest.fn().mockResolvedValue(true),
+  authenticateAsync: jest.fn().mockResolvedValue({ success: true }),
+}));
+
 describe('secureLock utils', () => {
   it('should verify PIN correctly', async () => {
     expect(await verifyPin('1234', '1234')).toBe(true);

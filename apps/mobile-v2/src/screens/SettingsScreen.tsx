@@ -98,7 +98,7 @@ export default function SettingsScreen() {
       const available = await isBiometricAvailable();
       setBiometricAvailable(available);
     };
-    checkBiometrics();
+    void checkBiometrics();
   }, []);
 
   const handleBiometricToggle = async (enabled: boolean) => {
@@ -399,6 +399,20 @@ export default function SettingsScreen() {
                 accessibilityHint='Use fingerprint or face recognition to unlock'
               />
             </View>
+          )}
+
+          {/* Biometric Helper Text */}
+          {biometricAvailable && !settings.pin && (
+            <Text
+              style={{
+                fontSize: 13,
+                color: tokens.textSecondary,
+                marginBottom: 12,
+                fontStyle: 'italic',
+              }}
+            >
+              Set up a PIN first to enable biometric authentication
+            </Text>
           )}
 
           {/* PIN Setup */}

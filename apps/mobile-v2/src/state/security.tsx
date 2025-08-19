@@ -59,19 +59,31 @@ export const SecurityProvider = ({ children }: { children: ReactNode }) => {
           setSettings(JSON.parse(storedSettings));
         }
       } catch (e) {
-        console.error('Failed to load security settings from AsyncStorage', e);
+        // Failed to load security settings from AsyncStorage
+        if (__DEV__) {
+          console.error(
+            'Failed to load security settings from AsyncStorage',
+            e
+          );
+        }
       } finally {
         setIsLoaded(true);
       }
     };
-    loadSettings();
+    void loadSettings();
   }, []);
 
   useEffect(() => {
     if (isLoaded) {
       void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settings)).catch(
-        e =>
-          console.error('Failed to save security settings to AsyncStorage', e)
+        e => {
+          if (__DEV__) {
+            console.error(
+              'Failed to save security settings to AsyncStorage',
+              e
+            );
+          }
+        }
       );
     }
   }, [settings, isLoaded]);

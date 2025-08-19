@@ -13,10 +13,25 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Slot, Redirect } from 'expo-router';
+import { SecurityProvider, useSecurityState } from '../src/state/security';
+import { ThemeProvider } from '../src/theme/ThemeProvider';
+import LockScreen from '../src/screens/LockScreen';
 
 type Boot = 'loading' | 'onboarding' | 'app';
 
-export default function RootLayout() {
+function AppContent() {
+  const { settings, isLocked } = useSecurityState();
+
+  // Show LockScreen only when app lock is enabled AND the app is locked
+  if (settings.appLockEnabled && isLocked) {
+    return <LockScreen />;
+  }
+
+  // Normal app flow
+  return <Slot />;
+}
+
+function BootLoader() {
   const [boot, setBoot] = useState<Boot>('loading');
 
   useEffect(() => {
@@ -48,6 +63,16 @@ export default function RootLayout() {
     return <Redirect href='/onboarding/welcome' />;
   }
 
-  // boot === 'app'
-  return <Slot />;
+  // boot === 'app' - render app with security context
+  return <AppContent />;
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <SecurityProvider>
+        <BootLoader />
+      </SecurityProvider>
+    </ThemeProvider>
+  );
 }
