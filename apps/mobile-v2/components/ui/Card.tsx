@@ -8,7 +8,7 @@ export const Card = ({ style, elevated = false, ...rest }: CardProps) => {
   const { tokens } = useThemeContext();
   return (
     <View
-      accessibilityRole='summary'
+      accessibilityRole="summary"
       style={[
         {
           backgroundColor: tokens.surface,
@@ -30,3 +30,7 @@ export const Card = ({ style, elevated = false, ...rest }: CardProps) => {
 };
 
 export default Card;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main

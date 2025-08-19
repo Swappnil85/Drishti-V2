@@ -264,6 +264,12 @@ export default function SettingsScreen() {
     );
   };
 
+<<<<<<< HEAD
+=======
+  // Do not block render on loading to keep QA Tools test deterministic
+  // Show a subtle inline note instead of full-screen loader
+
+>>>>>>> origin/main
   return (
     <ScrollView
       style={{
@@ -289,6 +295,11 @@ export default function SettingsScreen() {
       >
         Settings
       </Text>
+      {loading && (
+        <Text style={{ color: tokens.textSecondary, marginBottom: 12 }}>
+          Loading settings...
+        </Text>
+      )}
       <Text
         accessibilityLabel='theme-mode-label'
         style={{ color: tokens.text }}
