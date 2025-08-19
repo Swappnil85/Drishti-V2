@@ -4,10 +4,11 @@ module.exports = {
   setupFilesAfterEnv: [
     '@testing-library/jest-native/extend-expect',
     '<rootDir>/jest.setup.after.js',
+    '<rootDir>/jest.setup.mobile.ts',
   ],
   testEnvironment: 'jsdom',
   transformIgnorePatterns: [
-    'node_modules/(?!(expo|expo-.*|react-native|@react-native|@expo|react-native-web|@react-navigation|expo-router)/)',
+    'node_modules/(?!(react-native|@react-native|react-native-reanimated|expo|expo-router|expo-constants|expo-modules-core)/)',
   ],
   moduleNameMapper: {
     '^react$': '<rootDir>/node_modules/react',
