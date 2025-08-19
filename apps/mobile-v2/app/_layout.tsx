@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Slot, Redirect } from 'expo-router';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SecurityProvider, useSecurityState } from '../src/state/security';
 import { ThemeProvider } from '../src/theme/ThemeProvider';
 import LockScreen from '../src/screens/LockScreen';
@@ -80,9 +81,11 @@ function BootLoader() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <SecurityProvider>
-        <BootLoader />
-      </SecurityProvider>
+      <SafeAreaProvider>
+        <SecurityProvider>
+          <BootLoader />
+        </SecurityProvider>
+      </SafeAreaProvider>
     </ThemeProvider>
   );
 }
