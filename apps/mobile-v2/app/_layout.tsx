@@ -20,7 +20,16 @@ import LockScreen from '../src/screens/LockScreen';
 type Boot = 'loading' | 'onboarding' | 'app';
 
 function AppContent() {
-  const { settings, isLocked } = useSecurityState();
+  const { settings, isLocked, isLoaded } = useSecurityState();
+
+  // Show loading while security settings are being loaded
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   // Show LockScreen only when app lock is enabled AND the app is locked
   if (settings.appLockEnabled && isLocked) {

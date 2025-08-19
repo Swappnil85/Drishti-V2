@@ -20,6 +20,7 @@ export type SecuritySettings = {
 type SecurityContextType = {
   settings: SecuritySettings;
   isLocked: boolean;
+  isLoaded: boolean;
   failedPinAttempts: number;
   lockoutUntil: number | null;
   setPin: (pin: string | null) => Promise<void>;
@@ -144,6 +145,7 @@ export const SecurityProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     settings,
     isLocked,
+    isLoaded,
     failedPinAttempts,
     lockoutUntil,
     setPin,

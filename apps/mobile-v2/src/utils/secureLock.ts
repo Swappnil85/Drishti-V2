@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 export const verifyPin = async (
@@ -8,14 +9,28 @@ export const verifyPin = async (
 };
 
 export const isBiometricAvailable = async (): Promise<boolean> => {
-  const hasHardware = await LocalAuthentication.hasHardwareAsync();
-  const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-  return hasHardware && isEnrolled;
+  // Biometrics are not available on web
+  if (Platform.OS === 'web') {
+    return false;
+  }
+
+  try {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    return hasHardware && isEnrolled;
+  } catch {
+    return false;
+  }
 };
 
 export const authenticateWithBiometrics = async (): Promise<{
   success: boolean;
 }> => {
+  // Biometrics are not available on web
+  if (Platform.OS === 'web') {
+    return { success: false };
+  }
+
   try {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Unlock Drishti',
