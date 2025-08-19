@@ -264,12 +264,9 @@ export default function SettingsScreen() {
     );
   };
 
-<<<<<<< HEAD
-=======
   // Do not block render on loading to keep QA Tools test deterministic
   // Show a subtle inline note instead of full-screen loader
 
->>>>>>> origin/main
   return (
     <ScrollView
       style={{
