@@ -1,18 +1,25 @@
 // React import not required with react-jsx runtime
-import { View, Text, Pressable, Alert, ScrollView, Switch } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Alert,
+  ScrollView,
+  Switch,
+  Modal,
+  TextInput,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../theme/ThemeProvider';
-import {
-  clearOnboardingState,
-  clearAllPreferences,
-  getPrivacyModeEnabled,
-  setPrivacyModeEnabled,
-} from '../utils/storage';
+import { clearOnboardingState, clearAllPreferences } from '../utils/storage';
 import { logEvent } from '../telemetry';
-import { useEffect, useState } from 'react';
-import { securityService } from '../services/SecurityService';
-import { biometricService } from '../services/BiometricService';
+import { useEffect, useState } from 'react'; // Keep React import for useState/useEffect
 import { useHaptics } from '../utils/haptics';
+import { useSecurityState } from '../state/security'; // Use the new context hook
+import {
+  isBiometricAvailable,
+  authenticateWithBiometrics,
+} from '../utils/secureLock';
 
 type BtnProps = {
   label: string;
@@ -72,159 +79,80 @@ export default function SettingsScreen() {
   } = useThemeContext();
   const insets = useSafeAreaInsets();
   const { light: safeImpactLight } = useHaptics();
+  const {
+    settings,
+    setPin,
+    clearPin,
+    setBiometricEnabled,
+    setAppLockEnabled,
+    setAutoLockTimeout,
+  } = useSecurityState(); // Use the new context hook
 
-  // Privacy and Security state
-  const [privacyModeEnabled, setPrivacyModeEnabledState] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [pinEnabled, setPinEnabled] = useState(false);
-  const [appLockEnabled, setAppLockEnabled] = useState(false);
-  const [autoLockTimeout, setAutoLockTimeoutState] = useState(5);
-  const [loading, setLoading] = useState(true);
+  const [isPinModalVisible, setPinModalVisible] = useState(false);
+  const [pinInput, setPinInput] = useState(''); // Renamed to avoid conflict with setPin from context
+  const [confirmPinInput, setConfirmPinInput] = useState(''); // Renamed to avoid conflict
 
-  // Load settings on mount
   useEffect(() => {
-    loadSettings();
+    const checkBiometrics = async () => {
+      const available = await isBiometricAvailable();
+      setBiometricAvailable(available);
+    };
+    checkBiometrics();
   }, []);
 
-  const loadSettings = async () => {
-    try {
-      setLoading(true);
-
-      // Load privacy mode
-      const privacyMode = await getPrivacyModeEnabled();
-      setPrivacyModeEnabledState(privacyMode);
-
-      // Load security settings
-      const securitySettings = await securityService.getSecuritySettings();
-      setAppLockEnabled(securitySettings.appLockEnabled);
-      setBiometricEnabled(securitySettings.biometricEnabled);
-      setPinEnabled(securitySettings.pinEnabled);
-      setAutoLockTimeoutState(securitySettings.autoLockTimeout);
-
-      // Check biometric availability
-      const biometricAvailability =
-        await biometricService.checkBiometricAvailability();
-      setBiometricAvailable(biometricAvailability.isAvailable);
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Privacy Mode handlers
-  const handlePrivacyModeToggle = async (enabled: boolean) => {
-    try {
-      safeImpactLight();
-
-      if (enabled) {
-        // Show confirmation dialog when enabling privacy mode
-        Alert.alert(
-          'Enable Privacy Mode',
-          'Privacy Mode stores all your data locally on this device only. Cloud sync will be disabled. For enhanced security, we recommend enabling app lock with PIN or biometric authentication.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Enable',
-              onPress: async () => {
-                await setPrivacyModeEnabled(enabled);
-                setPrivacyModeEnabledState(enabled);
-                logEvent('privacy_local_only_enabled', { enabled });
-              },
-            },
-          ]
-        );
-      } else {
-        await setPrivacyModeEnabled(enabled);
-        setPrivacyModeEnabledState(enabled);
-        logEvent('privacy_local_only_enabled', { enabled });
-      }
-    } catch (error) {
-      console.error('Error toggling privacy mode:', error);
-      Alert.alert('Error', 'Failed to update privacy mode setting');
-    }
-  };
-
-  const handlePrivacyStatementPress = () => {
-    safeImpactLight();
-    // In a real app, this would open the privacy statement
-    // For now, we'll show a placeholder
-    Alert.alert(
-      'Privacy Statement',
-      'Your privacy is important to us. When Privacy Mode is enabled, all your financial data is stored locally on your device and never sent to our servers. This ensures maximum privacy and security for your sensitive information.',
-      [{ text: 'OK' }]
-    );
-  };
-
-  // Security handlers
   const handleBiometricToggle = async (enabled: boolean) => {
-    try {
-      safeImpactLight();
-
-      if (enabled) {
-        const result = await biometricService.enableBiometric();
-        if (result.success) {
-          setBiometricEnabled(true);
-          Alert.alert('Success', 'Biometric authentication has been enabled');
-        } else {
-          Alert.alert(
-            'Error',
-            result.error || 'Failed to enable biometric authentication'
-          );
-        }
-      } else {
-        await biometricService.disableBiometric();
-        setBiometricEnabled(false);
-        Alert.alert('Success', 'Biometric authentication has been disabled');
-      }
-    } catch (error) {
-      console.error('Error toggling biometric:', error);
-      Alert.alert('Error', 'Failed to update biometric setting');
-    }
-  };
-
-  const handleSetupPin = () => {
     safeImpactLight();
-    Alert.alert(
-      'Setup PIN',
-      'PIN setup functionality will be implemented in a future update. For now, this is a placeholder.',
-      [{ text: 'OK' }]
-    );
+    if (enabled) {
+      // Check if biometrics are available
+      if (!biometricAvailable) {
+        Alert.alert(
+          'Error',
+          'Biometric authentication is not available on this device'
+        );
+        return;
+      }
+
+      // Require PIN to be set first
+      if (!settings.pin) {
+        Alert.alert(
+          'PIN Required',
+          'Please set up a PIN first before enabling biometric authentication. This provides a fallback authentication method.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const result = await authenticateWithBiometrics();
+      if (result.success) {
+        await setBiometricEnabled(true);
+        Alert.alert('Success', 'Biometric authentication has been enabled');
+      } else {
+        Alert.alert('Error', 'Failed to enable biometric authentication');
+      }
+    } else {
+      await setBiometricEnabled(false);
+      Alert.alert('Success', 'Biometric authentication has been disabled');
+    }
   };
 
   const handleAppLockToggle = async (enabled: boolean) => {
-    try {
-      safeImpactLight();
-
-      if (enabled) {
-        // Check if at least one auth method is available
-        if (!biometricEnabled && !pinEnabled) {
-          Alert.alert(
-            'Authentication Required',
-            'Please enable biometric authentication or set up a PIN before enabling app lock.',
-            [{ text: 'OK' }]
-          );
-          return;
-        }
+    safeImpactLight();
+    if (enabled) {
+      if (!settings.biometricEnabled && !settings.pin) {
+        Alert.alert(
+          'Authentication Required',
+          'Please enable biometric authentication or set up a PIN before enabling app lock.',
+          [{ text: 'OK' }]
+        );
+        return;
       }
-
-      await securityService.setAppLockEnabled(enabled);
-      setAppLockEnabled(enabled);
-
-      Alert.alert(
-        'Success',
-        enabled ? 'App lock has been enabled' : 'App lock has been disabled'
-      );
-    } catch (error) {
-      console.error('Error toggling app lock:', error);
-      Alert.alert(
-        'Error',
-        error instanceof Error
-          ? error.message
-          : 'Failed to update app lock setting'
-      );
     }
+    await setAppLockEnabled(enabled);
+    Alert.alert(
+      'Success',
+      enabled ? 'App lock has been enabled' : 'App lock has been disabled'
+    );
   };
 
   const handleAutoLockTimeoutChange = () => {
@@ -234,25 +162,28 @@ export default function SettingsScreen() {
       'Choose when the app should automatically lock after inactivity:',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: '1 minute', onPress: () => updateAutoLockTimeout(1) },
-        { text: '5 minutes', onPress: () => updateAutoLockTimeout(5) },
-        { text: '10 minutes', onPress: () => updateAutoLockTimeout(10) },
+        { text: '1 minute', onPress: () => setAutoLockTimeout(1) },
+        { text: '3 minutes', onPress: () => setAutoLockTimeout(3) },
+        { text: '5 minutes', onPress: () => setAutoLockTimeout(5) },
+        { text: '10 minutes', onPress: () => setAutoLockTimeout(10) },
       ]
     );
   };
 
-  const updateAutoLockTimeout = async (minutes: number) => {
-    try {
-      await securityService.setAutoLockTimeout(minutes);
-      setAutoLockTimeoutState(minutes);
-      Alert.alert(
-        'Success',
-        `Auto-lock timeout set to ${minutes} minute${minutes > 1 ? 's' : ''}`
-      );
-    } catch (error) {
-      console.error('Error updating auto-lock timeout:', error);
-      Alert.alert('Error', 'Failed to update auto-lock timeout');
+  const handleSetPin = async () => {
+    if (pinInput.length < 4 || pinInput.length > 6) {
+      Alert.alert('Invalid PIN', 'PIN must be between 4 and 6 digits.');
+      return;
     }
+    if (pinInput !== confirmPinInput) {
+      Alert.alert('PINs do not match', 'Please re-enter your PIN.');
+      setConfirmPinInput('');
+      return;
+    }
+    await setPin(pinInput);
+    setPinModalVisible(false);
+    setPinInput('');
+    setConfirmPinInput('');
   };
 
   const handleResetOnboarding = () => {
@@ -293,9 +224,6 @@ export default function SettingsScreen() {
     );
   };
 
-  // Do not block render on loading to keep QA Tools test deterministic
-  // Show a subtle inline note instead of full-screen loader
-
   return (
     <ScrollView
       style={{
@@ -321,11 +249,6 @@ export default function SettingsScreen() {
       >
         Settings
       </Text>
-      {loading && (
-        <Text style={{ color: tokens.textSecondary, marginBottom: 12 }}>
-          Loading settings...
-        </Text>
-      )}
       <Text
         accessibilityLabel='theme-mode-label'
         style={{ color: tokens.text }}
@@ -373,7 +296,7 @@ export default function SettingsScreen() {
         Reduced Motion
       </Text>
       <Btn
-        label='Reduced Motion System'
+        label='System Default'
         onPress={() => setReducedMotionOverride('system')}
         active={reducedMotionOverride === 'system'}
       />
@@ -401,73 +324,6 @@ export default function SettingsScreen() {
         >
           Privacy & Security
         </Text>
-
-        {/* Privacy Mode Toggle */}
-        <View
-          style={{
-            backgroundColor: tokens.surface,
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 16,
-            borderWidth: 1,
-            borderColor: tokens.border,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '600',
-                color: tokens.text,
-                flex: 1,
-              }}
-            >
-              Privacy Mode
-            </Text>
-            <Switch
-              value={privacyModeEnabled}
-              onValueChange={handlePrivacyModeToggle}
-              accessibilityLabel='Privacy Mode toggle'
-              accessibilityHint='Stores data locally on device only when enabled'
-            />
-          </View>
-          <Text
-            style={{
-              fontSize: 14,
-              color: tokens.textSecondary,
-              marginBottom: 12,
-              lineHeight: 20,
-            }}
-          >
-            When enabled, all your data is stored locally on this device only.
-            Cloud sync is disabled for maximum privacy.
-          </Text>
-          <Pressable
-            onPress={handlePrivacyStatementPress}
-            accessibilityRole='button'
-            accessibilityLabel='View Privacy Statement'
-            style={{
-              alignSelf: 'flex-start',
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 14,
-                color: tokens.primary,
-                textDecorationLine: 'underline',
-              }}
-            >
-              View Privacy Statement
-            </Text>
-          </Pressable>
-        </View>
 
         {/* Security Settings */}
         <View
@@ -510,7 +366,7 @@ export default function SettingsScreen() {
               App Lock
             </Text>
             <Switch
-              value={appLockEnabled}
+              value={settings.appLockEnabled} // Use settings from context
               onValueChange={handleAppLockToggle}
               accessibilityLabel='App Lock toggle'
               accessibilityHint='Requires authentication to unlock the app'
@@ -518,7 +374,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Biometric Authentication */}
-          {biometricAvailable && (
+          {biometricAvailable && settings.pin && (
             <View
               style={{
                 flexDirection: 'row',
@@ -537,7 +393,7 @@ export default function SettingsScreen() {
                 Biometric Authentication
               </Text>
               <Switch
-                value={biometricEnabled}
+                value={settings.biometricEnabled} // Use settings from context
                 onValueChange={handleBiometricToggle}
                 accessibilityLabel='Biometric authentication toggle'
                 accessibilityHint='Use fingerprint or face recognition to unlock'
@@ -547,7 +403,7 @@ export default function SettingsScreen() {
 
           {/* PIN Setup */}
           <Pressable
-            onPress={handleSetupPin}
+            onPress={() => setPinModalVisible(true)} // Open modal
             accessibilityRole='button'
             accessibilityLabel='Setup PIN'
             style={{
@@ -573,13 +429,14 @@ export default function SettingsScreen() {
                 color: tokens.textSecondary,
               }}
             >
-              {pinEnabled ? 'Enabled' : 'Not Set'} →
+              {settings.pin ? 'Change PIN' : 'Set PIN'} →{' '}
+              {/* Display current PIN status */}
             </Text>
           </Pressable>
 
           {/* Auto-lock Timeout */}
-          {appLockEnabled && (
-            <Pressable
+          {settings.appLockEnabled && (
+            <Pressable // Only show if app lock is enabled
               onPress={handleAutoLockTimeoutChange}
               accessibilityRole='button'
               accessibilityLabel='Auto-lock timeout setting'
@@ -605,12 +462,100 @@ export default function SettingsScreen() {
                   color: tokens.textSecondary,
                 }}
               >
-                {autoLockTimeout} min →
+                {settings.autoLockTimeout} min →{' '}
+                {/* Display current auto-lock timeout */}
               </Text>
             </Pressable>
           )}
         </View>
       </View>
+      <Modal
+        visible={isPinModalVisible}
+        transparent
+        animationType='slide'
+        onRequestClose={() => setPinModalVisible(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: tokens.bg,
+              padding: 20,
+              borderRadius: 10,
+              width: '80%',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: tokens.text,
+                marginBottom: 20,
+              }}
+            >
+              {settings.pin ? 'Change PIN' : 'Set PIN'}
+            </Text>
+            <TextInput
+              style={{
+                height: 40,
+                borderColor: tokens.border,
+                borderWidth: 1,
+                borderRadius: 5,
+                paddingHorizontal: 10,
+                marginBottom: 10,
+                color: tokens.text,
+              }}
+              placeholder='Enter PIN (4-6 digits)'
+              placeholderTextColor={tokens.textSecondary}
+              keyboardType='numeric'
+              secureTextEntry
+              value={pinInput}
+              onChangeText={setPinInput}
+            />
+            <TextInput
+              style={{
+                height: 40,
+                borderColor: tokens.border,
+                borderWidth: 1,
+                borderRadius: 5,
+                paddingHorizontal: 10,
+                marginBottom: 20,
+                color: tokens.text,
+              }}
+              placeholder='Confirm PIN'
+              placeholderTextColor={tokens.textSecondary}
+              keyboardType='numeric'
+              secureTextEntry
+              value={confirmPinInput}
+              onChangeText={setConfirmPinInput}
+            />
+            <View
+              style={{ flexDirection: 'row', justifyContent: 'space-around' }}
+            >
+              <Btn label='Cancel' onPress={() => setPinModalVisible(false)} />
+              <Btn label='Save' onPress={handleSetPin} active />
+            </View>
+            {settings.pin && (
+              <View style={{ marginTop: 20 }}>
+                <Btn
+                  label='Clear PIN'
+                  onPress={async () => {
+                    await clearPin();
+                    setPinModalVisible(false);
+                  }}
+                  destructive
+                />
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {/* Theme Section */}
       <View style={{ width: '100%', maxWidth: 400, marginBottom: 32 }}>
