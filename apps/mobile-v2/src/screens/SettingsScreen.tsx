@@ -91,6 +91,7 @@ export default function SettingsScreen() {
     setAppLockEnabled,
     setAutoLockTimeout,
   } = securityState;
+  const loading = !securityState.isLoaded;
 
   const [biometricAvailable, setBiometricAvailable] = useState<boolean | null>(
     null

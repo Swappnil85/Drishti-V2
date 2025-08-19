@@ -6,7 +6,7 @@
   "scripts": {
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint -c .eslintrc.json 'src/**/!(__tests__)/**/*.{ts,tsx}'",
-    "test": "jest --passWithNoTests",
+    "test": "jest --runInBand --coverage",
     "start": "expo start",
     "start:clean": "watchman watch-del-all || true && expo start -c",
     "start:go:tunnel": "cross-env EXPO_NO_DEV_CLIENT=1 expo start --go --tunnel --port 8082 --clear",

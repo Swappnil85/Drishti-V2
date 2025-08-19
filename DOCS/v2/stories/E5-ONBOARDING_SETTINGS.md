@@ -82,38 +82,46 @@ interface Profile {{ currency: string; theme: "system"|"light"|"dark"; privacyLo
 
 ### E5-S5: Security Settings (PIN/Biometrics enable) & App Lock UX
 
-**Status**: DONE ✅ (2025-08-18 - Runtime patch merged)
+**Status**: DONE ✅ (2025-08-19) — merged via [PR #45](https://github.com/Swappnil85/Drishti-V2/pull/45)
 **Dependencies:** E2, E13.
 
 **Acceptance Criteria**
 
-- [x] Set 4–6 digit PIN; enable biometric unlock if supported.
-- [x] App locks after inactivity (configurable 1–10 minutes).
-- [x] **Telemetry:** `pin_set`, `biometric_enabled`, `auto_lock_triggered`.
+- [x] Set 4–6 digit PIN; enable biometric unlock if supported
+- [x] App locks after inactivity (configurable 1–10 minutes)
+- [x] Telemetry events captured for PIN, biometrics, auto-lock, privacy toggle
 - [x] Biometric prompt at app launch/resume with PIN fallback
 - [x] App Lock screen with proper authentication flow
 
 **Implementation Details:**
 
-- Created comprehensive security services (BiometricService, PinService, SecurityService)
-- Implemented App Lock screen with biometric authentication and PIN fallback
-- Added security settings section in Settings screen with toggles for:
-  - App Lock enable/disable
-  - Biometric authentication enable/disable
-  - PIN setup (placeholder for future implementation)
-  - Auto-lock timeout configuration (1-10 minutes)
-- Integrated with app lifecycle for automatic locking on background/foreground
-- Added proper error handling and lockout mechanisms for failed attempts
-- Includes comprehensive test coverage for all security services
-- WCAG AA compliant with proper accessibility labels and touch targets
+- SecurityProvider (context) manages settings, lock state, and timers; services for biometrics and PIN
+- PIN setup UI with 4–6 digit validation and persistence
+- Biometric gating requires a PIN to be set AND `isBiometricAvailable()` to be true; web-safe fallback returns false
+- Auto-lock timeout options: 1, 3, 5, 10 minutes; background/foreground hooks trigger `lock()` appropriately
+- Lockout after failed PIN attempts with progressive delays and clear messaging
+- Settings screen includes Security (App Lock, Biometrics, PIN, Auto-lock) and Privacy Toggle sections
+- WCAG AA compliant with proper accessibility labels and minimum touch target sizes
+- Comprehensive tests for security state, utilities, and QA flows (all passing)
 
-**SOP - Testing:**
+**Telemetry**
 
-- Start Expo Go with: `npm run start:go:tunnel` (QR must start with exp:// and be small)
-- LAN fallback: `npm run start:go:lan`
-- One-Metro rule: Only run one Metro instance at a time
+- `security_pin_set`
+- `security_bio_enabled` / `security_bio_disabled`
+- `security_locked`
+- `security_unlocked { method: 'pin' | 'biometric' }`
+- `security_autolock_changed { minutes: 1|3|5|10 }`
+- `privacy_mode_toggled { enabled: boolean }`
 
-**Runtime patch merged:** fix(runtime): Expo Go QR + Metro guard + SDK53 pins, validated on Expo Go and web, small exp:// QR confirmed.
+**Verification (SOP)**
+
+- Lint: `npm run lint -w apps/mobile-v2`
+- Typecheck: `npm run type-check -w apps/mobile-v2`
+- Tests + coverage: `npm test -w apps/mobile-v2 -- --coverage` (all suites pass)
+- Expo Web: `npm run -w apps/mobile-v2 start:web` → http://localhost:19008
+  - Navigate to Settings → Security: verify toggles, PIN flow, biometric gating (web shows unavailable)
+  - Privacy Toggle: verify state persists and telemetry event logs
+- A11y: Dark/Light contrast validated (e.g., 17.9:1, 12.7:1, 18.7:1, 4.7:1)
 
 ### E5-S6: Reduced Motion Tri-State & Dark Mode Contrast
 
@@ -157,4 +165,3 @@ interface Profile {{ currency: string; theme: "system"|"light"|"dark"; privacyLo
   **Telemetry:** `nudge_add_account_shown/clicked`.
 
 ---
-
